@@ -19,15 +19,15 @@ def train(nets, placeholders, sess, graph, train_inputs, train_outputs, batch_si
 
     with graph.as_default():
         # Both networks are created separately, using their own placeholders. They are not involved in any way
-        out = nets["n1"].building(tf.layers.flatten(placeholders["in"]["i1"]), graph)
+        out = nets["n1"].building(tf.compat.v1.layers.flatten(placeholders["in"]["i1"]), graph, '_')
         predictions["n1"] = out
-        out = nets["n0"].building(tf.layers.flatten(placeholders["in"]["i0"]), graph)
+        out = nets["n0"].building(tf.compat.v1.layers.flatten(placeholders["in"]["i0"]), graph, '_')
         predictions["n0"] = out
 
-        loss = tf.losses.softmax_cross_entropy(placeholders["out"]["o1"], predictions["n1"]) + tf.losses.softmax_cross_entropy(placeholders["out"]["o0"], predictions["n0"])
+        loss = tf.compat.v1.losses.softmax_cross_entropy(placeholders["out"]["o1"], predictions["n1"]) + tf.compat.v1.losses.softmax_cross_entropy(placeholders["out"]["o0"], predictions["n0"])
 
-        solver = tf.train.AdamOptimizer(learning_rate=0.01).minimize(loss, var_list=[nets["n1"].List_weights, nets["n1"].List_bias, nets["n0"].List_weights, nets["n0"].List_bias])
-        sess.run(tf.global_variables_initializer())
+        solver = tf.compat.v1.train.AdamOptimizer(learning_rate=0.01).minimize(loss, var_list=[nets["n1"].List_weights, nets["n1"].List_bias, nets["n0"].List_weights, nets["n0"].List_bias])
+        sess.run(tf.compat.v1.global_variables_initializer())
 
         for it in range(10):
             aux_ind = (aux_ind + batch_size) % train_inputs["i0"].shape[0]

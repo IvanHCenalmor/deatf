@@ -11,7 +11,7 @@ from evolution import Evolving, accuracy_error, batch
 from Network import MLPDescriptor, MLP
 
 
-optimizers = [tf.train.AdadeltaOptimizer, tf.train.AdagradOptimizer, tf.train.AdamOptimizer]
+optimizers = [tf.compat.v1.train.AdadeltaOptimizer, tf.compat.v1.train.AdagradOptimizer, tf.compat.v1.train.AdamOptimizer]
 
 """
 This is not a straightforward task as we need to "place" the models in the sequential order.
@@ -41,17 +41,17 @@ def train_sequential(nets, placeholders, sess, graph, train_inputs, train_output
     predictions = {}
     with graph.as_default():
         # The following four lines define the model layout:
-        out = nets["n0"].building(tf.layers.flatten(placeholders["in"]["i0"]), graph, None)
+        out = nets["n0"].building(tf.compat.v1.layers.flatten(placeholders["in"]["i0"]), graph, None)
         predictions["n0"] = out  # We construct n0 over its input placeholder, "in"-> "i0"
         out = nets["n1"].building(predictions["n0"], graph, None)
         predictions["n1"] = out  # We construct n1 over n0 because they are supposed to be sequential
 
         # Define the loss function and optimizer with the output of n1, which is the final output of the model
-        lf = tf.losses.softmax_cross_entropy(placeholders["out"]["o1"], predictions["n1"])
+        lf = tf.compat.v1.losses.softmax_cross_entropy(placeholders["out"]["o1"], predictions["n1"])
         opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"]).minimize(lf)
 
         # The rest is typical training
-        sess.run(tf.global_variables_initializer())
+        sess.run(tf.compat.v1.global_variables_initializer())
 
         for i in range(10):
             # As the input of n1 is the output of n0, these two placeholders need no feeding

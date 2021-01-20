@@ -25,7 +25,7 @@ if __name__ == "__main__":
     x_train = np.reshape(x_train, (-1, 784))
     x_test = np.reshape(x_test, (-1, 784))
 
-    e = Evolving(loss=hand_made_tf_mse, desc_list=[MLPDescriptor], x_trains=[x_train], y_trains=[x_train], x_tests=[x_test], y_tests=[x_test], evaluation=hand_made_np_mse, n_inputs=[[784]], n_outputs=[[784]], batch_size=150, population=5, generations=20, iters=1000, n_layers=10, max_layer_size=100, seed=0)
+    e = Evolving(loss=hand_made_tf_mse, desc_list=[MLPDescriptor], x_trains=[x_train], y_trains=[x_train], x_tests=[x_test], y_tests=[x_test], evaluation=hand_made_np_mse, n_inputs=[[784]], n_outputs=[[784]], batch_size=150, population=5, generations=20, iters=100, n_layers=10, max_layer_size=100, seed=0)
     a = e.evolve()
 
     print(a)
