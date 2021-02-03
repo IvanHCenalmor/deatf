@@ -4,6 +4,9 @@ from functools import reduce
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
+from tensorflow.keras import Sequential
+from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout
+
 
 def xavier_init(fan_in=None, fan_out=None, shape=None):
     """ Xavier initialization of network weights"""
@@ -572,72 +575,42 @@ class Network:
         """
         self.descriptor = network_descriptor
         self.List_layers = []           # This will contain the outputs of all layers in the network
-        self.List_weights = []          # This will contain the list of weights/kernels of the layers
 
 
 class MLP(Network):
 
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
-        self.List_bias = []             # This will contain the biases (if necessary) of the layers
 
-    def create_hidden_layer(self, in_size, out_size, init_w_function, layer_name):
-        """
-        This function creates the necessary tf variables for doing the matmul and addition operations afterwards
-        :param in_size: number of neurons in the previous layer
-        :param out_size: number of neurons in the current layer
-        :param init_w_function: function for randomly initializing the weights
-        :param layer_name: Usually the number of the layer
-        :return:
-        """
-
-        w = tf.Variable(init_w_function(shape=[in_size, out_size]), name="W"+layer_name)
-        b = tf.Variable(tf.zeros(shape=[out_size]), name="b"+layer_name)
-
-        self.List_weights.append(w)
-        self.List_bias.append(b)
-
-    def initialization(self, graph, _):
-        """
-        This function uses create_hidden_layer iteratively to form the necessary variables for the MLP
-        :param graph: tensorflow graph on which the variables are created (and where the whole model is implemented)
-        :param _: Convenience
-        :return:
-        """
-        with graph.as_default():
-            self.create_hidden_layer(self.descriptor.input_dim, self.descriptor.dims[0], self.descriptor.init_functions[0], str(0))
-
-            for lay in range(1, self.descriptor.number_hidden_layers):
-                self.create_hidden_layer(self.descriptor.dims[lay-1], self.descriptor.dims[lay], self.descriptor.init_functions[lay], str(lay))
-
-            self.create_hidden_layer(self.descriptor.dims[self.descriptor.number_hidden_layers-1], self.descriptor.output_dim, self.descriptor.init_functions[self.descriptor.number_hidden_layers], str(self.descriptor.number_hidden_layers))
-
-    def building(self, layer, graph, _):
+    def building(self, _):
         """
         This function uses the variables created by the initialization function to create the MLP
-        :param layer: input of the network
-        :param graph: graph on which the variables are defined
+        :param input: input of the network
         :param _: Convenience
-        :return:
+        :return: 
         """
-        with graph.as_default():
 
-            for lay in range(self.descriptor.number_hidden_layers+1):
-                act = self.descriptor.act_functions[lay]
-                layer = tf.matmul(layer, self.List_weights[lay]) + self.List_bias[lay]
+        model = Sequential()
+        
+        model.add(Input(self.input_dim, kernel_initializer=self.descriptor.init_functions[0]))
+        
+        for lay_indx in range(self.descriptor.number_hidden_layers):
+            
+            act = self.descriptor.act_functions[lay_indx]
+            if not(lay_indx < self.descriptor.number_hidden_layers):
+                act = None    
+            
+            model.add(Dense(self.descriptor.dims[lay_indx]), activation=act)
+            
+            if self.descriptor.dropout[lay_indx] > 0:
+                model.add(Dropout(self.descriptor.dropout_probs))
+            
+            if self.descriptor.batch_norm[lay_indx] > 0:
+                model.add(BatchNormalization())
 
-                if self.descriptor.batch_norm[lay] > 0:
-                    layer = tf.compat.v1.layers.batch_normalization(layer)
+        model.add(Dense(self.descriptor.output_dim, ))
 
-                if act is not None and lay < self.descriptor.number_hidden_layers:
-                    layer = act(layer)
-
-                if self.descriptor.dropout[lay] > 0:
-
-                    layer = tf.compat.v1.layers.dropout(layer, rate=self.descriptor.dropout_probs)
-                self.List_layers.append(layer)
-
-        return layer
+        return model
 
 
 class CNN(Network):
