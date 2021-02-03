@@ -5,23 +5,11 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout
-
-
-def xavier_init(fan_in=None, fan_out=None, shape=None):
-    """ Xavier initialization of network weights"""
-    if fan_in is None or shape is not None:
-        fan_in = shape[0]
-        fan_out = shape[1]
-    # http://proceedings.mlr.press/v9/glorot10a/glorot10a.pdf
-    lim = np.sqrt(6.0/(fan_in + fan_out))
-    #return tf.random_uniform((fan_in, fan_out), minval=-lim, maxval=lim, dtype=tf.float32)
-    return tf.random.uniform((fan_in, fan_out), minval=-lim, maxval=lim, dtype=tf.float32)
-
+from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout, Conv2D, MaxPooling2D
+from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNormal, GlorotUniform
 
 activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.sigmoid, tf.nn.tanh]
-initializations = [xavier_init,  tf.random.uniform,  tf.random.normal]
-
+initializations = [RandomNormal(), RandomUniform(), GlorotNormal(), GlorotUniform()]
 
 class NetworkDescriptor:
 
@@ -584,32 +572,29 @@ class MLP(Network):
 
     def building(self, _):
         """
-        This function uses the variables created by the initialization function to create the MLP
-        :param input: input of the network
+        This function creates the MLP's model
         :param _: Convenience
-        :return: 
+        :return: Generated Keras model representing the MLP
         """
 
         model = Sequential()
         
-        model.add(Input(self.input_dim, kernel_initializer=self.descriptor.init_functions[0]))
+        model.add(Input(shape=(self.descriptor.input_dim,)))
         
         for lay_indx in range(self.descriptor.number_hidden_layers):
             
-            act = self.descriptor.act_functions[lay_indx]
-            if not(lay_indx < self.descriptor.number_hidden_layers):
-                act = None    
-            
-            model.add(Dense(self.descriptor.dims[lay_indx]), activation=act)
-            
+            model.add(Dense(self.descriptor.dims[lay_indx], activation=self.descriptor.act_functions[lay_indx], kernel_initializer=self.descriptor.init_functions[lay_indx]))
             if self.descriptor.dropout[lay_indx] > 0:
                 model.add(Dropout(self.descriptor.dropout_probs))
-            
             if self.descriptor.batch_norm[lay_indx] > 0:
                 model.add(BatchNormalization())
-
-        model.add(Dense(self.descriptor.output_dim, ))
-
+        
+        model.add(Dense(self.descriptor.output_dim, activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers],kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers]))
+        if self.descriptor.dropout[lay_indx] > 0:
+            model.add(Dropout(self.descriptor.dropout_probs))  
+        if self.descriptor.batch_norm[lay_indx] > 0:
+            model.add(BatchNormalization())
+        
         return model
 
 
@@ -618,29 +603,7 @@ class CNN(Network):
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
 
-    def initialization(self, graph, _):
-        """
-        This function creates all the necessary filters for the CNN
-        :param graph: Graph in which the variables are created (and convolutional operations are performed)
-        :param _: Convenience
-        :return:
-        """
-        last_c = self.descriptor.input_dim[-1]
-        with graph.as_default():
-            for ind in range(self.descriptor.number_hidden_layers):
-
-                if self.descriptor.layers[ind] == 2:  # If the layer is convolutional
-                    if self.descriptor.init_functions[ind] == 0:
-                        w = tf.Variable(np.random.uniform(-0.1, 0.1, size=[self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], last_c, self.descriptor.filters[ind][2]]).astype('float32'), name="W"+str(ind))
-                    else:
-                        w = tf.Variable(np.random.normal(0, 0.03, size=[self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], last_c, self.descriptor.filters[ind][2]]).astype('float32'), name="W"+str(ind))
-                    self.List_weights += [tf.Variable(w)]
-                    last_c = self.descriptor.filters[ind][2]
-
-                else:  # In case the layer is pooling, no need of weights
-                    self.List_weights += [tf.Variable(-1)]
-
-    def building(self, layer, graph, _):
+    def building(self,  _):
         """
         Using the filters defined in the initialization function, create the CNN
         :param layer: Input of the network
@@ -648,20 +611,27 @@ class CNN(Network):
         :param _: Convenience
         :return: Output of the network
         """
-        with graph.as_default():
-            for ind in range(self.descriptor.number_hidden_layers):
+        model = Sequential()
+        
+        for ind in range(self.descriptor.number_hidden_layers):
 
-                if self.descriptor.layers[ind] == 2:  # If the layer is convolutional
-                    layer = tf.nn.conv2d(layer, self.List_weights[ind], (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], self.descriptor.strides[ind][2]), padding=[[0, 0], [0, 0], [0, 0], [0, 0]])
-                elif self.descriptor.layers[ind] == 0:  # If the layer is average pooling
-                    layer = tf.nn.avg_pool(layer, (1, self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], 1), (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], 1), padding="VALID")
-                else:
-                    layer = tf.nn.max_pool(layer, (1, self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], 1), (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], 1), padding="VALID")
+            if self.descriptor.layers[ind] == 2:  # If the layer is convolutional
+                #model.add(Conv2D(filers=
+                #                 kernel_size
+                #                 strides = (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], self.descriptor.strides[ind][2])
+                #                 padding='valid))
+                layer = tf.nn.conv2d(layer, 
+                                     self.List_weights[ind], 
+                                     padding=[[0, 0], [0, 0], [0, 0], [0, 0]])
+            elif self.descriptor.layers[ind] == 0:  # If the layer is average pooling
+                layer = tf.nn.avg_pool(layer, (1, self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], 1), (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], 1), padding="VALID")
+            else:
+                layer = tf.nn.max_pool(layer, (1, self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], 1), (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], 1), padding="VALID")
 
-                if self.descriptor.act_functions[ind] is not None:  # If we have activation function
-                    layer = self.descriptor.act_functions[ind](layer)
-                # batch normalization and dropout not implemented (maybe pooling operations should be part of convolutional layers instead of layers by themselves)
-                self.List_layers += [layer]
+            if self.descriptor.act_functions[ind] is not None:  # If we have activation function
+                layer = self.descriptor.act_functions[ind](layer)
+            # batch normalization and dropout not implemented (maybe pooling operations should be part of convolutional layers instead of layers by themselves)
+            self.List_layers += [layer]
 
         return layer
 
