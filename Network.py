@@ -5,7 +5,7 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout, Conv2D, MaxPooling2D
+from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout, Conv2D, MaxPooling2D, AveragePooling2D
 from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNormal, GlorotUniform
 
 activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.sigmoid, tf.nn.tanh]
@@ -583,7 +583,9 @@ class MLP(Network):
         
         for lay_indx in range(self.descriptor.number_hidden_layers):
             
-            model.add(Dense(self.descriptor.dims[lay_indx], activation=self.descriptor.act_functions[lay_indx], kernel_initializer=self.descriptor.init_functions[lay_indx]))
+            model.add(Dense(self.descriptor.dims[lay_indx], 
+                            activation=self.descriptor.act_functions[lay_indx], 
+                            kernel_initializer=self.descriptor.init_functions[lay_indx]))
             if self.descriptor.dropout[lay_indx] > 0:
                 model.add(Dropout(self.descriptor.dropout_probs))
             if self.descriptor.batch_norm[lay_indx] > 0:
@@ -613,26 +615,27 @@ class CNN(Network):
         """
         model = Sequential()
         
-        for ind in range(self.descriptor.number_hidden_layers):
+        for lay_indx in range(self.descriptor.number_hidden_layers):
 
-            if self.descriptor.layers[ind] == 2:  # If the layer is convolutional
-                #model.add(Conv2D(filers=
-                #                 kernel_size
-                #                 strides = (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], self.descriptor.strides[ind][2])
-                #                 padding='valid))
-                layer = tf.nn.conv2d(layer, 
-                                     self.List_weights[ind], 
-                                     padding=[[0, 0], [0, 0], [0, 0], [0, 0]])
-            elif self.descriptor.layers[ind] == 0:  # If the layer is average pooling
-                layer = tf.nn.avg_pool(layer, (1, self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], 1), (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], 1), padding="VALID")
+            if self.descriptor.layers[lay_indx] == 2:  # If the layer is convolutional
+                model.add(Conv2D(self.descriptor.filters[lay_indx][2],
+                                 self.descriptor.filters[lay_indx][0],
+                                 strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+                                 padding="valid",
+                                 activateion=self.descriptor.act_functions[lay_indx],
+                                 kernel_initializer=self.descriptor.init_functions[lay_indx]))
+
+            elif self.descriptor.layers[lay_indx] == 0:  # If the layer is average pooling
+                model.add(AveragePooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
+                                           strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+                                           padding="valid"))
             else:
-                layer = tf.nn.max_pool(layer, (1, self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], 1), (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], 1), padding="VALID")
+                model.add(MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
+                                       strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+                                       padding="valid"))
 
-            if self.descriptor.act_functions[ind] is not None:  # If we have activation function
-                layer = self.descriptor.act_functions[ind](layer)
             # batch normalization and dropout not implemented (maybe pooling operations should be part of convolutional layers instead of layers by themselves)
-            self.List_layers += [layer]
-
+            
         return layer
 
 
