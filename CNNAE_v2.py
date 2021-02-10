@@ -24,6 +24,15 @@ def train_cnn_ae(nets, placeholders, sess, graph, train_inputs, _, batch_size, h
         out = tf.compat.v1.layers.flatten(out)                                   # and flatten it
         out = tf.compat.v1.layers.dense(out, 49)                                 # before transforming it to the desired dimension
 
+        '''
+        
+        model1 = net1.building('_')
+        model1.add(tf.keras.layers.Flatten())
+        model1.add(Dense(49))
+        model1.add(tf.keras.layers.Reshape((7, 7, 1)))
+
+        '''
+
         predictions["n0"] = tf.reshape(out, (-1, 7, 7, 1))             # Then we reshape it so that the TCNN can take it
 
         out = nets["n1"].building(predictions["n0"], graph, _)         # Take the piece of data we're interested in (for reconstruction)

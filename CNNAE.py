@@ -69,7 +69,21 @@ if __name__ == "__main__":
 
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
     # Here we define a convolutional-transposed convolutional network combination
-    e = Evolving(loss=train_cnn_ae, desc_list=[ConvDescriptor, TConvDescriptor], x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test], evaluation=eval_cnn_ae, batch_size=150, population=2, generations=10, n_inputs=[[28, 28, 3], [7, 7, 1]], n_outputs=[[49], [28, 28, 3]], cxp=0, mtp=1, hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, no_batch_norm=False, no_dropout=False)
+    e = Evolving(loss=train_cnn_ae, 
+                 desc_list=[ConvDescriptor, TConvDescriptor], 
+                 x_trains=[x_train], y_trains=[y_train], 
+                 x_tests=[x_test], y_tests=[y_test], 
+                 evaluation=eval_cnn_ae, 
+                 batch_size=150, 
+                 population=2, 
+                 generations=10, 
+                 n_inputs=[[28, 28, 3], [7, 7, 1]], 
+                 n_outputs=[[49], [28, 28, 3]], 
+                 cxp=0, 
+                 mtp=1, 
+                 hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
+                 no_batch_norm=False, 
+                 no_dropout=False)
     a = e.evolve()
 
     print(a[-1])
