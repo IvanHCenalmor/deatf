@@ -5,11 +5,11 @@ import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from tensorflow.keras import Sequential
-from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout, Conv2D, MaxPooling2D, AveragePooling2D
+from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, MaxPooling2D, AveragePooling2D
 from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNormal, GlorotUniform
 
 activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.sigmoid, tf.nn.tanh]
-initializations = [RandomNormal(), RandomUniform(), GlorotNormal(), GlorotUniform()]
+initializations = [RandomNormal, RandomUniform, GlorotNormal, GlorotUniform]
 
 class NetworkDescriptor:
 
@@ -614,15 +614,17 @@ class CNN(Network):
         :return: Output of the network
         """
         model = Sequential()
-        
+        model.add(Input(shape=(self.descriptor.input_dim)))
+
         for lay_indx in range(self.descriptor.number_hidden_layers):
 
             if self.descriptor.layers[lay_indx] == 2:  # If the layer is convolutional
+                
                 model.add(Conv2D(self.descriptor.filters[lay_indx][2],
-                                 self.descriptor.filters[lay_indx][0],
+                                 [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
                                  strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
                                  padding="valid",
-                                 activateion=self.descriptor.act_functions[lay_indx],
+                                 activation=self.descriptor.act_functions[lay_indx],
                                  kernel_initializer=self.descriptor.init_functions[lay_indx]))
 
             elif self.descriptor.layers[lay_indx] == 0:  # If the layer is average pooling
@@ -636,7 +638,7 @@ class CNN(Network):
 
             # batch normalization and dropout not implemented (maybe pooling operations should be part of convolutional layers instead of layers by themselves)
             
-        return layer
+        return model
 
 
 class TCNN(Network):
@@ -645,37 +647,18 @@ class TCNN(Network):
     """
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
+    
+    def building(self, model):
+        
+        for lay_indx in range(self.descriptor.number_hidden_layers):
+            model.add(Conv2DTranspose(self.descriptor.filters[lay_indx][2],
+                                      [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
+                                      strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+                                      padding="valid",
+                                      activation=self.descriptor.act_functions[lay_indx],
+                                      kernel_initializer=self.descriptor.init_functions[lay_indx]))
 
-    def initialization(self, graph, _):
-
-        last_c = self.descriptor.input_dim[-1]
-        with graph.as_default():
-
-            for ind in range(self.descriptor.number_hidden_layers):
-                if self.descriptor.init_functions[ind] == 0:
-                    w = tf.Variable(np.random.uniform(-0.1, 0.1, size=[self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], self.descriptor.filters[ind][2], last_c]).astype('float32'), name="W"+str(ind))
-                else:
-                    w = tf.Variable(np.random.normal(0, 0.03, size=[self.descriptor.filters[ind][0], self.descriptor.filters[ind][1], self.descriptor.filters[ind][2], last_c]).astype('float32'), name="W"+str(ind))
-                self.List_weights += [tf.Variable(w)]
-
-                last_c = self.descriptor.filters[ind][2]
-
-    def building(self, layer, graph, _):
-        with graph.as_default():
-            for ind in range(self.descriptor.number_hidden_layers):
-                dyn_input_shape = tf.shape(layer)
-                batch_size = dyn_input_shape[0]
-
-                output_shape = tf.stack([batch_size, self.descriptor.output_shapes[ind][1], self.descriptor.output_shapes[ind][2], self.descriptor.output_shapes[ind][3]])
-
-                layer = tf.nn.conv2d_transpose(layer, self.List_weights[ind], output_shape, (1, self.descriptor.strides[ind][0], self.descriptor.strides[ind][1], self.descriptor.strides[ind][2]), padding="VALID")
-
-                if self.descriptor.act_functions[ind] is not None:
-                    layer = self.descriptor.act_functions[ind](layer)
-
-                self.List_layers += [layer]
-
-        return layer
+        return model
 
 
 def compute_output(input_shape, layer_type, filter_size, stride):
