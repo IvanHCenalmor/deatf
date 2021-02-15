@@ -11,6 +11,9 @@ from auxiliary_functions import batch
 from metrics import mse, accuracy_error
 import os
 
+from tensorflow.keras.layers import Input
+from tensorflow.keras.models import Model
+
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
 descs = {"ConvDescriptor": CNN, "MLPDescriptor": MLP, "TConvDescriptor": TCNN}
@@ -30,8 +33,10 @@ class MyContainer(object):
 
 
 class Evolving:
-    def __init__(self, loss="XEntropy", desc_list=(MLPDescriptor, ), compl=False, x_trains=None, y_trains=None, x_tests=None, y_tests=None, evaluation="Accuracy_error", n_inputs=((28, 28),), n_outputs=((10,),), batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel=0,
-                 n_layers=10, max_layer_size=100, max_filter=4, max_stride=3, seed=0, cxp=0, mtp=1, no_dropout=False, no_batch_norm=False, evol_kwargs={}, sel_kwargs={}, ev_alg=1, hyperparameters={}, add_obj=0):
+    def __init__(self, loss="XEntropy", desc_list=(MLPDescriptor, ), compl=False, x_trains=None, y_trains=None, x_tests=None, y_tests=None, 
+                 evaluation="Accuracy_error", n_inputs=((28, 28),), n_outputs=((10,),), batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel=0,
+                 n_layers=10, max_layer_size=100, max_filter=4, max_stride=3, seed=0, cxp=0, mtp=1, no_dropout=False, no_batch_norm=False, 
+                 evol_kwargs={}, sel_kwargs={}, ev_alg=1, hyperparameters={}, add_obj=0):
         """
         This is the main class in charge of evolving model descriptors.
         """
@@ -218,15 +223,13 @@ class Evolving:
         :return: Fitness value.
         """
 
-        graph = tf.Graph()
-
         if not self.complex:
-            ev = self.single_net_eval(individual, graph)
+            ev = self.single_net_eval(individual)
         else:
-            ev = self.eval_multinetwork(individual, graph)
+            ev = self.eval_multinetwork(individual)
         return ev
 
-    def single_net_eval(self, individual, graph):
+    def single_net_eval(self, individual):
         """
         Function for evolving a single individual. No need of the user providing a evaluation function
         :param individual: DEAP individual
@@ -234,31 +237,20 @@ class Evolving:
         :return: Fitness value
         """
         net = MLP(individual.descriptor_list["n0"])
-        with graph.as_default():
-            #self.sess = tf.Session()
-            self.sess =tf.compat.v1.Session()
-            for i, key in enumerate(self.train_inputs.keys()):
-                inp = self.train_inputs[key]
-                #self.inp_placeholders[key] = tf.placeholder(tf.float32, shape=[None] + [i for i in inp.shape[1:]])
-                self.inp_placeholders[key] = tf.compat.v1.placeholder(tf.float32, shape=[None] + [i for i in inp.shape[1:]])
-            #self.out_placeholders["o0"] = tf.placeholder(tf.float32, shape=[None] + [i for i in self.train_outputs["o0"].shape[1:]])
-            self.out_placeholders["o0"] = tf.compat.v1.placeholder(tf.float32, shape=[None] + [i for i in self.train_outputs["o0"].shape[1:]])
-
-            inp = tf.concat([tf.compat.v1.layers.flatten(self.inp_placeholders[i]) for i in self.inp_placeholders.keys()], axis=1)
-            net.initialization(graph, '_')
-            out = net.building(inp, graph, '_')
-            self.predictions["o0"] = out
-
-            lf = self.loss_function(self.out_placeholders["o0"], out)
-            #opt = tf.train.AdamOptimizer(learning_rate=self.lrate).minimize(lf)
-            opt = tf.compat.v1.train.AdamOptimizer(learning_rate=self.lrate).minimize(lf)
-            self.sess.run(tf.compat.v1.global_variables_initializer())
-            self.train_single_network(graph, opt, lf)
-            ev = self.evaluate_network(graph)
-            self.sess.close()
+        
+        inp = Input(shape=self.n_inputs)
+        out = net.building(inp)
+        model = Model(inputs=inp, outputs=out)
+        
+        model.compile(loss=self.loss_function, optimizer="Adam")
+        
+        model.fit(self.train_inputs, self.train_outputs, epochs=self.iters, batch_size=self.batch_size, verbose=0)
+        
+        ev = model.evaluate(self.test_inputs, self.test_outputs, verbose=0)
+        
         return ev
 
-    def eval_multinetwork(self, individual, graph):
+    def eval_multinetwork(self, individual):
         """
         Function for evaluating a DEAP individual consisting of more than a single MLP. The user must have implemented the
         training and evaluation functions.
@@ -267,65 +259,16 @@ class Evolving:
         :return: Fitness value
         """
         nets = {}
-        with graph.as_default():
-            #self.sess = tf.Session()
-            self.sess =tf.compat.v1.Session()
-            for i in range(len(self.n_inputs)):
-                #self.inp_placeholders["i" + str(i)] = tf.placeholder(tf.float32, shape=[None] + [j for j in self.n_inputs[i]], name="i" + str(i))
-                self.inp_placeholders["i" + str(i)] = tf.compat.v1.placeholder(tf.float32, shape=[None] + [j for j in self.n_inputs[i]], name="i" + str(i))
+    
+        for index, net in enumerate(individual.descriptor_list.keys()):
+            if "hypers" not in net:
+                nets[net] = descs[self.descriptors[index].__name__](individual.descriptor_list[net])
 
-                
-            for i in range(len(self.n_outputs)):
-                #self.out_placeholders["o" + str(i)] = tf.placeholder(tf.float32, shape=[None] + [j for j in self.n_outputs[i]], name="o" + str(i))
-                self.out_placeholders["o" + str(i)] = tf.compat.v1.placeholder(tf.float32, shape=[None] + [j for j in self.n_outputs[i]], name="o" + str(i))
+        self.loss_function(nets, self.train_inputs, self.train_outputs, self.batch_size, individual.descriptor_list["hypers"])
 
-            for index, net in enumerate(individual.descriptor_list.keys()):
-                if "hypers" not in net:
-                    nets[net] = descs[self.descriptors[index].__name__](individual.descriptor_list[net])
-                    nets[net].initialization(graph, individual.descriptor_list["hypers"])
+        ev = self.evaluation(self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
 
-            predictions = self.loss_function(nets, {"in": self.inp_placeholders, "out": self.out_placeholders}, self.sess, graph, self.train_inputs, self.train_outputs, self.batch_size, individual.descriptor_list["hypers"])
-
-            ev = self.evaluation(predictions, self.inp_placeholders, self.sess, graph, self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
-
-            self.sess.close()
         return ev
-
-    def train_single_network(self, graph, opt, lf):
-        """
-        For the simple case of learning a single MLP, training
-        :param graph: Graph in which the tensorflow variables were created
-        :param opt: Tensorflow optimizer
-        :param lf: Loss function being optimized. Only for visualization purposes
-        :return: --
-        """
-
-        aux_ind = 0
-        for i in range(self.iters):
-            feed_dict = {}
-            for inp in self.train_inputs:
-                feed_dict[self.inp_placeholders[inp]] = batch(self.train_inputs[inp], self.batch_size, aux_ind)
-            for output in self.train_outputs:
-                feed_dict[self.out_placeholders[output]] = batch(self.train_outputs[output], self.batch_size, aux_ind)
-
-            aux_ind = (aux_ind + self.batch_size) % self.train_inputs["i0"].shape[0]
-            with graph.as_default():
-                _, partial_loss = self.sess.run([opt, lf], feed_dict=feed_dict)
-
-    def evaluate_network(self, graph):
-        """
-        Function for evaluating a MLP in the simple case
-        :param graph: Tensorflow graph where the model is created
-        :return: Fitness value
-        """
-
-        feed_dict = {}
-        for inp in self.train_inputs:
-            feed_dict[self.inp_placeholders[inp]] = self.test_inputs[inp]
-        with graph.as_default():
-            res = self.sess.run(self.predictions, feed_dict=feed_dict)
-
-        return self.evaluation(res["o0"], self.test_outputs["o0"]),
 
 
 def mutations(ev_hypers, max_lay, batch_normalization, drop, individual):
