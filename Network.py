@@ -570,34 +570,32 @@ class MLP(Network):
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
 
-    def building(self, _):
+    def building(self, x):
         """
         This function creates the MLP's model
         :param _: Convenience
         :return: Generated Keras model representing the MLP
         """
-
-        model = Sequential()
-        
-        model.add(Input(shape=(self.descriptor.input_dim,)))
         
         for lay_indx in range(self.descriptor.number_hidden_layers):
             
-            model.add(Dense(self.descriptor.dims[lay_indx], 
-                            activation=self.descriptor.act_functions[lay_indx], 
-                            kernel_initializer=self.descriptor.init_functions[lay_indx]))
+            x = Dense(self.descriptor.dims[lay_indx], 
+                      activation=self.descriptor.act_functions[lay_indx], 
+                      kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
             if self.descriptor.dropout[lay_indx] > 0:
-                model.add(Dropout(self.descriptor.dropout_probs))
+                x = Dropout(self.descriptor.dropout_probs)(x)
             if self.descriptor.batch_norm[lay_indx] > 0:
-                model.add(BatchNormalization())
+                x = BatchNormalization()(x)
         
-        model.add(Dense(self.descriptor.output_dim, activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers],kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers]))
+        x = Dense(self.descriptor.output_dim, 
+                  activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers],
+                  kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers])(x)
         if self.descriptor.dropout[lay_indx] > 0:
-            model.add(Dropout(self.descriptor.dropout_probs))  
+            x = Dropout(self.descriptor.dropout_probs)(x)
         if self.descriptor.batch_norm[lay_indx] > 0:
-            model.add(BatchNormalization())
+            x = BatchNormalization()(x)
         
-        return model
+        return x
 
 
 class CNN(Network):
@@ -605,7 +603,7 @@ class CNN(Network):
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
 
-    def building(self,  _):
+    def building(self, x):
         """
         Using the filters defined in the initialization function, create the CNN
         :param layer: Input of the network
@@ -613,32 +611,30 @@ class CNN(Network):
         :param _: Convenience
         :return: Output of the network
         """
-        model = Sequential()
-        model.add(Input(shape=(self.descriptor.input_dim)))
 
         for lay_indx in range(self.descriptor.number_hidden_layers):
 
             if self.descriptor.layers[lay_indx] == 2:  # If the layer is convolutional
                 
-                model.add(Conv2D(self.descriptor.filters[lay_indx][2],
-                                 [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
-                                 strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
-                                 padding="valid",
-                                 activation=self.descriptor.act_functions[lay_indx],
-                                 kernel_initializer=self.descriptor.init_functions[lay_indx]))
+                x = Conv2D(self.descriptor.filters[lay_indx][2],
+                           [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
+                           strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+                           padding="valid",
+                           activation=self.descriptor.act_functions[lay_indx],
+                           kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
 
             elif self.descriptor.layers[lay_indx] == 0:  # If the layer is average pooling
-                model.add(AveragePooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
+                x = AveragePooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
                                            strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
-                                           padding="valid"))
+                                           padding="valid")(x)
             else:
-                model.add(MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
+                x = MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
                                        strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
-                                       padding="valid"))
+                                       padding="valid")(x)
 
             # batch normalization and dropout not implemented (maybe pooling operations should be part of convolutional layers instead of layers by themselves)
             
-        return model
+        return x
 
 
 class TCNN(Network):
@@ -648,17 +644,17 @@ class TCNN(Network):
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
     
-    def building(self, model):
+    def building(self, x):
         
         for lay_indx in range(self.descriptor.number_hidden_layers):
-            model.add(Conv2DTranspose(self.descriptor.filters[lay_indx][2],
+            x = Conv2DTranspose(self.descriptor.filters[lay_indx][2],
                                       [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
                                       strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
                                       padding="valid",
                                       activation=self.descriptor.act_functions[lay_indx],
-                                      kernel_initializer=self.descriptor.init_functions[lay_indx]))
+                                      kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
 
-        return model
+        return x
 
 
 def compute_output(input_shape, layer_type, filter_size, stride):
