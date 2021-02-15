@@ -4,7 +4,6 @@ from functools import reduce
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-from tensorflow.keras import Sequential
 from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, MaxPooling2D, AveragePooling2D
 from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNormal, GlorotUniform
 
