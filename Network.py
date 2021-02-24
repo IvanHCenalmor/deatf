@@ -582,7 +582,7 @@ class MLP(Network):
                       activation=self.descriptor.act_functions[lay_indx], 
                       kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
             if self.descriptor.dropout[lay_indx] > 0:
-                x = Dropout(self.descriptor.dropout_probs)(x)
+                x = Dropout(self.descriptor.dropout_probs[lay_indx])(x)
             if self.descriptor.batch_norm[lay_indx] > 0:
                 x = BatchNormalization()(x)
         
@@ -590,7 +590,7 @@ class MLP(Network):
                   activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers],
                   kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers])(x)
         if self.descriptor.dropout[lay_indx] > 0:
-            x = Dropout(self.descriptor.dropout_probs)(x)
+            x = Dropout(self.descriptor.dropout_probs[lay_indx])(x)
         if self.descriptor.batch_norm[lay_indx] > 0:
             x = BatchNormalization()(x)
         

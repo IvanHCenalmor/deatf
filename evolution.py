@@ -147,7 +147,7 @@ class Evolving:
 
         deap_algs = [algorithms.eaSimple, algorithms.eaMuPlusLambda, algorithms.eaMuCommaLambda, algorithms.eaGenerateUpdate]
 
-        creator.create("Fitness", base.Fitness, weights=[1.0]*(len(self.test_outputs) + add_obj))
+        creator.create("Fitness", base.Fitness, weights=[-1.0]*(len(self.test_outputs) + add_obj))
 
         creator.create("Individual", MyContainer, fitness=creator.Fitness)
 
@@ -238,16 +238,19 @@ class Evolving:
         """
         net = MLP(individual.descriptor_list["n0"])
         
-        inp = Input(shape=self.n_inputs)
+        inp = Input(shape=self.n_inputs[0])
         out = net.building(inp)
         model = Model(inputs=inp, outputs=out)
+
+        model.compile(loss=self.loss_function, optimizer="Adam", metrics=[])
         
-        model.compile(loss=self.loss_function, optimizer="Adam")
+        model.fit(self.train_inputs['i0'], self.train_outputs['o0'], epochs=self.iters, batch_size=self.batch_size, verbose=0)
         
-        model.fit(self.train_inputs, self.train_outputs, epochs=self.iters, batch_size=self.batch_size, verbose=0)
+        ev = model.evaluate(self.test_inputs['i0'], self.test_outputs['o0'], verbose=0)
         
-        ev = model.evaluate(self.test_inputs, self.test_outputs, verbose=0)
-        
+        if isinstance(ev, float):
+            ev = (ev,)
+            
         return ev
 
     def eval_multinetwork(self, individual):
