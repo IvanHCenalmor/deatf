@@ -12,45 +12,47 @@ from evolution import Evolving, batch
 from Network import ConvDescriptor, TConvDescriptor
 from sklearn.metrics import mean_squared_error
 
+from tensorflow.keras.layers import Input, Dense, Flatten
+from tensorflow.keras.models import Model
 
-optimizers = [tf.train.AdadeltaOptimizer, tf.train.AdagradOptimizer, tf.train.AdamOptimizer]
-
-
-def train_cnn_ae(nets, placeholders, sess, graph, train_inputs, _, batch_size, hypers):
-    aux_ind = 0
-    predictions = {}
-    with graph.as_default():
-        out = nets["n0"].building(placeholders["in"]["i0"], graph, _)  # We take the ouptut of the CNN
-        out = tf.layers.flatten(out)                                   # and flatten it
-        out = tf.layers.dense(out, 49)                                 # before transforming it to the desired dimension
-
-        predictions["n0"] = tf.reshape(out, (-1, 7, 7, 1))             # Then we reshape it so that the TCNN can take it
-
-        out = nets["n1"].building(predictions["n0"], graph, _)         # Take the piece of data we're interested in (for reconstruction)
-        predictions["n1"] = out[:, :28, :28, :3]                       # as the TCNN could provide more than that
-        # Common training
-        lf = tf.losses.mean_squared_error(placeholders["in"]["i0"], predictions["n1"])
-
-        opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"]).minimize(lf)
-        sess.run(tf.global_variables_initializer())
-        for i in range(10):
-            # As the input of n1 is the output of n0, these two placeholders need no feeding
-            __, loss = sess.run([opt, lf], feed_dict={placeholders["in"]["i0"]: batch(train_inputs["i0"], batch_size, aux_ind)})
-            if np.isnan(loss):
-                break
-            aux_ind = (aux_ind + batch_size) % train_inputs["i0"].shape[0]
-
-    return predictions
+import tensorflow.keras.optimizers as opt
 
 
-def eval_cnn_ae(preds, placeholders, sess, graph, inputs, _, __):
-    with graph.as_default():
-        res = sess.run(preds["n1"], feed_dict={placeholders["i0"]: inputs["i0"]})
-        sess.close()
-        if np.isnan(res).any():
-            return 288,
-        else:
-            return mean_squared_error(np.reshape(res, (-1)), np.reshape(inputs["i0"], (-1))),
+optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
+
+
+def train_cnn_ae(nets, train_inputs, _, batch_size, hypers):
+    models = {}
+
+    inp = Input(shape=train_inputs["i0"].shape[1:])
+    out = nets["n0"].building(inp)
+    out = Flatten()(out)
+    out = Dense(49)(out)
+    out = tf.reshape(out, (-1, 7, 7, 1))
+    out = nets["n1"].building(out)
+    
+    model = Model(inputs=inp, outputs=out)
+    
+    opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
+    model.compile(loss=tf.losses.mean_squared_error, optimizer=opt, metrics=[])
+    
+    # As the output has to be the same as the input, the input is passed twice
+    model.fit(train_inputs['i0'], train_inputs['i0'], epochs=10, batch_size=batch_size, verbose=0)
+            
+    models["n0"] = model
+                     
+    return models
+
+
+def eval_cnn_ae(models, inputs, _, __):
+
+    pred = models["n0"].predict(inputs["i0"])
+    res = pred[:, :28, :28, :3] 
+        
+    if np.isnan(res).any():
+        return 288,
+    else:
+        return mean_squared_error(np.reshape(res, (-1)), np.reshape(inputs["i0"], (-1))),
 
 
 if __name__ == "__main__":
@@ -63,7 +65,7 @@ if __name__ == "__main__":
     x_test = np.expand_dims(x_test, axis=3)/255
     x_test = np.concatenate((x_test, x_test, x_test), axis=3)
 
-    OHEnc = OneHotEncoder(categories='auto')
+    OHEnc = OneHotEncoder()
 
     y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
 
