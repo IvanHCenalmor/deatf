@@ -12,38 +12,48 @@ from Network import MLPDescriptor
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 
+from tensorflow.keras.layers import Input, Dense, Flatten
+from tensorflow.keras.models import Model
 
-def train(nets, placeholders, sess, graph, train_inputs, train_outputs, batch_size, _):
-    aux_ind = 0
-    predictions = {}
+def train(nets, train_inputs, train_outputs, batch_size, _):
 
-    with graph.as_default():
-        # Both networks are created separately, using their own placeholders. They are not involved in any way
-        out = nets["n1"].building(tf.compat.v1.layers.flatten(placeholders["in"]["i1"]), graph, '_')
-        predictions["n1"] = out
-        out = nets["n0"].building(tf.compat.v1.layers.flatten(placeholders["in"]["i0"]), graph, '_')
-        predictions["n0"] = out
+    models = {}
+    
+    inp_0 = Input(shape=train_inputs["i0"].shape[1:])
+    out_0 = Flatten()(inp_0)
+    out_0 = nets["n0"].building(out_0)
+    
+    inp_1 = Input(shape=train_inputs["i1"].shape[1:])
+    out_1 = Flatten()(inp_1)
+    out_1 = nets["n1"].building(out_1)
+    
+    model = Model(inputs=[inp_0, inp_1], outputs=[out_0, out_1])
+    
+    opt = tf.keras.optimizers.Adam(learning_rate=0.01)
+    model.compile(loss=[tf.nn.softmax_cross_entropy_with_logits, tf.nn.softmax_cross_entropy_with_logits], optimizer=opt, metrics=[])
+    
+    # As the output has to be the same as the input, the input is passed twice
+    model.fit([train_inputs['i0'], train_inputs['i1']],
+              [train_outputs['o0'], train_outputs['o0']],
+               epochs=10, batch_size=batch_size, verbose=0)
+    
+    #model.summary()
+    #tf.keras.utils.plot_model(model, "multi_input_and_output_model.png", show_shapes=True)
+    
+    models["n0"] = model
+    
+    
+    return models
 
-        loss = tf.compat.v1.losses.softmax_cross_entropy(placeholders["out"]["o1"], predictions["n1"]) + tf.compat.v1.losses.softmax_cross_entropy(placeholders["out"]["o0"], predictions["n0"])
+def eval(models, inputs, outputs, _):
 
-        solver = tf.compat.v1.train.AdamOptimizer(learning_rate=0.01).minimize(loss, var_list=[nets["n1"].List_weights, nets["n1"].List_bias, nets["n0"].List_weights, nets["n0"].List_bias])
-        sess.run(tf.compat.v1.global_variables_initializer())
+    pred_0, pred_1 = models['n0'].predict([inputs['i0'], inputs['i1']])
+        
+    res_0 = tf.nn.softmax(pred_0)
+    res_1 = tf.nn.softmax(pred_1)
 
-        for it in range(10):
-            aux_ind = (aux_ind + batch_size) % train_inputs["i0"].shape[0]
-            # Here all placeholders need to be feeded, unlike in the previous examples, as both networks work on their own
-            _ = sess.run([solver], feed_dict={placeholders["in"]["i0"]: batch(train_inputs["i0"], batch_size, aux_ind), placeholders["in"]["i1"]: batch(train_inputs["i1"], batch_size, aux_ind), placeholders["out"]["o0"]: batch(train_outputs["o0"], batch_size, aux_ind), placeholders["out"]["o1"]: batch(train_outputs["o1"], batch_size, aux_ind)})
-        return predictions
-
-
-def eval(preds, placeholders, sess, graph, inputs, outputs, _):
-
-    with graph.as_default():
-        # Compute predictions for both problems
-        res = sess.run([tf.nn.softmax(preds["n0"]), tf.nn.softmax(preds["n1"])], feed_dict={placeholders["i0"]: inputs["i0"], placeholders["i1"]: inputs["i1"]})
-        sess.close()
     # Return both accuracies
-    return accuracy_error(res[0], outputs["o0"]), accuracy_error(res[1], outputs["o1"])
+    return accuracy_error(res_0, outputs["o0"]), accuracy_error(res_1, outputs["o1"])
 
 
 if __name__ == "__main__":
@@ -51,7 +61,7 @@ if __name__ == "__main__":
     fashion_x_train, fashion_y_train, fashion_x_test, fashion_y_test = load_fashion()
     mnist_x_train, mnist_y_train, mnist_x_test, mnist_y_test = load_mnist()
 
-    OHEnc = OneHotEncoder(categories='auto')
+    OHEnc = OneHotEncoder()
 
     fashion_y_train = OHEnc.fit_transform(np.reshape(fashion_y_train, (-1, 1))).toarray()
 

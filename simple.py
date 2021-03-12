@@ -28,9 +28,9 @@ if __name__ == "__main__":
     			 n_inputs=[[28, 28]], 
     			 n_outputs=[[10]], 
     			 batch_size=150, 
-    			 population=30, 
+    			 population=5, 
     			 generations=10, 
-    			 iters=100, 
+    			 iters=10, 
     			 n_layers=10, 
     			 max_layer_size=20)
     

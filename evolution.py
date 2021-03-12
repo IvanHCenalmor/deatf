@@ -11,7 +11,7 @@ from auxiliary_functions import batch
 from metrics import mse, accuracy_error
 import os
 
-from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
@@ -119,7 +119,7 @@ class Evolving:
         """
 
         #losses = {"MSE": tf.losses.mean_squared_error, "XEntropy": tf.losses.softmax_cross_entropy}
-        losses = {"MSE": tf.losses.mean_squared_error, "XEntropy": tf.losses.categorical_crossentropy}       
+        losses = {"MSE": tf.losses.mean_squared_error, "XEntropy": tf.compat.v1.losses.softmax_cross_entropy}       
         evals = {"MSE": mse, "Accuracy_error": accuracy_error}
 
         if type(loss) is str:
@@ -239,12 +239,16 @@ class Evolving:
         net = MLP(individual.descriptor_list["n0"])
         
         inp = Input(shape=self.n_inputs[0])
-        out = net.building(inp)
+        out = Flatten()(inp)
+        out = net.building(out)
         model = Model(inputs=inp, outputs=out)
-
-        model.compile(loss=self.loss_function, optimizer="Adam", metrics=[])
+        
+        opt = tf.keras.optimizers.Adam(learning_rate=self.lrate)
+        model.compile(loss=self.loss_function, optimizer=opt, metrics=[])
         
         model.fit(self.train_inputs['i0'], self.train_outputs['o0'], epochs=self.iters, batch_size=self.batch_size, verbose=0)
+        
+        #model.summary()
         
         ev = model.evaluate(self.test_inputs['i0'], self.test_outputs['o0'], verbose=0)
         
@@ -267,9 +271,9 @@ class Evolving:
             if "hypers" not in net:
                 nets[net] = descs[self.descriptors[index].__name__](individual.descriptor_list[net])
 
-        self.loss_function(nets, self.train_inputs, self.train_outputs, self.batch_size, individual.descriptor_list["hypers"])
+        models = self.loss_function(nets, self.train_inputs, self.train_outputs, self.batch_size, individual.descriptor_list["hypers"])
 
-        ev = self.evaluation(self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
+        ev = self.evaluation(models, self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
 
         return ev
 
