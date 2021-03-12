@@ -34,7 +34,7 @@ def train(nets, train_inputs, train_outputs, batch_size, _):
     
     # As the output has to be the same as the input, the input is passed twice
     model.fit([train_inputs['i0'], train_inputs['i1']],
-              [train_outputs['o0'], train_outputs['o0']],
+              [train_outputs['o0'], train_outputs['o1']],
                epochs=10, batch_size=batch_size, verbose=0)
     
     #model.summary()
