@@ -5,15 +5,19 @@ In this instance, we handle a classification problem, which is to be solved by t
 """
 from data import load_fashion
 import tensorflow as tf
+import tensorflow.keras.optimizers as opt
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 from evolution import Evolving, accuracy_error, batch
 from Network import MLPDescriptor, MLP
 from metrics import ret_evals
 
+from tensorflow.keras.layers import Input, Dense, Flatten
+from tensorflow.keras.models import Model
+
 evals = []
 
-optimizers = [tf.train.AdadeltaOptimizer, tf.train.AdagradOptimizer, tf.train.AdamOptimizer]
+optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 """
 This is not a straightforward task as we need to "place" the models in the sequential order.
@@ -24,7 +28,7 @@ For this, we need to:
 """
 
 
-def train_wann(nets, placeholders, sess, graph, train_inputs, train_outputs, batch_size, hypers):
+def train_wann(nets, train_inputs, train_outputs, batch_size, hypers):
     """
     This function takes care of arranging the model and training it. It is used by the evolutionary internally,
     and always is provided with the same parameters
@@ -39,42 +43,46 @@ def train_wann(nets, placeholders, sess, graph, train_inputs, train_outputs, bat
     :return: A dictionary with the tf layer which makes the predictions
     """
 
-    assignations = []
-    predictions = {}
+    models = {}
 
-    parameters = np.sum([x.shape[0].value * x.shape[1].value for x in nets["n0"].List_weights])
+    inp = Input(shape=train_inputs["i0"].shape[1:])
+    out = Flatten()(inp)
+    out = nets["n0"].building(out)
+    
+    model = Model(inputs=inp, outputs=out)
+    
+    parameters = 0
+    for layer in model.layers:
+        if layer.get_weights() != []:
+            parameters += layer.get_weights()[0].shape[0] * layer.get_weights()[0].shape[1]
+    
     string = hypers["start"]
     while len(string) < parameters:
         string = string.replace("0", hypers["p1"])
         string = string.replace("1", hypers["p2"])
     aux = 0
     ls = []
-    for layer in nets["n0"].List_weights:
+    for layer in model.layers:
         lay = []
-        for i in range(layer.shape[0].value):
-            lay += [[int(i) for i in string[aux:aux+layer.shape[1].value]]]
-            aux += layer.shape[1].value
-
-        lay = np.array(lay)
-        lay = np.where(lay == 0, hypers["weight1"], lay)
-        lay = np.where(lay == 1, hypers["weight2"], lay)
+        if layer.get_weights() != []:
+            for i in range(layer.get_weights()[0].shape[0]):
+                lay += [[int(i) for i in string[aux:aux+layer.get_weights()[0].shape[1]]]]
+                aux += layer.get_weights()[0].shape[1]
+            lay = np.array(lay)
+            lay = np.where(lay == 0, hypers["weight1"], lay)
+            lay = np.where(lay == 1, hypers["weight2"], lay)
+            lay = [lay, layer.get_weights()[1]]
         ls += [lay]
+    
+    for i, layer in enumerate(model.layers):  # Este for asigna el valor a todos los pesos
+        layer.set_weights(ls[i])
 
-    with graph.as_default():
-        # The following four lines define the model layout:
-        sess.run(tf.global_variables_initializer())
+    models["n0"] = model
 
-        out = nets["n0"].building(tf.layers.flatten(placeholders["in"]["i0"]), graph, None)
-        for i, layer in enumerate(nets["n0"].List_weights):  # Este for asigna el valor a todos los pesos
-            assignations += [tf.assign(layer, ls[i])]
-        sess.run(assignations)
-
-        predictions["n0"] = out
-
-    return predictions
+    return models
 
 
-def eval_wann(preds, placeholders, sess, graph, inputs, outputs, hypers):
+def eval_wann(models, inputs, outputs, hypers):
     """
     Here we compute the fitness of the model. It is used by the evolutionary internally and always is provided with the same parameters
     :param preds: Dictionary created in the arranging and training function
@@ -87,10 +95,11 @@ def eval_wann(preds, placeholders, sess, graph, inputs, outputs, hypers):
     :return: fitness of the model (as a tuple)
     """
     global evals
-    with graph.as_default():
-
-        res = sess.run(tf.nn.softmax(preds["n0"]), feed_dict={placeholders["i0"]: inputs["i0"]})
-        sess.close()
+    
+    preds = models["n0"].predict(inputs["i0"])
+    
+    res = tf.nn.softmax(preds)
+    
     res = np.argmax(res, axis=1)
     res = 1 - np.sum(np.argmax(outputs["o0"], axis=1) == res) / res.shape[0]
 
@@ -108,15 +117,20 @@ if __name__ == "__main__":
     x_test = x_test/255
     y_train = np.array([0 if x <= 4 else 1 for x in y_train])
     y_test = np.array([0 if x <= 4 else 1 for x in y_test])
-    OHEnc = OneHotEncoder(categories='auto')
+    OHEnc = OneHotEncoder()
 
     y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
 
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
 
-    e = Evolving(loss=train_wann, desc_list=[MLPDescriptor], x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test],
-                 evaluation=eval_wann, batch_size=150, population=500, generations=10000, n_inputs=[[28, 28]], n_outputs=[[2]], cxp=0, mtp=1,
-                 no_batch_norm=True, no_dropout=True, hyperparameters={"weight1": np.arange(-2, 2, 0.5), "weight2": np.arange(-2, 2, 0.5), "start": ["0", "1"], "p1": ["01", "10"], "p2": ["001", "010", "011", "101", "110", "100"]})  # Los pesos, que también evolucionan
+    e = Evolving(loss=train_wann, desc_list=[MLPDescriptor], 
+                 x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test],
+                 evaluation=eval_wann, batch_size=150, population=10, generations=100, 
+                 n_inputs=[[28, 28]], n_outputs=[[2]], cxp=0, mtp=1,
+                 no_batch_norm=True, no_dropout=True, 
+                 hyperparameters={"weight1": np.arange(-2, 2, 0.5), "weight2": np.arange(-2, 2, 0.5), 
+                                  "start": ["0", "1"], "p1": ["01", "10"],
+                                  "p2": ["001", "010", "011", "101", "110", "100"]})  # Los pesos, que también evolucionan
     a = e.evolve()
     np.save("simple_res_rand.npy", np.array(ret_evals()))
     print(a[-1])

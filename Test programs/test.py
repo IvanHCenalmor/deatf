@@ -88,6 +88,6 @@ def test_all_datasets(loss_func=None, eval_func=None, batch_size=150, population
             print('An error ocurred executing the {} dataset.'.format(dataset))        
     
 if __name__ == "__main__":
-    test('forest_types', batch_size=150, population=5, 
+    test('forest_types', batch_size=150, population=20, 
          generations=10, iters=100, n_layers=10, max_layer_size=20)
     #test_all_datasets(batch_size=200, population=2, generations = 2, iters=10)

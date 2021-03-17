@@ -72,7 +72,11 @@ if __name__ == "__main__":
     mnist_y_test = OHEnc.fit_transform(np.reshape(mnist_y_test, (-1, 1))).toarray()
 
     # In this case, we provide two data inputs and outputs
-    e = Evolving(loss=train, desc_list=[MLPDescriptor, MLPDescriptor], x_trains=[fashion_x_train, mnist_x_train], y_trains=[fashion_y_train, mnist_y_train], x_tests=[fashion_x_test, mnist_x_test], y_tests=[fashion_y_test, mnist_y_test], evaluation=eval, batch_size=150, population=10, generations=10, n_inputs=[[28, 28], [28, 28]], n_outputs=[[10], [10]], sel=2)
+    e = Evolving(loss=train, desc_list=[MLPDescriptor, MLPDescriptor], 
+                 x_trains=[fashion_x_train, mnist_x_train], y_trains=[fashion_y_train, mnist_y_train], 
+                 x_tests=[fashion_x_test, mnist_x_test], y_tests=[fashion_y_test, mnist_y_test], 
+                 evaluation=eval, batch_size=150, population=10, generations=10, 
+                 n_inputs=[[28, 28], [28, 28]], n_outputs=[[10], [10]], sel=2)
     res = e.evolve()
 
     print(res[0])
