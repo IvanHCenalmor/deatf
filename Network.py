@@ -12,7 +12,8 @@ initializations = [RandomNormal, RandomUniform, GlorotNormal, GlorotUniform]
 
 class NetworkDescriptor:
 
-    def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1, init_functions=None, act_functions=None, dropout=(), dropout_probs=(), batch_norm=()):
+    def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1, init_functions=None, act_functions=None, 
+                 dropout=(), dropout_probs=(), batch_norm=()):
         """
         This class implements the descriptor of a generic network. Subclasses of this are the ones evolved.
         :param number_hidden_layers: Number of hidden layers in the network
@@ -76,7 +77,8 @@ class NetworkDescriptor:
 
 
 class MLPDescriptor(NetworkDescriptor):
-    def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1,  dims=None, init_functions=None, act_functions=None, dropout=(), batch_norm=()):
+    def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1,  dims=None, init_functions=None, 
+                 act_functions=None, dropout=(), batch_norm=()):
         """
 
         :param number_hidden_layers: Number of hidden layers in the network
@@ -216,7 +218,9 @@ class MLPDescriptor(NetworkDescriptor):
 
 
 class ConvDescriptor(NetworkDescriptor):
-    def __init__(self, number_hidden_layers=2, input_dim=(28, 28, 3), output_dim=(7, 7, 1), op_type=(0, 1), filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), list_init_functions=(0, 0), list_act_functions=(0, 0), dropout=(), batch_norm=()):
+    def __init__(self, number_hidden_layers=2, input_dim=(28, 28, 3), output_dim=(7, 7, 1), op_type=(0, 1), 
+                 filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), list_init_functions=(0, 0), 
+                 list_act_functions=(0, 0), dropout=(), batch_norm=()):
         """
         Descriptor for convolutional cells
         :param number_hidden_layers: Number of hidden layers (it's changed afterwards)
@@ -231,11 +235,14 @@ class ConvDescriptor(NetworkDescriptor):
         :param batch_norm: list of booleans defining whether batch normalization is applied to each layer (it's changed afterwards)
         """
 
-        super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, init_functions=list_init_functions, act_functions=list_act_functions, dropout=dropout, batch_norm=batch_norm)
+        super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
+                         init_functions=list_init_functions, act_functions=list_act_functions, dropout=dropout, 
+                         batch_norm=batch_norm)
         self.layers = op_type
         self.filters = filters
         self.strides = strides
-        self.shapes = []    # This is an important variable which contains the shapes of the blobs. This way we control that the CNN does not produce too small blobs
+        self.shapes = []    # This is an important variable which contains the shapes of the blobs. 
+                            # This way we control that the CNN does not produce too small blobs
 
     def random_init(self, input_size, output_size, nlayers, _, max_stride, max_filter, no_drop, no_batch):
         """
@@ -396,7 +403,9 @@ class ConvDescriptor(NetworkDescriptor):
 
 
 class TConvDescriptor(NetworkDescriptor):
-    def __init__(self, number_hidden_layers=2, input_dim=(7, 7, 50), output_dim=(28, 28, 3), filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), list_init_functions=(0, 0), list_act_functions=(0, 0), dropout=(), batch_norm=()):
+    def __init__(self, number_hidden_layers=2, input_dim=(7, 7, 50), output_dim=(28, 28, 3), 
+                 filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), list_init_functions=(0, 0), 
+                 list_act_functions=(0, 0), dropout=(), batch_norm=()):
         """
        Descriptor for transposed convolutional cells
        :param number_hidden_layers: Number of hidden layers (it's changed afterwards)
