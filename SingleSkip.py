@@ -20,7 +20,6 @@ class SkipCNN(CNN):
         """
         Using the filters defined in the initialization function, create the CNN
         :param layer: Input of the network
-        :param graph: Graph in which variables were defined
         :param skip: Example of how to implement a skip connection
         :return: Output of the network
         """

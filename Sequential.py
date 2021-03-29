@@ -30,9 +30,6 @@ def train_sequential(nets, train_inputs, train_outputs, batch_size, hypers):
     This function takes care of arranging the model and training it. It is used by the evolutionary internally,
     and always is provided with the same parameters
     :param nets: Dictionary with the Networks ("n0", "n1", ..., "nm", in the same order as they have been requested in the *desc_list* parameter)
-    :param placeholders: Dictionary with input ("in"->"i0", "i1", ..., im) placeholders ("out"->"o0", "o1", ..., "om") for each network
-    :param sess: tf session to be used when training
-    :param graph: tf graph to be used when training
     :param train_inputs: Data to be used for training
     :param train_outputs: Data to be used for training
     :param batch_size: Batch_size to be used when training. It is not mandatory to use it
@@ -64,9 +61,6 @@ def eval_sequential(models, inputs, outputs, _):
     """
     Here we compute the fitness of the model. It is used by the evolutionary internally and always is provided with the same parameters
     :param preds: Dictionary created in the arranging and training function
-    :param placeholders: (Only) Input placeholders: ("i0", "i1", ..., "im").
-    :param sess: tf session to perform inference
-    :param graph: tf graph in which inference is performed
     :param inputs: Data inputs for the model
     :param outputs: Data outputs for the metric
     :param _: hyperparameters, because we are evolving the optimizer selection and learning rate, they are unused when testing

@@ -11,61 +11,81 @@ from keras.models import model_from_json
 from evolution import Evolving, batch
 from Network import MLPDescriptor
 from PIL import Image
+import matplotlib.pyplot as plt
+
+from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
+from tensorflow.keras.models import Model
+
+def generator_loss(fake_out):
+    return - tf.reduce_mean(fake_out)
+
+def discriminator_loss(fake_out, real_out):
+    return - tf.reduce_mean(real_out) + tf.reduce_mean(fake_out)
 
 
-def gan_train(nets, placeholders, sess, graph, train_inputs, _, batch_size, __):
-    aux_ind = 0
-    predictions = {}
+def gan_train(nets, train_inputs, _, batch_size, __):
+    
+    models = {}
+        
+    noise = np.random.normal(size=(150, 10))
+    
+    g_inp = Input(shape=noise.shape[1:])
+    g_out = nets["n1"].building(g_inp)
+    g_out = Reshape(x_train.shape[1:])(g_out)
+    
+    g_model = Model(inputs=g_inp, outputs=g_out)
 
-    with graph.as_default():
-        # We define the special GAN structure
-        out = nets["n1"].building(placeholders["in"]["i1"], graph, _)
-        predictions["gen"] = out
-        out = nets["n0"].building(tf.layers.flatten(placeholders["in"]["i0"]), graph, _)
-        predictions["realDisc"] = out
-        out = nets["n0"].building(predictions["gen"], graph, _)
-        predictions["fakeDisc"] = out
+    d_inp = Input(shape=x_train.shape[1:])
+    d_out = Flatten()(d_inp)
+    d_out = nets["n0"].building(d_out)
+    
+    d_model = Model(inputs=d_inp, outputs=d_out)
 
-        # Loss function and optimizer
-        d_loss = -tf.reduce_mean(predictions["realDisc"]) + tf.reduce_mean(predictions["fakeDisc"])
-        g_loss = -tf.reduce_mean(predictions["fakeDisc"])
+    generator_optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
+    discriminator_optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
-        g_solver = tf.train.AdamOptimizer(learning_rate=0.01).minimize(g_loss, var_list=[nets["n1"].List_weights, nets["n1"].List_bias])
-        d_solver = tf.train.AdamOptimizer(learning_rate=0.01).minimize(d_loss, var_list=[nets["n0"].List_weights, nets["n0"].List_bias])
-        sess.run(tf.global_variables_initializer())
+    @tf.function
+    def train_step(x_train):
+        
+        with tf.GradientTape() as g_tape, tf.GradientTape() as d_tape:
+    
+            generated_images = g_model(noise, training=True)
+            fake_out = d_model(generated_images, training=True)
+            
+            real_out = d_model(x_train, training=True)
+            
+            g_loss = generator_loss(fake_out)
+            d_loss = discriminator_loss(fake_out, real_out)
+            
+        gradients_of_generator = g_tape.gradient(g_loss, g_model.trainable_variables)
+        gradients_of_discriminator = d_tape.gradient(d_loss, d_model.trainable_variables)
+    
+        generator_optimizer.apply_gradients(zip(gradients_of_generator, g_model.trainable_variables))
+        discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, d_model.trainable_variables))
+    
+    aux_ind = 0        
+    
+    for epoch in range(100):
 
-        for it in range(10):  # Train the model
-            z_mb = np.random.normal(size=(150, 10))
+        image_batch = batch(train_inputs["i0"], batch_size, aux_ind)
+        aux_ind = (aux_ind + batch_size) % train_inputs["i0"].shape[0]
+        train_step(image_batch)
+    
 
-            x_mb = batch(train_inputs["i0"], batch_size, aux_ind)
-            aux_ind = (aux_ind + batch_size) % train_inputs["i0"].shape[0]
+    models['n0'] = d_model
+    models['n1'] = g_model
+    
+    return models
 
-            _ = sess.run([d_solver], feed_dict={placeholders["in"]["i0"]: x_mb, placeholders["in"]["i1"]: z_mb})
-            _ = sess.run([g_solver], feed_dict={placeholders["in"]["i1"]: z_mb})
-        return predictions
-
-
-def load_model(model_name="Mobile"):  # We load the model once at the beginning of the process
-
-    model_paths = {"Mobile": "Mobile-99-94/", "Inception": "Inception-95-91/"}
-    json_file = open(model_paths[model_name] + 'model.json', 'r')
-    g_1 = tf.Graph()  # In a different graph, because the ones containing the individuals are constantly reinitialized
-    with g_1.as_default():
-        class_model = model_from_json(json_file.read())
-        class_model.load_weights(model_paths[model_name] + "model.h5")
-        class_model.compile(loss='binary_crossentropy', optimizer='rmsprop', metrics=['accuracy'])
-    json_file.close()
-    return g_1, class_model  # return graph and model
-
-
-def gan_eval(preds, placeholders, sess, graph, _, __, ___):
-
+def gan_eval(models, _, __, ___):
+    
     height, width = 90, 90
-    with graph.as_default():
-        samples = sess.run(preds["gen"], feed_dict={placeholders["i1"]: np.random.normal(size=(150, 10))})  # We generate data
+    
+    noise = np.random.normal(size=(150, 10))
+
+    samples = models['n1'](noise, training=False)
 
     # Make it usable for MoblieNet
-    samples = np.reshape(samples, (-1, 28, 28, 1))
     images = np.array([np.array(Image.fromarray(x).resize((width, height))) for x in np.reshape(samples, (-1, 28, 28))])/255.
     images = np.reshape(images, (-1, width, height, 1))
     images = np.concatenate([images, images, images], axis=3)
@@ -86,7 +106,7 @@ def gan_eval(preds, placeholders, sess, graph, _, __, ___):
 
 if __name__ == "__main__":
 
-    mobile_graph, model = load_model()  # The model and its graph are used as global variables
+    #mobile_graph, model = load_model()  # The model and its graph are used as global variables
 
     x_train, _, x_test, _ = load_fashion()
     # The GAN evolutive process is a common 2-DNN evolution

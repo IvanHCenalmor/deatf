@@ -615,8 +615,6 @@ class CNN(Network):
         """
         Using the filters defined in the initialization function, create the CNN
         :param layer: Input of the network
-        :param graph: Graph in which variables were defined
-        :param _: Convenience
         :return: Output of the network
         """
 

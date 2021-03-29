@@ -29,6 +29,7 @@ class MyContainer(object):
     # it will be  added later by the creator
     def __init__(self, descriptor_list):
         # Some initialisation with received values
+        print(descriptor_list)
         self.descriptor_list = descriptor_list
 
 
@@ -59,11 +60,8 @@ class Evolving:
         self.evaluation = None                                          # Function for evaluating the model
         self.define_loss_eval(loss, evaluation)                         # Assigning the values of the previous variables
 
-        self.sess = None                                                # Tensorflow Session
         self.batch_size = batch_size                                    # Batch size for training
         self.predictions = {}                                           # dict {"Net_id": net_output}
-        self.inp_placeholders = {}                                      # Placeholders for model inputs
-        self.out_placeholders = {}                                      # Placeholders for model outputs
         self.lrate = lrate                                              # Learning rate
         self.iters = iters                                              # Number of training epochs
         self.train_inputs = {}                                          # Training data (X)
@@ -233,7 +231,6 @@ class Evolving:
         """
         Function for evolving a single individual. No need of the user providing a evaluation function
         :param individual: DEAP individual
-        :param graph: Graph where the tensorflow variables were defined
         :return: Fitness value
         """
         net = MLP(individual.descriptor_list["n0"])
@@ -262,7 +259,6 @@ class Evolving:
         Function for evaluating a DEAP individual consisting of more than a single MLP. The user must have implemented the
         training and evaluation functions.
         :param individual: DEAP individual
-        :param graph: Tensorflow graph where the tensorflow variables were defined
         :return: Fitness value
         """
         nets = {}

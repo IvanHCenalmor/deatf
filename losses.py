@@ -273,8 +273,6 @@ def log_quaternion_loss_batch(predictions, labels, params):
 def log_quaternion_loss(predictions, labels, params):
   """A helper function to compute the mean error between batches of quaternions.
 
-  The caller is expected to add the loss to the graph.
-
   Args:
     predictions: A Tensor of size [batch_size, 4].
     labels: A Tensor of size [batch_size, 4].
