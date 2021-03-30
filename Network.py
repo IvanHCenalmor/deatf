@@ -38,9 +38,6 @@ class NetworkDescriptor:
     def remove_layer(self, _):  # Defined just in case the user redefines classes and forgets to define this function
         pass
 
-    def change_dimensions_in_layer(self, _, __):  # Defined just in case the user redefines classes and forgets to define this function
-        pass
-
     def remove_random_layer(self):
         layer_pos = np.random.randint(self.number_hidden_layers)
         self.remove_layer(layer_pos)
@@ -56,12 +53,6 @@ class NetworkDescriptor:
         if layer_pos < 0 or layer_pos > self.number_hidden_layers:
             return
         self.init_functions[layer_pos] = new_weight_fn
-
-    def change_dimensions(self, max_layer_size):
-        # Select random layer and execute change
-        layer_pos = np.random.randint(self.number_hidden_layers)
-        new_dim = np.random.randint(max_layer_size)+1
-        self.change_dimensions_in_layer(layer_pos, new_dim)
 
     def change_dropout(self):
         # Select random layer and flip dropout
@@ -274,7 +265,7 @@ class ConvDescriptor(NetworkDescriptor):
             self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
             self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])]
             shape = compute_output(shape, 0, self.filters[-1], self.strides[-1])
-            if shape[0] < 2 or shape[1] < 2 or shape[0] * shape[1] * self.filters[-1][2] < self.output_dim:  # If the blob size is too small
+            if shape[0] < 2 or shape[1] < 2 or np.prod(shape) < self.output_dim:  # If the blob size is too small
                 self.number_hidden_layers = i
                 self.strides = self.strides[:-1]
                 self.filters = self.filters[:-1]

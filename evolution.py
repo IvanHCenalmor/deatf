@@ -74,8 +74,8 @@ class Evolving:
         self.test_inputs = {}                                           # Test data (X)
         self.test_outputs = {}                                          # Test data (y)
         self.data_save(x_trains, y_trains, x_tests, y_tests)            # Save data in the previous dicts
-        self.complex = (type(loss) is not str) or (type(evaluation) is not str) or compl or len(self.descriptors) > 1 or self.descriptors[0] is not MLPDescriptor or len(hyperparameters) > 0
-
+        self.complex = self.is_complex(compl, loss, evaluation, hyperparameters)
+        
         self.toolbox = base.Toolbox()
         self.ev_alg = None                                              # DEAP evolutionary algorithm function
         self.cXp = cxp if len(desc_list) > 1 else 0                     # Crossover probability. 0 in the simple case
@@ -134,7 +134,20 @@ class Evolving:
             self.evaluation = evals[evaluation]
         else:
             self.evaluation = evaluation
-
+    
+    def is_complex(self, compl, loss, evaluation, hyperparameters):
+        if compl:
+            return True
+        elif (type(loss) is not str) or (type(evaluation) is not str):
+            return True
+        elif self.descriptors[0] is not MLPDescriptor:
+            return True
+        elif len(self.descriptors) > 1 or len(hyperparameters) > 0:
+            return True
+        
+        return False
+        
+    
     def initialize_deap(self, sel, sel_kwargs, ev_alg, ev_kwargs, no_batch, no_drop, custom_mutations, add_obj):
         """
         Initialize DEAP algorithm

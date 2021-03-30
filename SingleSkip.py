@@ -109,7 +109,7 @@ def train_cnn(nets, train_inputs, train_outputs, batch_size, hypers):
     return models
 
 
-def eval_cnn(models, graph, inputs, outputs, _):
+def eval_cnn(models, inputs, outputs, _):
     
     preds = models["n0"].predict(inputs["i0"])
     
