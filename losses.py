@@ -27,9 +27,6 @@ The following domain adaptation loss functions are defined:
 from functools import partial
 import tensorflow as tf
 
-slim = tf.contrib.slim
-
-
 ################################################################################
 # SIMILARITY LOSS
 ################################################################################
@@ -148,13 +145,12 @@ def mmd_loss(source_samples, target_samples, weight, scope=None):
   loss_value = maximum_mean_discrepancy(
       source_samples, target_samples, kernel=gaussian_kernel)
   loss_value = tf.maximum(1e-4, loss_value) * weight
-  assert_op = tf.Assert(tf.is_finite(loss_value), [loss_value])
+  assert_op = tf.Assert(tf.math.is_finite(loss_value), [loss_value])
   with tf.control_dependencies([assert_op]):
     tag = 'MMD Loss'
     if scope:
       tag = scope + tag
     tf.summary.scalar(tag, loss_value)
-    tf.losses.add_loss(loss_value)
 
   return loss_value
 
@@ -189,7 +185,6 @@ def correlation_loss(source_samples, target_samples, weight, scope=None):
     if scope:
       tag = scope + tag
     tf.summary.scalar(tag, corr_loss)
-    tf.losses.add_loss(corr_loss)
 
   return corr_loss
 

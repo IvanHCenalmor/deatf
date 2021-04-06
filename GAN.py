@@ -17,19 +17,18 @@ from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
 from tensorflow.keras.models import Model
 
 def generator_loss(fake_out):
-    G_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_out,
+    g_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_out,
                                                                     labels=tf.ones_like(fake_out)))
-    return G_loss
+    return g_loss
 
 def discriminator_loss(fake_out, real_out):
-    D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=real_out, 
+    d_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=real_out, 
                                                                          labels=tf.ones_like(real_out)))
-    D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_out,
+    d_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_out,
                                                                          labels=tf.zeros_like(fake_out)))
     
-    
-    D_loss = D_loss_real + D_loss_fake
-    return D_loss
+    d_loss = d_loss_real + d_loss_fake
+    return d_loss
 
 def gan_train(nets, train_inputs, _, batch_size, __):
     
@@ -86,32 +85,6 @@ def gan_train(nets, train_inputs, _, batch_size, __):
     return models
 
 def gan_eval(models, _, __, ___):
-    
-    '''
-    height, width = 90, 90
-    
-    noise = np.random.normal(size=(150, 10))
-
-    samples = models['n1'](noise, training=False)
-
-    # Make it usable for MoblieNet
-    images = np.array([np.array(Image.fromarray(x).resize((width, height))) for x in np.reshape(samples, (-1, 28, 28))])/255.
-    images = np.reshape(images, (-1, width, height, 1))
-    images = np.concatenate([images, images, images], axis=3)
-    # Compute the IS
-    with mobile_graph.as_default():
-        predictions = model.predict(images)
-    preds = np.argmax(predictions, axis=1)
-    aux_preds = np.zeros(10)
-    unique, counts = np.unique(preds, return_counts=True)
-    for number, appearances in zip(unique, counts):
-        aux_preds[number] = appearances
-    aux_preds = aux_preds/predictions.shape[0]
-    predictions = np.sort(predictions, axis=1)
-    predictions = np.mean(predictions, axis=0)
-
-    return -np.sum([aux_preds[w] * np.log(aux_preds[w] / predictions[w]) if aux_preds[w] > 0 else 0 for w in range(predictions.shape[0])]),
-    '''
 
     noise = np.random.normal(size=(150, 10))
     
@@ -120,8 +93,6 @@ def gan_eval(models, _, __, ___):
     return generator_loss(generated_images).numpy(),
     
 if __name__ == "__main__":
-
-    #mobile_graph, model = load_model()  # The model and its graph are used as global variables
 
     x_train, _, x_test, _ = load_fashion()
     # The GAN evolutive process is a common 2-DNN evolution

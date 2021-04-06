@@ -9,76 +9,102 @@ import numpy as np
 from evolution import Evolving, batch
 from Network import MLPDescriptor
 from gaussians import mmd, plt_center_assignation, create_data
-import argparse
+import sys
 import matplotlib.pyplot as plt
+
+from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
+from tensorflow.keras.models import Model
 
 best_mmd = 28888888
 eval_tot = 0
 
+def generator_loss(fake_out):
+    g_loss = tf.reduce_mean(
+        tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_out, labels=tf.ones_like(fake_out)))
 
-def gan_train(nets, placeholders, sess, graph, train_inputs, _, batch_size, __):
+    return g_loss
+
+def discriminator_loss(fake_out, real_out):
+    d_loss = tf.reduce_mean(
+        tf.nn.sigmoid_cross_entropy_with_logits(logits=real_out, labels=tf.ones_like(real_out)) +
+        tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_out, labels=tf.zeros_like(fake_out)))
+    
+    return d_loss
+
+
+def gan_train(nets, train_inputs, _, batch_size, __):
+
+    models = {}
+    
+    g_inp = Input(shape=z_size)
+    g_out = nets["n1"].building(g_inp)
+    g_out = tf.sigmoid(g_out)
+    
+    g_model = Model(inputs=g_inp, outputs=g_out)
+
+    d_inp = Input(shape=2)
+    d_out = nets["n0"].building(d_inp)
+    d_out = tf.sigmoid(d_out)
+    
+    d_model = Model(inputs=d_inp, outputs=d_out)
+
+    generator_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
+    discriminator_optimizer = tf.keras.optimizers.Adam(learning_rate=0.0001)
+    
+    @tf.function
+    def train_step(x_train):
+        
+        with tf.GradientTape() as g_tape, tf.GradientTape() as d_tape:
+
+            z_mb = np.random.uniform(size=(batch_size, z_size))
+            generated_images = g_model(z_mb, training=True)
+            z_mb = np.random.uniform(size=(batch_size, z_size))
+            generated_images = g_model(z_mb, training=True)
+            z_mb = np.random.uniform(size=(batch_size, z_size))
+            generated_images = g_model(z_mb, training=True)
+            fake_out = d_model(generated_images, training=True)
+            
+            real_out = d_model(x_train, training=True)
+            
+            g_loss = generator_loss(fake_out)
+            d_loss = discriminator_loss(fake_out, real_out)
+            
+        gradients_of_generator = g_tape.gradient(g_loss, g_model.trainable_variables)
+        gradients_of_discriminator = d_tape.gradient(d_loss, d_model.trainable_variables)
+    
+        generator_optimizer.apply_gradients(zip(gradients_of_generator, g_model.trainable_variables))
+        discriminator_optimizer.apply_gradients(zip(gradients_of_discriminator, d_model.trainable_variables))
+    
     aux_ind = 0
-    predictions = {}
+        
+    for epoch in range(100):
 
-    with graph.as_default():
-        # We define the special GAN structure
-        out = nets["n1"].building(placeholders["in"]["i1"], graph, _)
-        predictions["gen"] = tf.nn.sigmoid(out)
-        out = nets["n0"].building(placeholders["in"]["i0"], graph, _)
-        predictions["realDisc"] = tf.nn.sigmoid(out)
-        out = nets["n0"].building(predictions["gen"], graph, _)
-        predictions["fakeDisc"] = tf.nn.sigmoid(out)
+        x_mb = batch(train_inputs["i0"], batch_size, aux_ind)
+        aux_ind = (aux_ind + batch_size) % train_inputs["i0"].shape[0]
+        train_step(x_mb)
+        
+    models['n0'] = d_model
+    models['n1'] = g_model
+        
+    return models
 
-        # Loss function and optimizer
-        d_loss = tf.reduce_mean(
-            tf.nn.sigmoid_cross_entropy_with_logits(logits=predictions["realDisc"], labels=tf.ones_like(predictions["realDisc"])) +
-            tf.nn.sigmoid_cross_entropy_with_logits(logits=predictions["fakeDisc"], labels=tf.zeros_like(predictions["fakeDisc"])))
-        g_loss = tf.reduce_mean(
-            tf.nn.sigmoid_cross_entropy_with_logits(logits=predictions["fakeDisc"], labels=tf.ones_like(predictions["fakeDisc"])))
-
-        g_solver = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(g_loss, var_list=[nets["n1"].List_weights, nets["n1"].List_bias])
-        d_solver = tf.train.AdamOptimizer(learning_rate=0.0001).minimize(d_loss, var_list=[nets["n0"].List_weights, nets["n0"].List_bias])
-        sess.run(tf.global_variables_initializer())
-
-        for it in range(epochs):  # Train the model
-
-
-            x_mb = batch(train_inputs["i0"], batch_size, aux_ind)
-
-            aux_ind = (aux_ind + batch_size) % train_inputs["i0"].shape[0]
-            z_mb = np.random.uniform(size=(batch_size, z_size))
-            _, b = sess.run([g_solver, g_loss], feed_dict={placeholders["in"]["i1"]: z_mb})
-            z_mb = np.random.uniform(size=(batch_size, z_size))
-            _, b = sess.run([g_solver, g_loss], feed_dict={placeholders["in"]["i1"]: z_mb})
-            z_mb = np.random.uniform(size=(batch_size, z_size))
-            _, b = sess.run([g_solver, g_loss], feed_dict={placeholders["in"]["i1"]: z_mb})
-            _, a = sess.run([d_solver, d_loss], feed_dict={placeholders["in"]["i0"]: x_mb, placeholders["in"]["i1"]: z_mb})
-
-            #if it % 50 == 0: print(a, b)
-            #samples = sess.run(predictions["gen"], feed_dict={placeholders["in"]["i1"]: np.random.uniform(size=(1000, z_size))})
-            #plt.plot(x_mb[:, 0], x_mb[:, 1], "o")
-            #plt.show()
-        return predictions
-
-
-def gan_eval(preds, placeholders, sess, graph, _, outputs, __):
+def gan_eval(models, _, outputs, __):
 
     global best_mmd
     global eval_tot
-    with graph.as_default():
-        samples = sess.run(preds["gen"], feed_dict={placeholders["i1"]: np.random.uniform(size=(n_samples, z_size))})  # We generate data
-
-    # Make it usable for MoblieNet
+    
+    noise = np.random.uniform(size=(n_samples, z_size))
+    samples = models["n1"](noise)
 
     mmd_value, centers = mmd(candidate=samples, target=outputs["o0"])
-
+    print(mmd_value)
     if mmd_value < best_mmd:
         best_mmd = mmd_value
         plt.plot(outputs["o0"][:, 0], outputs["o0"][:, 1], "o")
         plt.plot(samples[:, 0], samples[:, 1], "o")
-        plt.savefig("Evoflow_" + str(n_gauss) + "_" + str(seed) + "_" + str(eval_tot) + "_" + str(np.round(mmd_value, decimals=3)) + ".pdf")
+        plt.savefig("gaussian_results/Evoflow_" + str(n_gauss) + "_" + str(seed) + "_" + str(eval_tot) + "_" + str(np.round(mmd_value, decimals=3)) + ".jpg")
         plt.clf()
-        np.save("Samples_" + str(n_gauss) + "_" + str(seed) + "_" + str(mmd_value), samples)
+        np.save("gaussian_results/Samples_" + str(n_gauss) + "_" + str(seed) + "_" + str(mmd_value), samples)
     eval_tot += 1
 
     return mmd_value,
@@ -86,20 +112,15 @@ def gan_eval(preds, placeholders, sess, graph, _, outputs, __):
 
 if __name__ == "__main__":
 
-    parser = argparse.ArgumentParser()
-    parser.add_argument('integers', metavar='int', type=int, choices=range(10001),
-                        nargs='+', help='an integer in the range 0..3000')
-    parser.add_argument('--sum', dest='accumulate', action='store_const', const=sum,
-                        default=max, help='sum the integers (default: find the max)')
-
-    args = parser.parse_args()
-    seed = args.integers[0]
-    n_gauss = args.integers[1]
-    n_samples = args.integers[2]
-    population = args.integers[3]
-    generations = args.integers[4]
-    epochs = args.integers[5]
-    z_size = args.integers[6]
+    args = sys.argv[1:]
+    seed = int(args[0])
+    n_gauss = int(args[1])
+    n_samples = int(args[2])
+    population = int(args[3])
+    generations = int(args[4])
+    epochs = int(args[5])
+    z_size = int(args[6])
+    
     x_train = create_data(n_gauss, n_samples)
     x_train = x_train - np.min(x_train, axis=0)
     x_train = x_train / np.max(x_train, axis=0)
@@ -108,7 +129,11 @@ if __name__ == "__main__":
     x_test = x_test - np.min(x_test, axis=0)
     x_test = x_test / np.max(x_test, axis=0)
     # The GAN evolutive process is a common 2-DNN evolution
-    e = Evolving(loss=gan_train, desc_list=[MLPDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[x_train], x_tests=[x_test], y_tests=[x_test], evaluation=gan_eval, batch_size=50, population=population, generations=generations, n_inputs=[[2], [z_size]], n_outputs=[[1], [2]], cxp=0.5, mtp=0.5, no_dropout=True, no_batch_norm=True)
+    e = Evolving(loss=gan_train, desc_list=[MLPDescriptor, MLPDescriptor], 
+                 x_trains=[x_train], y_trains=[x_train], x_tests=[x_test], y_tests=[x_test], 
+                 evaluation=gan_eval, batch_size=50, population=population, generations=generations, 
+                 n_inputs=[[2], [z_size]], n_outputs=[[1], [2]], 
+                 cxp=0.5, mtp=0.5, no_dropout=True, no_batch_norm=True)
     res = e.evolve()
 
     print(res[0])

@@ -68,7 +68,7 @@ def assign_centers(data, modes=8):
         y3 = data[:, 1] - (-(np.sqrt(2) + 1) * data[:, 0])
         y4 = data[:, 1] - (1 / (np.sqrt(2) + 1) * data[:, 0])
 
-        ys = np.concatenate((y1.reshape(-1, 1), y2.reshape(-1, 1), y3.reshape(-1, 1), y4.reshape(-1, 1)), axis=1)
+        ys = np.concatenate((np.reshape(y1, (-1, 1)), np.reshape(y2,(-1, 1)), np.reshape(y3, (-1, 1)), np.reshape(y4, (-1, 1))), axis=1)
 
         return np.sum(ys > 0, axis=1) + (ys[:, 2] > 0)*3
 
@@ -151,13 +151,11 @@ def evaluate_sets(datasets, modes=8):
 
 def mmd(candidate, target, modes=8):
     centers = assign_centers(candidate, modes=modes)
-    sess = tf.compat.v1.Session(config=tf.ConfigProto(device_count={'GPU': 1}))
+    
     res = losses.mmd_loss(tf.Variable(candidate, dtype="float32", name="Candidate"), tf.Variable(target, dtype="float32", name="Target"), 1)
-    sess.run(tf.global_variables_initializer())
-    res = sess.run(res)
+
     if res < 0.00001:
         res = 10000
-    sess.close()
     return res, centers
 
 
