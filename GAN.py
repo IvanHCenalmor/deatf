@@ -17,11 +17,19 @@ from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
 from tensorflow.keras.models import Model
 
 def generator_loss(fake_out):
-    return - tf.reduce_mean(fake_out)
+    G_loss = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_out,
+                                                                    labels=tf.ones_like(fake_out)))
+    return G_loss
 
 def discriminator_loss(fake_out, real_out):
-    return - tf.reduce_mean(real_out) + tf.reduce_mean(fake_out)
-
+    D_loss_real = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=real_out, 
+                                                                         labels=tf.ones_like(real_out)))
+    D_loss_fake = tf.reduce_mean(tf.nn.sigmoid_cross_entropy_with_logits(logits=fake_out,
+                                                                         labels=tf.zeros_like(fake_out)))
+    
+    
+    D_loss = D_loss_real + D_loss_fake
+    return D_loss
 
 def gan_train(nets, train_inputs, _, batch_size, __):
     
@@ -79,6 +87,7 @@ def gan_train(nets, train_inputs, _, batch_size, __):
 
 def gan_eval(models, _, __, ___):
     
+    '''
     height, width = 90, 90
     
     noise = np.random.normal(size=(150, 10))
@@ -102,8 +111,14 @@ def gan_eval(models, _, __, ___):
     predictions = np.mean(predictions, axis=0)
 
     return -np.sum([aux_preds[w] * np.log(aux_preds[w] / predictions[w]) if aux_preds[w] > 0 else 0 for w in range(predictions.shape[0])]),
+    '''
 
-
+    noise = np.random.normal(size=(150, 10))
+    
+    generated_images = models['n1'](noise, training=False)
+    
+    return generator_loss(generated_images).numpy(),
+    
 if __name__ == "__main__":
 
     #mobile_graph, model = load_model()  # The model and its graph are used as global variables

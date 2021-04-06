@@ -31,7 +31,6 @@ class MyContainer(object):
     # it will be  added later by the creator
     def __init__(self, descriptor_list):
         # Some initialisation with received values
-        print(descriptor_list)
         self.descriptor_list = descriptor_list
 
 
@@ -39,16 +38,15 @@ class Evolving:
     def __init__(self, loss="XEntropy", desc_list=(MLPDescriptor, ), compl=False, 
                  x_trains=None, y_trains=None, x_tests=None, y_tests=None, 
                  evaluation="Accuracy_error", n_inputs=((28, 28),), n_outputs=((10,),), 
-                 batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel=0,
+                 batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel='best',
                  n_layers=10, max_layer_size=100, max_filter=4, max_stride=3, seed=0, cxp=0, 
                  mtp=1, no_dropout=False, no_batch_norm=False, evol_kwargs={}, sel_kwargs={}, 
-                 ev_alg=1, hyperparameters={}, custom_mutations={}, add_obj=0):
+                 ev_alg='mu_plus_lambda', hyperparameters={}, custom_mutations={}, add_obj=0):
         """
         This is the main class in charge of evolving model descriptors.
         """
 
         np.random.seed(seed)
-        #tf.random.set_random_seed(seed)
         tf.random.set_seed(seed)
         random.seed(seed)
 
@@ -77,16 +75,15 @@ class Evolving:
         self.complex = self.is_complex(compl, loss, evaluation, hyperparameters)
         
         self.toolbox = base.Toolbox()
-        self.ev_alg = None                                              # DEAP evolutionary algorithm function
+        self.ev_alg = ev_alg                                            # DEAP evolutionary algorithm function
         self.cXp = cxp if len(desc_list) > 1 else 0                     # Crossover probability. 0 in the simple case
         self.mtp = mtp if len(desc_list) > 1 else 1                     # Mutation probability. 1 in the simple case
-        self.evol_kwargs = {}                                           # Parameters for the main DEAP function
-        self.evol_function = ev_alg                                     # main DEAP function index
+        self.evol_kwargs = evol_kwargs                                  # Parameters for the main DEAP function
         self.generations = generations                                  # Number of generations
         self.population_size = population                               # Individuals in a population
         self.ev_hypers = hyperparameters                                # Hyperparameters to be evolved (e.g., optimizer, batch size)
-        self.initialize_deap(sel, sel_kwargs, ev_alg, evol_kwargs, 
-                             no_batch_norm, no_dropout, custom_mutations, add_obj)      # Initialize DEAP-related matters
+        self.initialize_deap(sel, sel_kwargs, no_batch_norm, 
+                             no_dropout, custom_mutations, add_obj)     # Initialize DEAP-related matters
         
     def data_save(self, x_trains, y_trains, x_tests, y_tests):
         """
@@ -148,7 +145,7 @@ class Evolving:
         return False
         
     
-    def initialize_deap(self, sel, sel_kwargs, ev_alg, ev_kwargs, no_batch, no_drop, custom_mutations, add_obj):
+    def initialize_deap(self, sel, sel_kwargs, no_batch, no_drop, custom_mutations, add_obj):
         """
         Initialize DEAP algorithm
         :param sel: Selection method
@@ -161,7 +158,9 @@ class Evolving:
         :return: --
         """
 
-        deap_algs = [algorithms.eaSimple, algorithms.eaMuPlusLambda, algorithms.eaMuCommaLambda, algorithms.eaGenerateUpdate]
+        deap_algs = {'simple':algorithms.eaSimple, 'mu_plus_lambda': algorithms.eaMuPlusLambda, 
+                     'mu_comm_lambda':algorithms.eaMuCommaLambda}
+        sel_methods = {'best':tools.selBest, 'tournament':tools.selTournament, 'nsga2':tools.selNSGA2}
 
         creator.create("Fitness", base.Fitness, weights=[-1.0]*(len(self.test_outputs) + add_obj))
 
@@ -174,19 +173,15 @@ class Evolving:
         self.toolbox.register("mate", cross, creator.Individual)
         self.toolbox.register("mutate", mutations, self.ev_hypers, self.max_lay, no_batch, no_drop, custom_mutations)
 
-        sel_methods = [tools.selBest, tools.selTournament, tools.selNSGA2]
-
         self.toolbox.register("select", sel_methods[sel], **sel_kwargs)
 
-        if len(ev_kwargs) == 0:
-            if ev_alg == 0:
-                self.evol_kwargs = {"cxpb": self.cXp, "mutpb": self.mtp, "ngen": self.generations, "verbose": 1}
-            if ev_alg == 1:
-                self.evol_kwargs = {"mu": self.population_size, "lambda_": self.population_size, "cxpb": self.cXp, "mutpb": self.mtp, "ngen": self.generations, "verbose": 1}
-            if ev_alg == 2:
-                self.evol_kwargs = {"mu": self.population_size, "lambda_": self.population_size, "cxpb": self.cXp, "mutpb": self.mtp, "ngen": self.generations, "verbose": 1}
+        if not self.evol_kwargs:
+            if self.ev_alg == 'simple':
+                self.evol_kwargs = {"cxpb": self.cXp, "mutpb": self.mtp}
+            else:
+                self.evol_kwargs = {"mu": self.population_size, "lambda_": self.population_size, "cxpb": self.cXp, "mutpb": self.mtp}
 
-        self.ev_alg = deap_algs[ev_alg]
+        self.ev_alg = deap_algs[self.ev_alg]
 
     def evolve(self):
         """
@@ -202,7 +197,9 @@ class Evolving:
         stats.register("std", np.std, axis=0)
         stats.register("min", np.min, axis=0)
         stats.register("max", np.max, axis=0)
-        result, log_book = self.ev_alg(pop, self.toolbox, **self.evol_kwargs, stats=stats, halloffame=hall_of)
+        result, log_book = self.ev_alg(pop, self.toolbox, ngen=self.generations, 
+                                       **self.evol_kwargs, verbose=1, 
+                                       stats=stats, halloffame=hall_of)
 
         return result, log_book, hall_of
 

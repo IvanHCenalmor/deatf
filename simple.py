@@ -32,7 +32,8 @@ if __name__ == "__main__":
     			 generations=10, 
     			 iters=10, 
     			 n_layers=10, 
-    			 max_layer_size=20)
+    			 max_layer_size=20,
+                 ev_alg='simple')
     
     a = e.evolve()
 
