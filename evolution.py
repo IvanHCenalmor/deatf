@@ -39,7 +39,7 @@ class Evolving:
                  x_trains=None, y_trains=None, x_tests=None, y_tests=None, 
                  evaluation="Accuracy_error", n_inputs=((28, 28),), n_outputs=((10,),), 
                  batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel='best',
-                 n_layers=10, max_layer_size=100, max_filter=4, max_stride=3, seed=0, cxp=0, 
+                 n_layers=10, max_layer_size=100, max_filter=4, max_stride=3, seed=None , cxp=0, 
                  mtp=1, no_dropout=False, no_batch_norm=False, evol_kwargs={}, sel_kwargs={}, 
                  ev_alg='mu_plus_lambda', hyperparameters={}, custom_mutations={}, add_obj=0):
         """
@@ -75,13 +75,20 @@ class Evolving:
         self.complex = self.is_complex(compl, loss, evaluation, hyperparameters)
         
         self.toolbox = base.Toolbox()
-        self.ev_alg = ev_alg                                            # DEAP evolutionary algorithm function
+
+        self.selection = None
+        self.define_selection(sel)
+
+        self.ev_alg = None                                              # DEAP evolutionary algorithm function
+        self.evol_kwargs = evol_kwargs                                  # Parameters for the main DEAP function
         self.cXp = cxp if len(desc_list) > 1 else 0                     # Crossover probability. 0 in the simple case
         self.mtp = mtp if len(desc_list) > 1 else 1                     # Mutation probability. 1 in the simple case
-        self.evol_kwargs = evol_kwargs                                  # Parameters for the main DEAP function
+        self.define_evolving(ev_alg)
+
         self.generations = generations                                  # Number of generations
         self.population_size = population                               # Individuals in a population
         self.ev_hypers = hyperparameters                                # Hyperparameters to be evolved (e.g., optimizer, batch size)
+
         self.initialize_deap(sel, sel_kwargs, no_batch_norm, 
                              no_dropout, custom_mutations, add_obj)     # Initialize DEAP-related matters
         
@@ -132,6 +139,33 @@ class Evolving:
         else:
             self.evaluation = evaluation
     
+    def define_selection(self, selection):
+        
+        sel_methods = {'best':tools.selBest, 'tournament':tools.selTournament, 'nsga2':tools.selNSGA2}
+       
+        if type(selection) is str:
+            self.selection = sel_methods[selection]
+        else:
+            self.selection = selection
+            
+    def define_evolving(self, ev_alg):
+        
+        deap_algs = {'simple':algorithms.eaSimple, 'mu_plus_lambda': algorithms.eaMuPlusLambda, 
+                     'mu_comm_lambda':algorithms.eaMuCommaLambda}
+        
+        if type(ev_alg) is str:
+            
+            self.ev_alg = deap_algs[ev_alg]
+        
+            if not self.evol_kwargs:
+                if ev_alg == 'simple':
+                    self.evol_kwargs = {"cxpb": self.cXp, "mutpb": self.mtp}
+                else:
+                    self.evol_kwargs = {"mu": self.population_size, "lambda_": self.population_size, "cxpb": self.cXp, "mutpb": self.mtp}
+    
+        else:
+            self.ev_alg = ev_alg
+    
     def is_complex(self, compl, loss, evaluation, hyperparameters):
         if compl:
             return True
@@ -158,10 +192,6 @@ class Evolving:
         :return: --
         """
 
-        deap_algs = {'simple':algorithms.eaSimple, 'mu_plus_lambda': algorithms.eaMuPlusLambda, 
-                     'mu_comm_lambda':algorithms.eaMuCommaLambda}
-        sel_methods = {'best':tools.selBest, 'tournament':tools.selTournament, 'nsga2':tools.selNSGA2}
-
         creator.create("Fitness", base.Fitness, weights=[-1.0]*(len(self.test_outputs) + add_obj))
 
         creator.create("Individual", MyContainer, fitness=creator.Fitness)
@@ -173,15 +203,8 @@ class Evolving:
         self.toolbox.register("mate", cross, creator.Individual)
         self.toolbox.register("mutate", mutations, self.ev_hypers, self.max_lay, no_batch, no_drop, custom_mutations)
 
-        self.toolbox.register("select", sel_methods[sel], **sel_kwargs)
+        self.toolbox.register("select", self.selection, **sel_kwargs)
 
-        if not self.evol_kwargs:
-            if self.ev_alg == 'simple':
-                self.evol_kwargs = {"cxpb": self.cXp, "mutpb": self.mtp}
-            else:
-                self.evol_kwargs = {"mu": self.population_size, "lambda_": self.population_size, "cxpb": self.cXp, "mutpb": self.mtp}
-
-        self.ev_alg = deap_algs[self.ev_alg]
 
     def evolve(self):
         """
