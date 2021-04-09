@@ -59,6 +59,9 @@ class Mutation:
         
     def mut_dropout(self, network):
         network.change_dropout()
+        
+    def mut_dropout_prob(self, network):
+        network.change_dropout_prob()
 
     def mut_batch_norm(self, network):
         network.change_batch_norm() 

@@ -83,11 +83,12 @@ class Evolving:
         self.evol_kwargs = evol_kwargs                                  # Parameters for the main DEAP function
         self.cXp = cxp if len(desc_list) > 1 else 0                     # Crossover probability. 0 in the simple case
         self.mtp = mtp if len(desc_list) > 1 else 1                     # Mutation probability. 1 in the simple case
-        self.define_evolving(ev_alg)
 
         self.generations = generations                                  # Number of generations
         self.population_size = population                               # Individuals in a population
         self.ev_hypers = hyperparameters                                # Hyperparameters to be evolved (e.g., optimizer, batch size)
+
+        self.define_evolving(ev_alg)
 
         self.initialize_deap(sel, sel_kwargs, no_batch_norm, 
                              no_dropout, custom_mutations, add_obj)     # Initialize DEAP-related matters
@@ -283,7 +284,7 @@ class Evolving:
         
         model.fit(self.train_inputs['i0'], self.train_outputs['o0'], epochs=self.iters, batch_size=self.batch_size, verbose=0)
         
-        #model.summary()
+        model.summary()
         
         ev = model.evaluate(self.test_inputs['i0'], self.test_outputs['o0'], verbose=0)
         
@@ -306,7 +307,7 @@ class Evolving:
                 nets[net] = descs[self.descriptors[index].__name__](individual.descriptor_list[net])
 
         models = self.loss_function(nets, self.train_inputs, self.train_outputs, self.batch_size, individual.descriptor_list["hypers"])
-
+        
         ev = self.evaluation(models, self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
 
         return ev

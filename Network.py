@@ -4,7 +4,7 @@ from functools import reduce
 import os
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-from tensorflow.keras.layers import Dense, Input, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, MaxPooling2D, AveragePooling2D
+from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, MaxPooling2D, AveragePooling2D
 from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNormal, GlorotUniform
 
 activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.sigmoid, tf.nn.tanh]
@@ -13,7 +13,7 @@ initializations = [RandomNormal, RandomUniform, GlorotNormal, GlorotUniform]
 class NetworkDescriptor:
 
     def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1, init_functions=None, act_functions=None, 
-                 dropout=(), dropout_probs=(), batch_norm=()):
+                 dropout=False, dropout_probs=(), batch_norm=False):
         """
         This class implements the descriptor of a generic network. Subclasses of this are the ones evolved.
         :param number_hidden_layers: Number of hidden layers in the network
@@ -55,23 +55,20 @@ class NetworkDescriptor:
         self.init_functions[layer_pos] = new_weight_fn
 
     def change_dropout(self):
-        # Select random layer and flip dropout
-        rnd = np.random.choice(np.arange(0, self.dropout.shape[0]), size=np.random.randint(0, self.dropout.shape[0]), replace=False)
-        self.dropout[rnd] -= 1
-        self.dropout[rnd] = self.dropout[rnd]**2
-
+        # Change dropout
+        self.dropout = not self.dropout
+    
+    def change_dropout_prob(self):
+        self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+    
     def change_batch_norm(self):
-        # Select random layer and flip batch normalization
-        rnd = np.random.choice(np.arange(0, self.batch_norm.shape[0]), size=np.random.randint(0, self.batch_norm.shape[0]), replace=False)
-        self.batch_norm[rnd] -= 1
-        self.batch_norm[rnd] = self.batch_norm[rnd]**2
-
+        # Change batch normalization
+        self.batch_norm = not self.batch_norm
 
 class MLPDescriptor(NetworkDescriptor):
     def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1,  dims=None, init_functions=None, 
-                 act_functions=None, dropout=(), batch_norm=()):
+                 act_functions=None, dropout=False, batch_norm=False):
         """
-
         :param number_hidden_layers: Number of hidden layers in the network
         :param input_dim: Dimension of the input data (can have one or more dimensions)
         :param output_dim: Expected output of the network (similarly, can have one or more dimensions)
@@ -107,18 +104,13 @@ class MLPDescriptor(NetworkDescriptor):
             self.dims = [np.random.randint(4, max_layer_size)+1 for _ in range(self.number_hidden_layers)]
             self.init_functions = np.random.choice(initializations, size=self.number_hidden_layers+1)
             self.act_functions = np.random.choice(activations, size=self.number_hidden_layers+1)
-        if no_batch is not None:
-            if no_batch:
-                self.batch_norm = np.zeros(self.number_hidden_layers+1)
-            else:
-                self.batch_norm = np.random.randint(0, 2, size=self.number_hidden_layers+1)
-        if no_drop is not None:
-            if no_drop:
-                self.dropout = np.zeros(self.number_hidden_layers+1)
-                self.dropout_probs = np.zeros(self.number_hidden_layers+1)
-            else:
-                self.dropout = np.random.randint(0, 2, size=self.number_hidden_layers+1)
-                self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+        
+        if no_batch is not None and not no_batch:
+            self.batch_norm = np.random.choice([True, False])
+            
+        if no_drop is not None and not no_drop:
+            self.dropout = np.random.choice([True, False])
+            self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
 
     def add_layer(self, layer_pos, lay_dims, init_w_function, init_a_function, dropout, drop_prob, batch_norm):
         """
@@ -142,8 +134,6 @@ class MLPDescriptor(NetworkDescriptor):
         self.init_functions = np.insert(self.init_functions, layer_pos, init_w_function)
         self.act_functions = np.insert(self.act_functions, layer_pos, init_a_function)
         self.number_hidden_layers = self.number_hidden_layers + 1
-        self.batch_norm = np.insert(self.batch_norm, layer_pos, batch_norm)
-        self.dropout = np.insert(self.dropout, layer_pos, dropout)
         self.dropout_probs = np.insert(self.dropout_probs, layer_pos, drop_prob)
 
     def remove_layer(self, layer_pos):
@@ -164,8 +154,6 @@ class MLPDescriptor(NetworkDescriptor):
         self.dims = np.delete(self.dims, layer_pos)
         self.init_functions = np.delete(self.init_functions, layer_pos)
         self.act_functions = np.delete(self.act_functions, layer_pos)
-        self.batch_norm = np.delete(self.batch_norm, layer_pos)
-        self.dropout = np.delete(self.dropout, layer_pos)
         self.dropout_probs = np.delete(self.dropout_probs, layer_pos)
 
         # Finally the number of hidden layers is updated
@@ -227,8 +215,8 @@ class ConvDescriptor(NetworkDescriptor):
         """
 
         super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
-                         init_functions=list_init_functions, act_functions=list_act_functions, dropout=dropout, 
-                         batch_norm=batch_norm)
+                         init_functions=list_init_functions, act_functions=list_act_functions, dropout=False, 
+                         batch_norm=False)
         self.layers = op_type
         self.filters = filters
         self.strides = strides
@@ -259,34 +247,39 @@ class ConvDescriptor(NetworkDescriptor):
         self.strides = []
         self.filters = []
         shape = self.input_dim
+        
         i = 0
         while i < nlayers:
-
-            self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
-            self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])]
-            shape = compute_output(shape, 0, self.filters[-1], self.strides[-1])
+            self.layers += [np.random.choice([0, 1, 2])]
+            
+            conv_strides = np.array([np.random.randint(1, max_stride)] * 2 + [1])
+            conv_filters = np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])
+            shape = compute_output(shape, 0, conv_filters, conv_strides)
             if shape[0] < 2 or shape[1] < 2 or np.prod(shape) < self.output_dim:  # If the blob size is too small
                 self.number_hidden_layers = i
-                self.strides = self.strides[:-1]
-                self.filters = self.filters[:-1]
+                self.layers = self.layers[:-1]
                 break
+            
+            pool_strides, pool_filters = None, None
+            if self.layers[-1] != 2:
+                pool_strides = np.array([np.random.randint(1, max_stride)] * 2 + [1])
+                pool_filters = np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])
+                shape = compute_output(shape, 0, pool_filters, pool_strides)
+                if shape[0] < 2 or shape[1] < 2 or np.prod(shape) < self.output_dim:  # If the blob size is too small
+                    self.number_hidden_layers = i
+                    self.layers = self.layers[:-1]
+                    break
+            
+            self.strides += [(conv_strides, pool_strides)]
+            self.filters += [(conv_filters, pool_filters)]
+                
             i += 1
             self.shapes += [shape]
             self.init_functions += [np.random.choice(initializations[1:])]
             self.act_functions += [np.random.choice(activations)]
-            self.layers += [np.random.choice([0, 1, 2])]
-
-        if no_batch:
-            self.batch_norm = np.zeros(self.number_hidden_layers+1)
-        else:
-            self.batch_norm = np.random.randint(0, 2, size=self.number_hidden_layers+1)
-
-        if no_drop:
-            self.dropout = np.zeros(self.number_hidden_layers+1)
-            self.dropout_probs = np.zeros(self.number_hidden_layers+1)
-        else:
-            self.dropout = np.random.randint(0, 2, size=self.number_hidden_layers+1)
-            self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+        
+        if no_batch is not None and not no_batch:
+            self.batch_norm = np.random.choice([True, False])
 
     def add_layer(self, layer_pos, lay_type, lay_params):
         """
@@ -410,7 +403,9 @@ class TConvDescriptor(NetworkDescriptor):
        :param batch_norm: list of booleans defining whether batch normalization is applied to each layer (it's changed afterwards)
        """
 
-        super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, init_functions=list_init_functions, act_functions=list_act_functions, dropout=dropout, batch_norm=batch_norm)
+        super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
+                         init_functions=list_init_functions, act_functions=list_act_functions, dropout=False, 
+                         batch_norm=False)
         self.filters = filters
         self.strides = strides
         self.output_shapes = []
@@ -453,17 +448,8 @@ class TConvDescriptor(NetworkDescriptor):
                 self.number_hidden_layers = i+1
                 break
 
-        if no_batch:
-            self.batch_norm = np.zeros(self.number_hidden_layers+1)
-        else:
-            self.batch_norm = np.random.randint(0, 2, size=self.number_hidden_layers+1)
-
-        if no_drop:
-            self.dropout = np.zeros(self.number_hidden_layers+1)
-            self.dropout_probs = np.zeros(self.number_hidden_layers+1)
-        else:
-            self.dropout = np.random.randint(0, 2, size=self.number_hidden_layers+1)
-            self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+        if no_batch is not None and not no_batch:
+            self.batch_norm = np.random.choice([True, False])
 
     def add_layer(self, layer_pos, lay_params):
         """
@@ -581,17 +567,17 @@ class MLP(Network):
             x = Dense(self.descriptor.dims[lay_indx], 
                       activation=self.descriptor.act_functions[lay_indx], 
                       kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
-            if self.descriptor.dropout[lay_indx] > 0:
+            if self.descriptor.dropout:
                 x = Dropout(self.descriptor.dropout_probs[lay_indx])(x)
-            if self.descriptor.batch_norm[lay_indx] > 0:
+            if self.descriptor.batch_norm:
                 x = BatchNormalization()(x)
         
         x = Dense(self.descriptor.output_dim, 
                   activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers],
                   kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers])(x)
-        if self.descriptor.dropout[lay_indx] > 0:
+        if self.descriptor.dropout:
             x = Dropout(self.descriptor.dropout_probs[lay_indx])(x)
-        if self.descriptor.batch_norm[lay_indx] > 0:
+        if self.descriptor.batch_norm:
             x = BatchNormalization()(x)
         
         return x
@@ -611,22 +597,23 @@ class CNN(Network):
 
         for lay_indx in range(self.descriptor.number_hidden_layers):
 
-            if self.descriptor.layers[lay_indx] == 2:  # If the layer is convolutional
-                
-                x = Conv2D(self.descriptor.filters[lay_indx][2],
-                           [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
-                           strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
-                           padding="valid",
-                           activation=self.descriptor.act_functions[lay_indx],
-                           kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
-
-            elif self.descriptor.layers[lay_indx] == 0:  # If the layer is average pooling
-                x = AveragePooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
-                                           strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+            x = Conv2D(self.descriptor.filters[lay_indx][0][2],
+                       [self.descriptor.filters[lay_indx][0][0],self.descriptor.filters[lay_indx][0][1]],
+                       strides=[self.descriptor.strides[lay_indx][0][0], self.descriptor.strides[lay_indx][0][1]],
+                       padding="valid",
+                       activation=self.descriptor.act_functions[lay_indx],
+                       kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
+        
+            if self.descriptor.batch_norm:
+                x = BatchNormalization()(x)
+            
+            if self.descriptor.layers[lay_indx] == 0:  # If is has average pooling
+                x = AveragePooling2D(pool_size=[self.descriptor.filters[lay_indx][1][0], self.descriptor.filters[lay_indx][1][1]],
+                                           strides=[self.descriptor.strides[lay_indx][1][0], self.descriptor.strides[lay_indx][1][1]],
                                            padding="valid")(x)
-            else:
-                x = MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
-                                       strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+            elif self.descriptor.layers[lay_indx] == 1: # If it has max pooling
+                x = MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][1][0], self.descriptor.filters[lay_indx][1][1]],
+                                       strides=[self.descriptor.strides[lay_indx][1][0], self.descriptor.strides[lay_indx][1][1]],
                                        padding="valid")(x)
 
             # batch normalization and dropout not implemented (maybe pooling operations should be part of convolutional layers instead of layers by themselves)
