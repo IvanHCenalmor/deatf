@@ -33,6 +33,9 @@ if __name__ == "__main__":
     			 iters=10, 
     			 n_layers=10, 
     			 max_layer_size=20,
+                 seed=0,
+                 dropout=False,
+                 batch_norm=False,
                  ev_alg='simple')
     
     a = e.evolve()

@@ -8,11 +8,11 @@ import tensorflow as tf
 import tensorflow.keras.optimizers as opt
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
-from evolution import Evolving, accuracy_error, batch
-from Network import MLPDescriptor, MLP
+from evolution import Evolving
+from Network import MLPDescriptor
 from metrics import ret_evals
 
-from tensorflow.keras.layers import Input, Dense, Flatten
+from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
 
 evals = []
@@ -121,7 +121,7 @@ if __name__ == "__main__":
                  x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test],
                  evaluation=eval_wann, batch_size=150, population=10, generations=100, 
                  n_inputs=[[28, 28]], n_outputs=[[2]], cxp=0, mtp=1,
-                 no_batch_norm=True, no_dropout=True, 
+                 batch_norm=False, dropout=False, 
                  hyperparameters={"weight1": np.arange(-2, 2, 0.5), "weight2": np.arange(-2, 2, 0.5), 
                                   "start": ["0", "1"], "p1": ["01", "10"],
                                   "p2": ["001", "010", "011", "101", "110", "100"]})  # Los pesos, que también evolucionan

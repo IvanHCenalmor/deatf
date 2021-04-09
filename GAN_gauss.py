@@ -12,7 +12,7 @@ from gaussians import mmd, plt_center_assignation, create_data
 import sys
 import matplotlib.pyplot as plt
 
-from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
+from tensorflow.keras.layers import Input
 from tensorflow.keras.models import Model
 
 best_mmd = 28888888
@@ -133,7 +133,7 @@ if __name__ == "__main__":
                  x_trains=[x_train], y_trains=[x_train], x_tests=[x_test], y_tests=[x_test], 
                  evaluation=gan_eval, batch_size=50, population=population, generations=generations, 
                  n_inputs=[[2], [z_size]], n_outputs=[[1], [2]], 
-                 cxp=0.5, mtp=0.5, no_dropout=True, no_batch_norm=True)
+                 cxp=0.5, mtp=0.5, dropout=False, batch_norm=False)
     res = e.evolve()
 
     print(res[0])

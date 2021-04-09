@@ -84,7 +84,7 @@ class MLPDescriptor(NetworkDescriptor):
         super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, init_functions=init_functions, act_functions=act_functions, dropout=dropout, batch_norm=batch_norm)
         self.dims = dims  # Number of neurons in each layer
 
-    def random_init(self, input_size=None, output_size=None, nlayers=None, max_layer_size=None, _=None, __=None, no_drop=None, no_batch=None):
+    def random_init(self, input_size=None, output_size=None, nlayers=None, max_layer_size=None, _=None, __=None, dropout=None, batch_norm=None):
 
         # If the incoming/outgoing sizes have more than one dimension compute the size of the flattened sizes
         if input_size is not None:
@@ -105,10 +105,10 @@ class MLPDescriptor(NetworkDescriptor):
             self.init_functions = np.random.choice(initializations, size=self.number_hidden_layers+1)
             self.act_functions = np.random.choice(activations, size=self.number_hidden_layers+1)
         
-        if no_batch is not None and not no_batch:
+        if batch_norm is not None and batch_norm:
             self.batch_norm = np.random.choice([True, False])
             
-        if no_drop is not None and not no_drop:
+        if dropout is not None and dropout:
             self.dropout = np.random.choice([True, False])
             self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
 
@@ -223,7 +223,7 @@ class ConvDescriptor(NetworkDescriptor):
         self.shapes = []    # This is an important variable which contains the shapes of the blobs. 
                             # This way we control that the CNN does not produce too small blobs
 
-    def random_init(self, input_size, output_size, nlayers, _, max_stride, max_filter, no_drop, no_batch):
+    def random_init(self, input_size, output_size, nlayers, _, max_stride, max_filter, dropout, batch_norm):
         """
         This function randomly initializes the descriptor. This function is susceptible of being modified by the user with specific creation needs
         :param input_size:  Dimension of the input
@@ -232,8 +232,8 @@ class ConvDescriptor(NetworkDescriptor):
         :param _: unused
         :param max_stride: maximum stride possible (used as 2)
         :param max_filter: maximum filter size possible (used as 3)
-        :param no_drop: Whether dropout is a possibility in the network
-        :param no_batch: Whether batch normalization is a possibility in the network
+        :param dropout: Whether dropout is a possibility in the network
+        :param batch_norm: Whether batch normalization is a possibility in the network
         :return:
         """
 
@@ -278,7 +278,7 @@ class ConvDescriptor(NetworkDescriptor):
             self.init_functions += [np.random.choice(initializations[1:])]
             self.act_functions += [np.random.choice(activations)]
         
-        if no_batch is not None and not no_batch:
+        if batch_norm is not None and not batch_norm:
             self.batch_norm = np.random.choice([True, False])
 
     def add_layer(self, layer_pos, lay_type, lay_params):
@@ -410,7 +410,7 @@ class TConvDescriptor(NetworkDescriptor):
         self.strides = strides
         self.output_shapes = []
 
-    def random_init(self, input_size, output_size, _, __, max_stride, max_filter, no_drop, no_batch):
+    def random_init(self, input_size, output_size, _, __, max_stride, max_filter, dropout, batch_norm):
         """
         This function randomly initializes the descriptor. This function is susceptible of being modified by the user with specific creation needs
         :param input_size:  Dimension of the input
@@ -419,8 +419,8 @@ class TConvDescriptor(NetworkDescriptor):
         :param __: unused
         :param max_stride: maximum stride possible (used as 2)
         :param max_filter: maximum filter size possible (used as 3)
-        :param no_drop: Whether dropout is a possibility in the network
-        :param no_batch: Whether batch normalization is a possibility in the network
+        :param dropout: Whether dropout is a possibility in the network
+        :param batch_norm: Whether batch normalization is a possibility in the network
         :return:
         """
         self.input_dim = input_size
@@ -448,7 +448,7 @@ class TConvDescriptor(NetworkDescriptor):
                 self.number_hidden_layers = i+1
                 break
 
-        if no_batch is not None and not no_batch:
+        if batch_norm is not None and not batch_norm:
             self.batch_norm = np.random.choice([True, False])
 
     def add_layer(self, layer_pos, lay_params):

@@ -8,7 +8,7 @@ from data import load_fashion
 import tensorflow as tf
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
-from evolution import Evolving, batch
+from evolution import Evolving
 from Network import ConvDescriptor, TConvDescriptor
 from sklearn.metrics import mean_squared_error
 
@@ -84,8 +84,8 @@ if __name__ == "__main__":
                  cxp=0, 
                  mtp=1, 
                  hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
-                 no_batch_norm=False, 
-                 no_dropout=False)
+                 batch_norm=True, 
+                 dropout=True)
     a = e.evolve()
 
     print(a[-1])

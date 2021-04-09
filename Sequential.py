@@ -8,8 +8,8 @@ import tensorflow as tf
 import tensorflow.keras.optimizers as opt
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
-from evolution import Evolving, accuracy_error, batch
-from Network import MLPDescriptor, MLP
+from evolution import Evolving, accuracy_error
+from Network import MLPDescriptor
 
 from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
@@ -90,6 +90,6 @@ if __name__ == "__main__":
     e = Evolving(loss=train_sequential, desc_list=[MLPDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[y_train], x_tests=[x_test],
                  y_tests=[y_test], evaluation=eval_sequential, batch_size=150, population=10, generations=10, n_inputs=[[28, 28], [10]],
                  n_outputs=[[10], [10]], cxp=0.5, mtp=0.5, hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]},
-                 no_batch_norm=True, no_dropout=True)
+                 batch_norm=False, dropout=False)
     a = e.evolve()
     print(a[-1])

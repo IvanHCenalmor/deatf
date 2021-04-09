@@ -7,12 +7,12 @@ Fashion-MNIST. They don't interact in any moment in the model.
 from data import load_fashion, load_mnist
 import tensorflow as tf
 from metrics import accuracy_error
-from evolution import Evolving, batch
+from evolution import Evolving
 from Network import MLPDescriptor
 from sklearn.preprocessing import OneHotEncoder
 import numpy as np
 
-from tensorflow.keras.layers import Input, Dense, Flatten
+from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
 
 def train(nets, train_inputs, train_outputs, batch_size, _):
@@ -37,7 +37,6 @@ def train(nets, train_inputs, train_outputs, batch_size, _):
               [train_outputs['o0'], train_outputs['o1']],
                epochs=10, batch_size=batch_size, verbose=0)
     
-    #model.summary()
     #tf.keras.utils.plot_model(model, "multi_input_and_output_model.png", show_shapes=True)
     
     models["n0"] = model

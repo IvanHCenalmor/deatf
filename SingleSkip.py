@@ -25,6 +25,11 @@ class SkipCNN(CNN):
         """
         skip = (self.descriptor.number_hidden_layers % (skip-2)) + 2
         for lay_indx in range(self.descriptor.number_hidden_layers):
+            
+            if lay_indx == 0:
+                skip_layer = x
+                skip_kernel_size = x.shape[1]
+            
             if skip == lay_indx:
                 actual_kernel_size = x.shape[1]
                 x = UpSampling2D((skip_kernel_size,skip_kernel_size))(x)
@@ -48,40 +53,8 @@ class SkipCNN(CNN):
                 x = MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
                                        strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
                                        padding="valid")(x)
-            if lay_indx == 0:
-                skip_layer = x
-                skip_kernel_size = x.shape[1]
                 
         return x
-
-"""
-    def building(self, x):
-
-        for lay_indx in range(self.descriptor.number_hidden_layers):
-
-            if self.descriptor.layers[lay_indx] == 2:  # If the layer is convolutional
-                
-                x = Conv2D(self.descriptor.filters[lay_indx][2],
-                           [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
-                           strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
-                           padding="valid",
-                           activation=self.descriptor.act_functions[lay_indx],
-                           kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
-
-            elif self.descriptor.layers[lay_indx] == 0:  # If the layer is average pooling
-                x = AveragePooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
-                                           strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
-                                           padding="valid")(x)
-            else:
-                x = MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
-                                       strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
-                                       padding="valid")(x)
-
-            # batch normalization and dropout not implemented (maybe pooling operations should be part of convolutional layers instead of layers by themselves)
-            
-        return x
-"""
-
 
 evolution.descs["ConvDescriptor"] = SkipCNN
 
@@ -139,7 +112,7 @@ if __name__ == "__main__":
                            evaluation=eval_cnn, batch_size=150, population=200, generations=10, 
                            n_inputs=[[28, 28, 3], [20]], n_outputs=[[20], [10]], cxp=0.5, mtp=0.5, 
                            hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2], "skip": range(3, 10)}, 
-                           no_batch_norm=False, no_dropout=False)
+                           batch_norm=True, dropout=True)
     a = e.evolve()
 
     print(a[-1])

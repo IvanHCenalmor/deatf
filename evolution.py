@@ -7,9 +7,8 @@ from deap import base
 from deap import creator
 from deap import tools
 
-from Network import MLP, MLPDescriptor, initializations, activations, TCNN, CNN, ConvDescriptor, TConvDescriptor
+from Network import MLP, MLPDescriptor, TCNN, CNN
 from Mutation import MLP_Mutation, CNN_Mutation, TCNN_Mutation
-from auxiliary_functions import batch
 from metrics import mse, accuracy_error
 import os
 
@@ -40,7 +39,7 @@ class Evolving:
                  evaluation="Accuracy_error", n_inputs=((28, 28),), n_outputs=((10,),), 
                  batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel='best',
                  n_layers=10, max_layer_size=100, max_filter=4, max_stride=3, seed=None , cxp=0, 
-                 mtp=1, no_dropout=False, no_batch_norm=False, evol_kwargs={}, sel_kwargs={}, 
+                 mtp=1, dropout=False, batch_norm=False, evol_kwargs={}, sel_kwargs={}, 
                  ev_alg='mu_plus_lambda', hyperparameters={}, custom_mutations={}, add_obj=0):
         """
         This is the main class in charge of evolving model descriptors.
@@ -90,8 +89,8 @@ class Evolving:
 
         self.define_evolving(ev_alg)
 
-        self.initialize_deap(sel, sel_kwargs, no_batch_norm, 
-                             no_dropout, custom_mutations, add_obj)     # Initialize DEAP-related matters
+        self.initialize_deap(sel, sel_kwargs, batch_norm, 
+                             dropout, custom_mutations, add_obj)     # Initialize DEAP-related matters
         
     def data_save(self, x_trains, y_trains, x_tests, y_tests):
         """
@@ -180,15 +179,15 @@ class Evolving:
         return False
         
     
-    def initialize_deap(self, sel, sel_kwargs, no_batch, no_drop, custom_mutations, add_obj):
+    def initialize_deap(self, sel, sel_kwargs, batch_norm, dropout, custom_mutations, add_obj):
         """
         Initialize DEAP algorithm
         :param sel: Selection method
         :param sel_kwargs: Hyperparameters for the selection methods, e.g., size of the tournament if that method is selected
         :param ev_alg: DEAP evolutionary algorithm (EA)
         :param ev_kwargs: Hyperparameters for the EA, e.g., mutation or crossover probability.
-        :param no_batch: Whether the evolutive process includes batch normalization in the networks or not
-        :param no_drop: Whether the evolutive process includes dropout in the networks or not
+        :param batch_norm: Whether the evolutive process includes batch normalization in the networks or not
+        :param dropout: Whether the evolutive process includes dropout in the networks or not
         :param add_obj: Number of additional objectives
         :return: --
         """
@@ -197,12 +196,12 @@ class Evolving:
 
         creator.create("Individual", MyContainer, fitness=creator.Fitness)
 
-        self.toolbox.register("individual", self.init_individual, creator.Individual, no_batch, no_drop)
+        self.toolbox.register("individual", self.init_individual, creator.Individual, batch_norm, dropout)
         self.toolbox.register("population", tools.initRepeat, list, self.toolbox.individual)
 
         self.toolbox.register("evaluate", self.eval_individual)
         self.toolbox.register("mate", cross, creator.Individual)
-        self.toolbox.register("mutate", mutations, self.ev_hypers, self.max_lay, no_batch, no_drop, custom_mutations)
+        self.toolbox.register("mutate", mutations, self.ev_hypers, self.max_lay, batch_norm, dropout, custom_mutations)
 
         self.toolbox.register("select", self.selection, **sel_kwargs)
 
@@ -227,12 +226,12 @@ class Evolving:
 
         return result, log_book, hall_of
 
-    def init_individual(self, init_ind, no_batch, no_drop):
+    def init_individual(self, init_ind, batch_norm, dropout):
         """
         Creation of a single individual
         :param init_ind: DEAP function for transforming a network descriptor, or a list of descriptors + evolvable hyperparameters into a DEAP individual
-        :param no_batch: Boolean, whether batch normalization is included into the evolution or not
-        :param no_drop: Boolean, whether dropout is included into the evolution or not
+        :param batch_norm: Boolean, whether batch normalization is included into the evolution or not
+        :param dropout: Boolean, whether dropout is included into the evolution or not
         :return: a DEAP individual
         """
 
@@ -240,11 +239,11 @@ class Evolving:
 
         if not self.complex:  # Simple case
             network_descriptor["n0"] = MLPDescriptor()
-            network_descriptor["n0"].random_init(self.train_inputs["i0"].shape[1:], self.train_outputs["o0"].shape[1], self.nlayers, self.max_lay, None, None, no_drop, no_batch)
+            network_descriptor["n0"].random_init(self.train_inputs["i0"].shape[1:], self.train_outputs["o0"].shape[1], self.nlayers, self.max_lay, None, None, dropout, batch_norm)
         else:  # Custom case
             for i, descriptor in enumerate(self.descriptors):
                 network_descriptor["n" + str(i)] = descriptor()
-                network_descriptor["n" + str(i)].random_init(self.n_inputs[i], self.n_outputs[i], self.nlayers, self.max_lay, self.max_stride, self.max_filter, no_drop, no_batch)
+                network_descriptor["n" + str(i)].random_init(self.n_inputs[i], self.n_outputs[i], self.nlayers, self.max_lay, self.max_stride, self.max_filter, dropout, batch_norm)
         network_descriptor["hypers"] = {}
         if len(self.ev_hypers) > 0:
 
@@ -283,8 +282,6 @@ class Evolving:
         model.compile(loss=self.loss_function, optimizer=opt, metrics=[])
         
         model.fit(self.train_inputs['i0'], self.train_outputs['o0'], epochs=self.iters, batch_size=self.batch_size, verbose=0)
-        
-        model.summary()
         
         ev = model.evaluate(self.test_inputs['i0'], self.test_outputs['o0'], verbose=0)
         
