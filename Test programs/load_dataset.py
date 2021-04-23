@@ -1,6 +1,7 @@
 import pandas as pd
 import numpy as np
 from sklearn.model_selection import train_test_split
+import tensorflow_datasets as tfds
 
 def load_dataset(dataset_name):
     
@@ -12,8 +13,16 @@ def load_dataset(dataset_name):
                 'parkinsons': load_parkinsons
                 }
     
-    features, labels, mode = datasets[dataset_name]()
+    datasets_CNN = ['mnist', 'kmnist', 'cmaterdb', 'fashion_mnist', 'omniglot', 
+                    'binary_alpha_digits', 'cifa10', 'rock_paper_scissors']
     
+    if dataset_name in datasets.keys():
+        features, labels, mode = datasets[dataset_name]()
+    elif dataset_name in datasets_CNN:
+        features, labels, mode = load_CNN(dataset_name)
+    else:
+        raise ValueError('The dataset \'{}\' is not available'.format(dataset_name))
+        
     X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.33, random_state=42)
     
     return X_train, X_test, y_train, y_test, mode
@@ -59,6 +68,32 @@ def load_parkinsons():
                                 'status',['name'])
     return features, labels, 'class'
 
+def load_CNN(dataset_name):
+    
+    dataset = tfds.load(dataset_name)
+    
+    features = []
+    labels = []
+    
+    if 'train' in dataset.keys():
+        dataset_train = dataset["train"]
+        for example in tfds.as_numpy(dataset_train):
+            image, label = example['image'], example['label']
+            features.append(image)
+            labels.append(label)
+            
+    if 'test' in dataset.keys():
+        dataset_test = dataset["test"]    
+        for example in tfds.as_numpy(dataset_test):
+            image, label = example['image'], example['label']
+            features.append(image)
+            labels.append(label) 
+        
+    features = np.array(features)
+    labels = np.array(labels)
+    
+    return features, labels, 'class'
+
 def load_csv(data_directory, data_sep, decimal, label_column, removed_columns):
     
     data = pd.read_csv(data_directory, sep=data_sep, decimal=decimal, engine='python')    
@@ -72,7 +107,10 @@ def load_csv(data_directory, data_sep, decimal, label_column, removed_columns):
     
     return features, labels
 
+
 if __name__ == "__main__":
     #features, labels, model = load_air_quality()
-    features, labels, model = load_forest_types()
+    features, labels, model = load_CNN('mnist')
     #X_train, X_test, y_train, y_test, mode = load_dataset('mushrooms')
+    pass
+        

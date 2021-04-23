@@ -122,6 +122,7 @@ class CNN_Mutation(Mutation):
     
     def mut_stride_conv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
+        
         if network.strides[layer][0] == 1 and network.shapes[-1][0] >= 4:
             network.change_stride(layer, 2)
         elif network.strides[layer][0] == 2:
@@ -129,6 +130,7 @@ class CNN_Mutation(Mutation):
     
     def mut_filter_conv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
+        
         channels = np.random.randint(0, 65)
         if network.filters[layer][0] == 2 and network.shapes[-1][0] >= 3:
             network.change_filters(layer, 3, channels)
@@ -161,6 +163,3 @@ class TCNN_Mutation(Mutation):
             network.change_filters(layer, 2, np.random.randint(0, 65))
         elif network.filters[layer][1] == 2:
             network.change_filters(layer, 3, np.random.randint(0, 65))
-    
-
-

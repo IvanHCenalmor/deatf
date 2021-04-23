@@ -2,6 +2,7 @@ import tensorflow as tf
 import numpy as np
 from functools import reduce
 import os
+import copy
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, MaxPooling2D, AveragePooling2D
@@ -111,6 +112,8 @@ class MLPDescriptor(NetworkDescriptor):
         if dropout is not None and dropout:
             self.dropout = np.random.choice([True, False])
             self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+        else:
+            self.dropout_probs = np.zeros(self.number_hidden_layers+1)
 
     def add_layer(self, layer_pos, lay_dims, init_w_function, init_a_function, dropout, drop_prob, batch_norm):
         """
@@ -197,7 +200,7 @@ class MLPDescriptor(NetworkDescriptor):
 
 
 class ConvDescriptor(NetworkDescriptor):
-    def __init__(self, number_hidden_layers=2, input_dim=(28, 28, 3), output_dim=(7, 7, 1), op_type=(0, 1), 
+    def __init__(self, number_hidden_layers=2, input_dim=(28, 28, 3), output_dim=(7, 7, 1), op_type=(2, 1), 
                  filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), list_init_functions=(0, 0), 
                  list_act_functions=(0, 0), dropout=(), batch_norm=()):
         """
@@ -246,38 +249,48 @@ class ConvDescriptor(NetworkDescriptor):
         self.layers = []
         self.strides = []
         self.filters = []
+        self.shapes = []
         shape = self.input_dim
         
         i = 0
         while i < nlayers:
-            self.layers += [np.random.choice([0, 1, 2])]
+            new_layer = np.random.choice([0, 1, 2])
             
-            conv_strides = np.array([np.random.randint(1, max_stride)] * 2 + [1])
-            conv_filters = np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])
-            shape = compute_output(shape, 0, conv_filters, conv_strides)
+            self.layers += [2]
+            self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])]
+            self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
+            shape = compute_output(shape, 2, self.filters[-1], self.strides[-1])
             if shape[0] < 2 or shape[1] < 2 or np.prod(shape) < self.output_dim:  # If the blob size is too small
                 self.number_hidden_layers = i
                 self.layers = self.layers[:-1]
+                self.filters = self.filters[:-1]
+                self.strides = self.strides[:-1]
                 break
             
-            pool_strides, pool_filters = None, None
-            if self.layers[-1] != 2:
-                pool_strides = np.array([np.random.randint(1, max_stride)] * 2 + [1])
-                pool_filters = np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])
-                shape = compute_output(shape, 0, pool_filters, pool_strides)
+            self.init_functions += [np.random.choice(initializations[1:])]
+            self.act_functions += [np.random.choice(activations)]
+            self.shapes += [shape]
+            
+            if new_layer != 2:
+                self.layers += [new_layer]
+                self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])]
+                self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
+                shape = compute_output(shape, new_layer, self.filters[-1], self.strides[-1])
                 if shape[0] < 2 or shape[1] < 2 or np.prod(shape) < self.output_dim:  # If the blob size is too small
                     self.number_hidden_layers = i
-                    self.layers = self.layers[:-1]
+                    self.layers = self.layers[:-2]
+                    self.filters = self.filters[:-2]
+                    self.strides = self.strides[:-2]
+                    self.init_functions = self.init_functions[:-1]
+                    self.act_functions = self.act_functions[:-1]
                     break
-            
-            self.strides += [(conv_strides, pool_strides)]
-            self.filters += [(conv_filters, pool_filters)]
+                i += 1
+                self.init_functions += [np.random.choice(initializations[1:])]
+                self.act_functions += [np.random.choice(activations)]
                 
             i += 1
             self.shapes += [shape]
-            self.init_functions += [np.random.choice(initializations[1:])]
-            self.act_functions += [np.random.choice(activations)]
-        
+            
         if batch_norm is not None and not batch_norm:
             self.batch_norm = np.random.choice([True, False])
 
@@ -289,23 +302,43 @@ class ConvDescriptor(NetworkDescriptor):
         :param lay_params: sizes of the *filters*.
         :return:
         """
-        self.layers.insert(layer_pos, lay_type)
-        if self.shapes[-1][0] > 2 and self.shapes[-1][1] > 2:
-            self.number_hidden_layers += 1
+        
+        aux_filters = copy.deepcopy(self.filters)
+        aux_strides = copy.deepcopy(self.strides)
+        aux_number_hidden_layers = self.number_hidden_layers
+        
+        if self.layers[layer_pos] != 2:
+            layer_pos += 1
+        
+        aux_number_hidden_layers += 1
+        aux_filters.insert(layer_pos, np.array([lay_params[1], lay_params[1], np.random.randint(0, 65)]))
+        aux_strides.insert(layer_pos, np.array([lay_params[0], lay_params[0], 1]))
+        if lay_type < 2:
+            aux_number_hidden_layers += 1
+            pool_params = [1, np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])]
+            
+            aux_filters.insert(layer_pos, np.array([pool_params[1], pool_params[1], np.random.randint(0, 65)]))
+            aux_strides.insert(layer_pos, np.array([pool_params[0], pool_params[0], 1]))
+            
+        if calculate_CNN_shape(self.input_dim, aux_filters, aux_strides, aux_number_hidden_layers)[0] > 0:
+        
+            self.layers.insert(layer_pos, 2)
+            # A convolutional layer is added always
+            self.act_functions.insert(layer_pos, lay_params[2])
+            self.init_functions.insert(layer_pos, lay_params[3])
+    
             if lay_type < 2:
-                self.filters.insert(layer_pos, [lay_params[1], lay_params[1], 1])
-                self.act_functions.insert(layer_pos, None)
-                self.init_functions.insert(layer_pos, None)
-                self.strides.insert(layer_pos, [lay_params[0], lay_params[0], 1])
-            elif lay_type == 2:
-                self.strides.insert(layer_pos, [lay_params[0], lay_params[0], 1])
-                self.filters.insert(layer_pos, [lay_params[1], lay_params[1], np.random.randint(0, 65)])
-                self.act_functions.insert(layer_pos, lay_params[2])
-                self.init_functions.insert(layer_pos, lay_params[3])
-            self.reset_shapes()
-            return 0
-        else:
-            return 1
+                # If a max_pool or avg_pool has to be added
+                self.layers.insert(layer_pos+1, lay_type)
+                
+                self.act_functions.insert(layer_pos+1, None)
+                self.init_functions.insert(layer_pos+1, None)               
+                
+            self.filters = aux_filters
+            self.strides = aux_strides
+            self.number_hidden_layers = aux_number_hidden_layers
+  
+        self.reset_shapes()              
 
     def reset_shapes(self):
         """
@@ -315,7 +348,7 @@ class ConvDescriptor(NetworkDescriptor):
         self.shapes = []
         shape = self.input_dim
         for lay in range(self.number_hidden_layers):
-            shape = compute_output(shape, 0, self.filters[lay], self.strides[lay])
+            shape = compute_output(shape, self.layers[lay], self.filters[lay], self.strides[lay])
             self.shapes += [shape]
 
     def remove_layer(self, layer_pos):
@@ -324,12 +357,23 @@ class ConvDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the layer to be deleted
         :return:
         """
-
-        self.filters.pop(layer_pos)
+ 
+        self.layers.pop(layer_pos)
         self.act_functions.pop(layer_pos)
         self.init_functions.pop(layer_pos)
+        self.filters.pop(layer_pos)
         self.strides.pop(layer_pos)
         self.number_hidden_layers -= 1
+        
+        if layer_pos < self.number_hidden_layers:
+            if self.layers[layer_pos] != 2:
+                self.layers.pop(layer_pos)
+                self.act_functions.pop(layer_pos)
+                self.init_functions.pop(layer_pos)
+                self.filters.pop(layer_pos)
+                self.strides.pop(layer_pos)
+                self.number_hidden_layers -= 1
+
         self.reset_shapes()
 
     def remove_random_layer(self):
@@ -338,7 +382,7 @@ class ConvDescriptor(NetworkDescriptor):
         :return:
         """
         if self.number_hidden_layers > 1:
-            layer_pos = np.random.randint(len(self.filters))
+            layer_pos = np.random.randint(self.number_hidden_layers)
             self.remove_layer(layer_pos)
             return 0
         else:
@@ -352,9 +396,14 @@ class ConvDescriptor(NetworkDescriptor):
         :param new_channel: Number of output channels
         :return:
         """
-        self.filters[layer_pos][0] = new_kernel_size
-        self.filters[layer_pos][1] = new_kernel_size
-        self.filters[layer_pos][2] = new_channel
+        aux_filters = copy.deepcopy(self.filters)
+        aux_filters[layer_pos][0] = new_kernel_size
+        aux_filters[layer_pos][1] = new_kernel_size
+        aux_filters[layer_pos][2] = new_channel
+        
+        if calculate_CNN_shape(self.input_dim, aux_filters, self.strides, self.number_hidden_layers)[0] > 0:
+            self.filters = aux_filters
+        
         self.reset_shapes()
 
     def change_stride(self, layer_pos, new_stride):
@@ -364,8 +413,13 @@ class ConvDescriptor(NetworkDescriptor):
         :param new_stride: self-explanatory
         :return:
         """
-        self.strides[layer_pos][0] = new_stride
-        self.strides[layer_pos][1] = new_stride
+        aux_strides = copy.deepcopy(self.strides)
+        aux_strides[layer_pos][0] = new_stride
+        aux_strides[layer_pos][1] = new_stride
+        
+        if calculate_CNN_shape(self.input_dim, self.strides, aux_strides, self.number_hidden_layers)[0] > 0:
+            self.strides = aux_strides
+            
         self.reset_shapes()
 
     def print_components(self, identifier):
@@ -547,8 +601,6 @@ class Network:
         :param network_descriptor: The descriptor this class is implementing
         """
         self.descriptor = network_descriptor
-        self.List_layers = []           # This will contain the outputs of all layers in the network
-
 
 class MLP(Network):
 
@@ -594,30 +646,34 @@ class CNN(Network):
         :param layer: Input of the network
         :return: Output of the network
         """
-
-        for lay_indx in range(self.descriptor.number_hidden_layers):
-
-            x = Conv2D(self.descriptor.filters[lay_indx][0][2],
-                       [self.descriptor.filters[lay_indx][0][0],self.descriptor.filters[lay_indx][0][1]],
-                       strides=[self.descriptor.strides[lay_indx][0][0], self.descriptor.strides[lay_indx][0][1]],
+        lay_indx = 0
+        while lay_indx < self.descriptor.number_hidden_layers:
+            
+            x = Conv2D(self.descriptor.filters[lay_indx][2],
+                       [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
+                       strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
                        padding="valid",
                        activation=self.descriptor.act_functions[lay_indx],
                        kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
-        
+            
             if self.descriptor.batch_norm:
                 x = BatchNormalization()(x)
-            
-            if self.descriptor.layers[lay_indx] == 0:  # If is has average pooling
-                x = AveragePooling2D(pool_size=[self.descriptor.filters[lay_indx][1][0], self.descriptor.filters[lay_indx][1][1]],
-                                           strides=[self.descriptor.strides[lay_indx][1][0], self.descriptor.strides[lay_indx][1][1]],
-                                           padding="valid")(x)
-            elif self.descriptor.layers[lay_indx] == 1: # If it has max pooling
-                x = MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][1][0], self.descriptor.filters[lay_indx][1][1]],
-                                       strides=[self.descriptor.strides[lay_indx][1][0], self.descriptor.strides[lay_indx][1][1]],
-                                       padding="valid")(x)
 
-            # batch normalization and dropout not implemented (maybe pooling operations should be part of convolutional layers instead of layers by themselves)
-            
+            lay_indx += 1
+
+            if lay_indx < self.descriptor.number_hidden_layers:
+               
+                if self.descriptor.layers[lay_indx] == 0:  # If is has average pooling
+                    x = AveragePooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
+                                               strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+                                               padding="valid")(x)
+                    lay_indx += 1
+                elif self.descriptor.layers[lay_indx] == 1: # If it has max pooling
+                    x = MaxPooling2D(pool_size=[self.descriptor.filters[lay_indx][0], self.descriptor.filters[lay_indx][1]],
+                                           strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
+                                           padding="valid")(x)
+                    lay_indx += 1
+                
         return x
 
 
@@ -642,9 +698,41 @@ class TCNN(Network):
 
 
 def compute_output(input_shape, layer_type, filter_size, stride):
-
+    #print('Input shape: ',input_shape, ' Filter_size: ', filter_size, ' Stride: ',stride)
     if layer_type < 3:
         output_shape = (np.array(input_shape[:2]) - np.array(filter_size[:2]) + 1) // np.array(stride[:2])
-        return np.array([np.max([output_shape[0], 1]), np.max([output_shape[1], 1]), filter_size[2]])
+        if layer_type == 2:
+            return np.array([np.max([output_shape[0], 1]), np.max([output_shape[1], 1]), filter_size[2]])
+        else:
+            return np.array([np.max([output_shape[0], 1]), np.max([output_shape[1], 1]), input_shape[2]])
     else:
         return [(input_shape[0]-1) * stride[0] + filter_size[0], (input_shape[1]-1) * stride[1] + filter_size[1]]
+    
+def calculate_CNN_shape(input_shape, filters, strides, desired_layer):
+    if desired_layer == 0:
+        return input_shape
+    
+    filter_size = filters[0]
+    stride_size = strides[0]
+    output_shape = (np.array(input_shape[:2]) - np.array(filter_size[:2]) + 1) // np.array(stride_size[:2])
+    return calculate_CNN_shape(output_shape, filters[1:], strides[1:], desired_layer-1)
+
+'''
+CNNDescr = ConvDescriptor()
+CNNDescr.random_init((28,28,1), 10, 30, 0, 2,3,False,False)
+CNNDescr.reset_shapes()
+CNNDescr.remove_random_layer()
+CNNDescr.change_filters(3,4,12)
+#CNNDescr.remove_random_layer()
+#CNNDescr.add_layer(5,2, [1, np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])])
+CNN = CNN(CNNDescr)
+#CNNDescr.remove_layer(5)
+#print(CNNDescr.filters)
+from tensorflow.keras.layers import Input
+inp = Input(shape=(28,28,1))
+out = CNN.building(inp)
+from tensorflow.keras.models import Model
+model = Model(inputs=inp, outputs=out)
+model.summary()
+print(CNNDescr.shapes)
+'''
