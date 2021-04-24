@@ -417,7 +417,7 @@ class ConvDescriptor(NetworkDescriptor):
         aux_strides[layer_pos][0] = new_stride
         aux_strides[layer_pos][1] = new_stride
         
-        if calculate_CNN_shape(self.input_dim, self.strides, aux_strides, self.number_hidden_layers)[0] > 0:
+        if calculate_CNN_shape(self.input_dim, self.filters, aux_strides, self.number_hidden_layers)[0] > 0:
             self.strides = aux_strides
             
         self.reset_shapes()
@@ -484,21 +484,22 @@ class TConvDescriptor(NetworkDescriptor):
 
         self.strides = []
         self.filters = []
+        self.output_shapes = [list(self.input_dim)]
         self.init_functions = []
         self.act_functions = []
-        shape = [-1] + list(self.input_dim)
         for i in range(300):
             self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
             self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 65)])]
-            shape = [-1] + compute_output(shape[1:], 4, self.filters[-1], self.strides[-1]) + [self.filters[-1][2]]
-            self.output_shapes += [shape]
+            self.output_shapes += [compute_output(self.output_shapes[-1], 4, self.filters[-1], self.strides[-1]) + [self.filters[-1][2]]]
             self.init_functions += [np.random.choice(initializations[1:])]
             self.act_functions += [np.random.choice(activations)]
 
-            if shape[1] >= self.output_dim[0] and shape[2] >= self.output_dim[1]:  # Once the expected shape is exceeded, we have enough layers
-                self.filters[-1][2] = self.output_dim[2]
-                shape[-1] = self.output_dim[2]
-                self.output_shapes[-1] = shape
+            if self.output_shapes[-1][0] >= self.output_dim[0] and self.output_shapes[-1][1] >= self.output_dim[1]:  # Once the expected shape is exceeded, we have enough layers
+                while self.output_shapes[-2][0] * self.strides[-1][0] > self.output_dim[0]:
+                    self.strides[-1] = np.array([self.strides[-1][0] - 1, self.strides[-1][1] - 1, self.strides[-1][2]])
+                desired_filter_size = self.output_dim[0] - (self.output_shapes[-2][0] - 1) * self.strides[-1][0]
+                self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
+                self.output_shapes[-1] = self.output_dim
                 self.number_hidden_layers = i+1
                 break
 
@@ -512,12 +513,19 @@ class TConvDescriptor(NetworkDescriptor):
         :param lay_params: sizes of the filters.
         :return:
         """
-
         self.number_hidden_layers += 1
         self.strides.insert(layer_pos, [lay_params[0], lay_params[0], 1])
         self.filters.insert(layer_pos, [lay_params[1], lay_params[1], np.random.randint(0, 65)])
         self.act_functions.insert(layer_pos, lay_params[2])
         self.init_functions.insert(layer_pos, lay_params[3])
+        
+        output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
+        
+        while output[0] * self.strides[-1][0] > self.output_dim[0]:
+            self.strides[-1] = np.array([self.strides[-1][0] - 1, self.strides[-1][1] - 1, self.strides[-1][2]])
+        desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
+        self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
+        
         self.reset_shapes()
         return 0
 
@@ -530,7 +538,7 @@ class TConvDescriptor(NetworkDescriptor):
         shape = self.input_dim
         for lay in range(self.number_hidden_layers):
             shape = compute_output(shape, 4, self.filters[lay], self.strides[lay])
-            self.output_shapes += [[-1] + shape + [self.filters[lay][2]]]
+            self.output_shapes += [shape + [self.filters[lay][2]]]
 
     def remove_layer(self, layer_pos):
         """
@@ -544,21 +552,24 @@ class TConvDescriptor(NetworkDescriptor):
         self.init_functions.pop(layer_pos)
         self.strides.pop(layer_pos)
         self.number_hidden_layers -= 1
+        
+        output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
+        
+        while output[0] * self.strides[-1][0] > self.output_dim[0]:
+            self.strides[-1] = np.array([self.strides[-1][0] - 1, self.strides[-1][1] - 1, self.strides[-1][2]])
+        desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
+        self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
+        
         self.reset_shapes()
 
     def remove_random_layer(self):
-        """
-        Search for a layer which is deletable and (in case it exists) run deletion
-        :return:
-        """
-        layers = np.random.choice(np.arange(0, len(self.filters)), size=len(self.filters), replace=False)
-
-        for layer_pos in layers:
-            if self.number_hidden_layers > 1 and (self.output_shapes[-1][1] - 1) / self.strides[layer_pos][0] - self.filters[layer_pos][0] > self.output_dim[0]:
-                self.remove_layer(layer_pos)
-                return 0
-        return -1
-
+        if self.number_hidden_layers > 1:
+            layer_pos = np.random.randint(self.number_hidden_layers)
+            self.remove_layer(layer_pos)
+            return 0
+        else:
+            return -1
+        
     def change_activation(self, layer_pos, new_act_fn):
         self.act_functions[layer_pos] = new_act_fn
 
@@ -569,11 +580,28 @@ class TConvDescriptor(NetworkDescriptor):
         self.filters[layer_pos][0] = new_kernel_size
         self.filters[layer_pos][1] = new_kernel_size
         self.filters[layer_pos][2] = new_channel
+        
+        output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
+        
+        while output[0] * self.strides[-1][0] > self.output_dim[0]:
+            self.strides[-1] = np.array([self.strides[-1][0] - 1, self.strides[-1][1] - 1, self.strides[-1][2]])
+        desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
+        self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
+        
         self.reset_shapes()
 
     def change_stride(self, layer_pos, new_stride):
+        
         self.strides[layer_pos][0] = new_stride
         self.strides[layer_pos][1] = new_stride
+        
+        output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
+        
+        while output[0] * self.strides[-1][0] > self.output_dim[0]:
+            self.strides[-1] = np.array([self.strides[-1][0] - 1, self.strides[-1][1] - 1, self.strides[-1][2]])
+        desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
+        self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
+        
         self.reset_shapes()
 
     def print_components(self, identifier):
@@ -706,9 +734,11 @@ def compute_output(input_shape, layer_type, filter_size, stride):
         else:
             return np.array([np.max([output_shape[0], 1]), np.max([output_shape[1], 1]), input_shape[2]])
     else:
-        return [(input_shape[0]-1) * stride[0] + filter_size[0], (input_shape[1]-1) * stride[1] + filter_size[1]]
+        return [input_shape[0] * stride[0] + max(filter_size[0] - stride[0], 0) , input_shape[1] * stride[1] + max(filter_size[1] - stride[1], 0)]
     
 def calculate_CNN_shape(input_shape, filters, strides, desired_layer):
+    if desired_layer == -1:
+        return calculate_CNN_shape(input_shape, filters, strides, len(filters))
     if desired_layer == 0:
         return input_shape
     
@@ -717,22 +747,14 @@ def calculate_CNN_shape(input_shape, filters, strides, desired_layer):
     output_shape = (np.array(input_shape[:2]) - np.array(filter_size[:2]) + 1) // np.array(stride_size[:2])
     return calculate_CNN_shape(output_shape, filters[1:], strides[1:], desired_layer-1)
 
-'''
-CNNDescr = ConvDescriptor()
-CNNDescr.random_init((28,28,1), 10, 30, 0, 2,3,False,False)
-CNNDescr.reset_shapes()
-CNNDescr.remove_random_layer()
-CNNDescr.change_filters(3,4,12)
-#CNNDescr.remove_random_layer()
-#CNNDescr.add_layer(5,2, [1, np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])])
-CNN = CNN(CNNDescr)
-#CNNDescr.remove_layer(5)
-#print(CNNDescr.filters)
-from tensorflow.keras.layers import Input
-inp = Input(shape=(28,28,1))
-out = CNN.building(inp)
-from tensorflow.keras.models import Model
-model = Model(inputs=inp, outputs=out)
-model.summary()
-print(CNNDescr.shapes)
-'''
+
+def calculate_TCNN_shape(input_shape, filters, strides, desired_layer):
+    if desired_layer == -1:
+        return calculate_TCNN_shape(input_shape, filters, strides, len(filters))
+    if desired_layer == 0:
+        return input_shape
+    
+    filter_size = filters[0]
+    stride_size = strides[0]
+    output_shape = [input_shape[0] * stride_size[0] + max(filter_size[0] - stride_size[0], 0), input_shape[1] * stride_size[1] + max(filter_size[1] - stride_size[1], 0)]
+    return calculate_TCNN_shape(output_shape, filters[1:], strides[1:], desired_layer-1)
