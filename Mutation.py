@@ -113,8 +113,7 @@ class CNN_Mutation(Mutation):
         super().__init__(ev_hypers, max_lay, batch_normalization, drop, individual)
 
     def mut_add_conv_layer(self, network):
-        if network.shapes[-1][0] > 2 and network.shapes[-1][1] > 2:
-            network.add_layer(np.random.randint(0, network.number_hidden_layers), np.random.randint(0, 3), [1, np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])])
+        network.add_layer(np.random.randint(0, network.number_hidden_layers), np.random.randint(0, 3), [np.random.randint(1, 2), np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])])
     
     def mut_del_conv_layer(self, network):
         if network.number_hidden_layers > 1:
@@ -122,20 +121,16 @@ class CNN_Mutation(Mutation):
     
     def mut_stride_conv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
-        
-        if network.strides[layer][0] == 1 and network.shapes[-1][0] >= 4:
-            network.change_stride(layer, 2)
-        elif network.strides[layer][0] == 2:
-            network.change_stride(layer, 1)
+            
+        new_stride = np.random.randint(1, 2)
+        network.change_stride(layer, new_stride)
     
     def mut_filter_conv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
         
         channels = np.random.randint(0, 65)
-        if network.filters[layer][0] == 2 and network.shapes[-1][0] >= 3:
-            network.change_filters(layer, 3, channels)
-        elif network.filters[layer][0] == 3:
-            network.change_filters(layer, 2, channels)
+        new_filter_size = np.random.randint(2, 4)
+        network.change_filters(layer, new_filter_size, channels)
             
 
 class TCNN_Mutation(Mutation):
@@ -144,22 +139,48 @@ class TCNN_Mutation(Mutation):
         super().__init__(ev_hypers, max_lay, batch_normalization, drop, individual)
          
     def mut_add_deconv_layer(self, network):
-        network.add_layer(np.random.randint(0, network.number_hidden_layers), [1, np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])])
+        network.add_layer(np.random.randint(0, network.number_hidden_layers), [np.random.randint(1, 3), np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])])
     
     def mut_del_deconv_layer(self, network):
         network.remove_random_layer()
     
     def mut_stride_deconv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
-        if network.strides[layer][1] == 2 and network.output_shapes[-1][1] / 2 >= network.output_dim[1]:
-            network.change_stride(layer, 1)
-        elif network.strides[layer][1] == 1:
-            network.change_stride(layer, 2)
+        new_stride  =np.random.randint(1, 3)
+        network.change_stride(layer, new_stride)
     
     def mut_filter_deconv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
+        
+        channels = np.random.randint(0, 65)
+        new_filter_size = np.random.randint(2, 4)
+        network.change_filters(layer, new_filter_size, channels)
+
+class RNN_Mutation(Mutation):
     
-        if network.filters[layer][1] == 3 and network.output_shapes[-1][1] - 6 >= network.output_dim[1]:
-            network.change_filters(layer, 2, np.random.randint(0, 65))
-        elif network.filters[layer][1] == 2:
-            network.change_filters(layer, 3, np.random.randint(0, 65))
+    def __init__(self, ev_hypers, max_lay, batch_normalization, drop, individual):
+        super().__init__(ev_hypers, max_lay, batch_normalization, drop, individual)
+        
+    def mut_add_rnn_layer(self, network):
+        layer_pos = np.random.randint(network.number_hidden_layers)
+        units_in_layer = np.random.randint(1, network.max_units)
+        bidirectional = np.random.choice([True, False])
+        act_function = np.random.choice(activations[1:])
+        init_function = np.random.choice(initializations[1:])
+        network.add_layer(layer_pos, [units_in_layer, bidirectional, act_function, init_function])
+
+    def mut_remove_rnn_layer(self, network):
+        network.remove_random_layer()
+        
+    def mut_change_units(self, network):
+        layer_pos = np.random.randint(network.number_hidden_layers)
+        new_units = np.random.randint(1, network.max_units)
+        network.change_units(layer_pos, new_units)
+        
+    def mut_change_bidirectional(self, network):
+        layer_pos = np.random.randint(network.number_hidden_layers)
+        network.change_bidirectional(layer_pos)
+        
+    def mut_change_max_units(self, network):
+        max_units = np.random.randint(2,10) * 32
+        network.change_max_units(max_units)
