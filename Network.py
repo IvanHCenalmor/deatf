@@ -5,7 +5,8 @@ import os
 import copy
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
-from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, MaxPooling2D, AveragePooling2D
+from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, \
+                                    MaxPooling2D, AveragePooling2D, Bidirectional, SimpleRNN, LSTM, GRU
 from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNormal, GlorotUniform
 
 activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.sigmoid, tf.nn.tanh]
@@ -577,7 +578,95 @@ class TConvDescriptor(NetworkDescriptor):
         strides = [str(x) for x in self.strides]
         return str(self.input_dim) + "_" + str(self.output_dim) + "_" + ",".join(filters) + "*" + ",".join(["/".join(szs) for szs in sizes]) + "*" + ",".join(strides) + "_" + ",".join(init_funcs) + "_" + ",".join(act_funcs)
 
-
+class RNNDescriptor(NetworkDescriptor):
+    def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1, init_functions=None,
+                 rnn_layers = [SimpleRNN], bidirectional=[False], units_in_layer=[64], max_units=128, 
+                 act_functions=None, dropout=False, batch_norm=False):
+        
+        super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
+             init_functions=init_functions, act_functions=act_functions, dropout=dropout, batch_norm=batch_norm)
+        self.rnn_layers = rnn_layers
+        self.units_in_layer = [min(unit, max_units) for unit in units_in_layer]
+        self.max_units = max_units
+        self.bidirectional = bidirectional
+        
+    def random_init(self, input_size, output_size, nlayers, max_layer_size, _, __, dropout, batch_norm):
+        
+        self.input_dim = input_size
+        self.output_dim = output_size
+        
+        self.max_units = np.random.randint(2,4) * 32
+        
+        # Random initialization
+        self.number_hidden_layers = np.random.randint(nlayers)+1
+        self.units_in_layer = [np.random.randint(1, self.max_units)+1 for _ in range(self.number_hidden_layers)]
+        self.init_functions = list(np.random.choice(initializations, size=self.number_hidden_layers+1))
+        self.act_functions = list(np.random.choice(activations, size=self.number_hidden_layers+1))
+        
+        self.rnn_layers = list(np.random.choice([SimpleRNN, LSTM, GRU], size=self.number_hidden_layers+1))
+        self.bidirectional = list(np.random.choice([True, False], size=self.number_hidden_layers+1))
+        
+        if dropout is not None and dropout:
+            self.dropout = np.random.choice([True, False])
+            self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+        else:
+            self.dropout_probs = np.zeros(self.number_hidden_layers+1)
+    
+    def add_layer(self, layer_pos, lay_params):
+        self.number_hidden_layers += 1
+        self.rnn_layers.insert(layer_pos, lay_params[0])
+        self.units_in_layer.insert(layer_pos, min(lay_params[1], self.max_units))
+        self.bidirectional.insert(layer_pos, lay_params[2])
+        self.act_functions.insert(layer_pos, lay_params[3])
+        self.init_functions.insert(layer_pos, lay_params[4])
+    
+    def remove_layer(self, layer_pos):
+        self.number_hidden_layers -= 1
+        self.rnn_layers.pop(layer_pos)
+        self.units_in_layer.pop(layer_pos)
+        self.bidirectional.pop(layer_pos)
+        self.act_functions.pop(layer_pos)
+        self.init_functions.pop(layer_pos)
+    
+    def remove_random_layer(self):
+        if self.number_hidden_layers > 1:
+            layer_pos = np.random.randint(self.number_hidden_layers)
+            self.remove_layer(layer_pos)
+            return 0
+        else:
+            return -1
+        
+    def change_layer_type(self, layer_pos):
+        layer_type = self.rnn_layers[layer_pos]
+        possible_types = [SimpleRNN, LSTM, GRU]
+        possible_types.remove(layer_type)
+        self.rnn_layers[layer_pos] = np.random.choice(possible_types)
+        
+    def change_units(self, layer_pos, new_units):
+        self.units_in_layer[layer_pos] = new_units
+        
+    def change_bidirectional(self, layer_pos):
+        self.bidirectional[layer_pos] = not self.bidirectional[layer_pos]
+        
+    def change_max_units(self, max_units):
+        self.max_units = max_units
+        self.units_in_layer = [min(unit, self.max_units) for unit in self.units_in_layer]        
+    
+    def print_components(self, identifier):
+        print(identifier, ' RNN_layers:', self.rnn_layers)
+        print(identifier, ' Max units:', self.max_units)
+        print(identifier, ' Units:', self.units_in_layer)
+        print(identifier, ' Bidirectional:', self.bidirectional)
+        print(identifier, ' Init:', self.init_functions)
+        print(identifier, ' Act:', self.act_functions)
+    def codify_components(self):
+        units = [str(x) for x in self.units_in_layer]
+        bidirectional = [str(x) for x in self.bidirectional]
+        init_funcs = [str(x) for x in self.init_functions]
+        act_funcs = [str(x) for x in self.act_functions]
+        return str(self.input_dim) + "_" + str(self.output_dim) + "_" + str(self.rnn_layers) + "_" + ",".join(units) + \
+               "_" + ",".join(bidirectional) + "_" + ",".join(init_funcs) + "_" + ",".join(act_funcs)
+    
 class Network:
     def __init__(self, network_descriptor):
         """
@@ -678,6 +767,46 @@ class TCNN(Network):
                                       activation=self.descriptor.act_functions[lay_indx],
                                       kernel_initializer=self.descriptor.init_functions[lay_indx])(x)
 
+        return x
+
+class RNN(Network):
+    def __init__(self, network_descriptor):
+        super().__init__(network_descriptor)
+        
+    def building(self, x):
+        for lay_indx in range(self.descriptor.number_hidden_layers - 1):
+            
+            rnn_layer = self.descriptor.rnn_layers[lay_indx](units=self.descriptor.units_in_layer[lay_indx],
+                                                             return_sequences=True,
+                                                             activation=self.descriptor.act_functions[lay_indx],
+                                                             kernel_initializer=self.descriptor.init_functions[lay_indx]())
+            
+            if self.descriptor.bidirectional[lay_indx]:
+                x = Bidirectional(rnn_layer)(x)
+            else:
+                x = rnn_layer(x)
+        
+            if self.descriptor.dropout:
+                x = Dropout(self.descriptor.dropout_probs[lay_indx])(x)
+            
+        # Last layer is the one that decide the type of output: single or seguence
+        if len(self.descriptor.output_dim) == 1:
+            return_sequence = False
+        else:
+            return_sequence = True
+            
+        rnn_layer = self.descriptor.rnn_layers[self.descriptor.number_hidden_layers - 1](units=self.descriptor.units_in_layer[self.descriptor.number_hidden_layers - 1],
+                                                                                         return_sequences=return_sequence,
+                                                                                         activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers - 1],
+                                                                                         kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers - 1]())
+        
+        if self.descriptor.bidirectional[self.descriptor.number_hidden_layers]:
+            x = Bidirectional(rnn_layer)(x)
+        else:
+            x = rnn_layer(x)
+            
+        x = Dense(self.descriptor.output_dim[-1], activation='softmax')(x)
+            
         return x
 
 def calculate_CNN_shape(input_shape, filters, strides, desired_layer):

@@ -36,7 +36,7 @@ if __name__ == "__main__":
                  seed=0,
                  dropout=False,
                  batch_norm=False,
-                 ev_alg='simple')
+                 ev_alg='mu_plus_lambda')
     
     a = e.evolve()
 

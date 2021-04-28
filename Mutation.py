@@ -1,7 +1,7 @@
 
 import numpy as np
 from Network import initializations, activations
-
+from tensorflow.keras.layers import SimpleRNN, LSTM, GRU
 
 class Mutation:
     
@@ -163,14 +163,19 @@ class RNN_Mutation(Mutation):
         
     def mut_add_rnn_layer(self, network):
         layer_pos = np.random.randint(network.number_hidden_layers)
+        rnn_type = np.random.choice([SimpleRNN, LSTM, GRU])
         units_in_layer = np.random.randint(1, network.max_units)
         bidirectional = np.random.choice([True, False])
         act_function = np.random.choice(activations[1:])
         init_function = np.random.choice(initializations[1:])
-        network.add_layer(layer_pos, [units_in_layer, bidirectional, act_function, init_function])
-
+        network.add_layer(layer_pos, [rnn_type, units_in_layer, bidirectional, act_function, init_function])
+        
     def mut_remove_rnn_layer(self, network):
         network.remove_random_layer()
+
+    def mut_change_layer_type(self, network):
+        layer_pos = np.random.randint(network.number_hidden_layers)
+        network.change_layer_type(layer_pos)
         
     def mut_change_units(self, network):
         layer_pos = np.random.randint(network.number_hidden_layers)

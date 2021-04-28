@@ -7,8 +7,8 @@ from deap import base
 from deap import creator
 from deap import tools
 
-from Network import MLP, MLPDescriptor, TCNN, CNN
-from Mutation import MLP_Mutation, CNN_Mutation, TCNN_Mutation
+from Network import MLP, MLPDescriptor, TCNN, CNN, RNN
+from Mutation import MLP_Mutation, CNN_Mutation, TCNN_Mutation, RNN_Mutation
 from metrics import mse, accuracy_error
 import os
 
@@ -17,7 +17,7 @@ from tensorflow.keras.models import Model
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-descs = {"ConvDescriptor": CNN, "MLPDescriptor": MLP, "TConvDescriptor": TCNN}
+descs = {"ConvDescriptor": CNN, "MLPDescriptor": MLP, "TConvDescriptor": TCNN, "RNNDescriptor": RNN}
 
 # This function set the seeds of the tensorflow function
 # to make this notebook's output stable across runs
@@ -277,7 +277,7 @@ class Evolving:
         out = Flatten()(inp)
         out = net.building(out)
         model = Model(inputs=inp, outputs=out)
-        
+
         opt = tf.keras.optimizers.Adam(learning_rate=self.lrate)
         model.compile(loss=self.loss_function, optimizer=opt, metrics=[])
         
@@ -321,7 +321,7 @@ def mutations(ev_hypers, max_lay, batch_normalization, drop, custom_mutations, i
     :return: Mutated version of the DEAP individual.
     """
     
-    mutation_types = {'MLPDescriptor': MLP_Mutation, 'ConvDescriptor': CNN_Mutation, 'TConvDescriptor': TCNN_Mutation}
+    mutation_types = {'MLPDescriptor': MLP_Mutation, 'ConvDescriptor': CNN_Mutation, 'TConvDescriptor': TCNN_Mutation, 'RNNDescriptor': RNN_Mutation}
 
     nets = list(individual.descriptor_list.keys())
     nets.remove("hypers")
