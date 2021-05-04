@@ -86,7 +86,8 @@ class MLPDescriptor(NetworkDescriptor):
         super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, init_functions=init_functions, act_functions=act_functions, dropout=dropout, batch_norm=batch_norm)
         self.dims = dims  # Number of neurons in each layer
 
-    def random_init(self, input_size=None, output_size=None, nlayers=None, max_layer_size=None, _=None, __=None, dropout=None, batch_norm=None):
+    def random_init(self, input_size=None, output_size=None, nlayers=None, max_layer_size=None, 
+                    _=None, __=None, dropout=None, batch_norm=None):
 
         # If the incoming/outgoing sizes have more than one dimension compute the size of the flattened sizes
         if input_size is not None:
@@ -201,9 +202,12 @@ class MLPDescriptor(NetworkDescriptor):
 
 
 class ConvDescriptor(NetworkDescriptor):
+
+    MAX_NUM_FILTER = 65
+
     def __init__(self, number_hidden_layers=2, input_dim=(28, 28, 3), output_dim=(7, 7, 1), op_type=(2, 1), 
-                 filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), list_init_functions=(0, 0), 
-                 list_act_functions=(0, 0), dropout=(), batch_norm=()):
+                 max_filter=3, max_stride=2, filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), 
+                 list_init_functions=(0, 0), list_act_functions=(0, 0), dropout=(), batch_norm=()):
         """
         Descriptor for convolutional cells
         :param number_hidden_layers: Number of hidden layers (it's changed afterwards)
@@ -224,7 +228,9 @@ class ConvDescriptor(NetworkDescriptor):
         self.layers = op_type
         self.filters = filters
         self.strides = strides
-
+        self.max_stride = max_stride
+        self.max_filter = max_filter
+        
     def random_init(self, input_size, output_size, nlayers, _, max_stride, max_filter, dropout, batch_norm):
         """
         This function randomly initializes the descriptor. This function is susceptible of being modified by the user with specific creation needs
@@ -243,18 +249,20 @@ class ConvDescriptor(NetworkDescriptor):
         self.output_dim = output_size
 
         self.number_hidden_layers = np.random.randint(nlayers)+1
+        self.layers = []
+        self.max_stride = max_stride
+        self.strides = []
+        self.max_filter = max_filter
+        self.filters = []
         self.init_functions = []
         self.act_functions = []
-        self.layers = []
-        self.strides = []
-        self.filters = []
         
         i = 0
         while i < nlayers:
             new_layer = np.random.choice([0, 1, 2])
             
             self.layers += [2]
-            self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])]
+            self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, self.MAX_NUM_FILTER)])]
             self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
             shape = calculate_CNN_shape(self.input_dim, self.filters, self.strides, -1)
             if shape[0] < 2 or shape[1] < 2 or np.prod(shape) < self.output_dim:  # If the blob size is too small
@@ -269,7 +277,7 @@ class ConvDescriptor(NetworkDescriptor):
             
             if new_layer != 2:
                 self.layers += [new_layer]
-                self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 64.5)])]
+                self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, self.MAX_NUM_FILTER)])]
                 self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
                 shape = calculate_CNN_shape(self.input_dim, self.filters, self.strides, -1)
                 if shape[0] < 2 or shape[1] < 2 or np.prod(shape) < self.output_dim:  # If the blob size is too small
@@ -306,13 +314,13 @@ class ConvDescriptor(NetworkDescriptor):
             layer_pos += 1
         
         aux_number_hidden_layers += 1
-        aux_filters.insert(layer_pos, np.array([lay_params[1], lay_params[1], np.random.randint(0, 65)]))
+        aux_filters.insert(layer_pos, np.array([lay_params[1], lay_params[1], np.random.randint(0, self.MAX_NUM_FILTER)]))
         aux_strides.insert(layer_pos, np.array([lay_params[0], lay_params[0], 1]))
         if lay_type < 2:
             aux_number_hidden_layers += 1
             pool_params = [1, np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])]
             
-            aux_filters.insert(layer_pos, np.array([pool_params[1], pool_params[1], np.random.randint(0, 65)]))
+            aux_filters.insert(layer_pos, np.array([pool_params[1], pool_params[1], np.random.randint(0, self.MAX_NUM_FILTER)]))
             aux_strides.insert(layer_pos, np.array([pool_params[0], pool_params[0], 1]))
             
         if calculate_CNN_shape(self.input_dim, aux_filters, aux_strides, aux_number_hidden_layers)[0] > 0:
@@ -413,13 +421,18 @@ class ConvDescriptor(NetworkDescriptor):
         act_funcs = [str(x) for x in self.act_functions]
         sizes = [[str(y) for y in x] for x in self.filters]
         strides = [str(x) for x in self.strides]
-        return str(self.input_dim) + "_" + str(self.output_dim) + "_" + ",".join(filters) + "*" + ",".join(["/".join(szs) for szs in sizes]) + "*" + ",".join(strides) + "_" + ",".join(init_funcs) + "_" + ",".join(act_funcs)
+        return str(self.input_dim) + "_" + str(self.output_dim) + "_" + ",".join(filters) + "*" + \
+                    ",".join(["/".join(szs) for szs in sizes]) + "*" + ",".join(strides) + "_" + \
+                    ",".join(init_funcs) + "_" + ",".join(act_funcs)
 
 
 class TConvDescriptor(NetworkDescriptor):
+    
+    MAX_NUM_FILTER = 65
+    
     def __init__(self, number_hidden_layers=2, input_dim=(7, 7, 50), output_dim=(28, 28, 3), 
-                 filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), list_init_functions=(0, 0), 
-                 list_act_functions=(0, 0), dropout=(), batch_norm=()):
+                 max_filter=3, filters=((3, 3, 2), (3, 3, 2)), max_stride=2, strides=((1, 1, 1), (1, 1, 1)), 
+                 list_init_functions=(0, 0), list_act_functions=(0, 0), dropout=(), batch_norm=()):
         """
        Descriptor for transposed convolutional cells
        :param number_hidden_layers: Number of hidden layers (it's changed afterwards)
@@ -436,8 +449,11 @@ class TConvDescriptor(NetworkDescriptor):
         super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
                          init_functions=list_init_functions, act_functions=list_act_functions, dropout=False, 
                          batch_norm=False)
-        self.filters = filters
+
+        self.max_stride = max_stride
         self.strides = strides
+        self.max_filter = max_filter
+        self.filters = filters
 
     def random_init(self, input_size, output_size, _, __, max_stride, max_filter, dropout, batch_norm):
         """
@@ -456,20 +472,23 @@ class TConvDescriptor(NetworkDescriptor):
         self.output_dim = output_size
 
         # Random initialization
-
+        
+        self.max_stride = max_stride
         self.strides = []
+        self.max_filter = max_filter
         self.filters = []
         self.init_functions = []
         self.act_functions = []
         for i in range(300):
             self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
-            self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, 65)])]
+            self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, self.MAX_NUM_FILTER)])]
             self.init_functions += [np.random.choice(initializations[1:])]
             self.act_functions += [np.random.choice(activations)]
 
             shape = calculate_TCNN_shape(self.input_dim, self.filters, self.strides, -1)
-
-            if shape[0] >= self.output_dim[0] and shape[1] >= self.output_dim[1]:  # Once the expected shape is exceeded, we have enough layers
+            
+            # Once the expected shape is exceeded, we have enough layers
+            if shape[0] >= self.output_dim[0] and shape[1] >= self.output_dim[1]:  
                 prev_shape = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
                 while prev_shape[0] * self.strides[-1][0] > self.output_dim[0]:
                     self.strides[-1] = np.array([self.strides[-1][0] - 1, self.strides[-1][1] - 1, self.strides[-1][2]])
@@ -490,7 +509,7 @@ class TConvDescriptor(NetworkDescriptor):
         """
         self.number_hidden_layers += 1
         self.strides.insert(layer_pos, [lay_params[0], lay_params[0], 1])
-        self.filters.insert(layer_pos, [lay_params[1], lay_params[1], np.random.randint(0, 65)])
+        self.filters.insert(layer_pos, [lay_params[1], lay_params[1], np.random.randint(0, self.MAX_NUM_FILTER)])
         self.act_functions.insert(layer_pos, lay_params[2])
         self.init_functions.insert(layer_pos, lay_params[3])
         
@@ -576,7 +595,9 @@ class TConvDescriptor(NetworkDescriptor):
         act_funcs = [str(x) for x in self.act_functions]
         sizes = [[str(y) for y in x] for x in self.filters]
         strides = [str(x) for x in self.strides]
-        return str(self.input_dim) + "_" + str(self.output_dim) + "_" + ",".join(filters) + "*" + ",".join(["/".join(szs) for szs in sizes]) + "*" + ",".join(strides) + "_" + ",".join(init_funcs) + "_" + ",".join(act_funcs)
+        return str(self.input_dim) + "_" + str(self.output_dim) + "_" + ",".join(filters) + "*" + \
+                    ",".join(["/".join(szs) for szs in sizes]) + "*" + ",".join(strides) + "_" + \
+                    ",".join(init_funcs) + "_" + ",".join(act_funcs)
 
 class RNNDescriptor(NetworkDescriptor):
     def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1, init_functions=None,
@@ -795,10 +816,11 @@ class RNN(Network):
         else:
             return_sequence = True
             
-        rnn_layer = self.descriptor.rnn_layers[self.descriptor.number_hidden_layers - 1](units=self.descriptor.units_in_layer[self.descriptor.number_hidden_layers - 1],
-                                                                                         return_sequences=return_sequence,
-                                                                                         activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers - 1],
-                                                                                         kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers - 1]())
+        rnn_layer = self.descriptor.rnn_layers[self.descriptor.number_hidden_layers - 1](
+                        units=self.descriptor.units_in_layer[self.descriptor.number_hidden_layers - 1],
+                        return_sequences=return_sequence,
+                        activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers - 1],
+                        kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers - 1]())
         
         if self.descriptor.bidirectional[self.descriptor.number_hidden_layers]:
             x = Bidirectional(rnn_layer)(x)
@@ -829,5 +851,6 @@ def calculate_TCNN_shape(input_shape, filters, strides, desired_layer):
     
     filter_size = filters[0]
     stride_size = strides[0]
-    output_shape = [input_shape[0] * stride_size[0] + max(filter_size[0] - stride_size[0], 0), input_shape[1] * stride_size[1] + max(filter_size[1] - stride_size[1], 0)]
+    output_shape = [input_shape[0] * stride_size[0] + max(filter_size[0] - stride_size[0], 0), 
+                    input_shape[1] * stride_size[1] + max(filter_size[1] - stride_size[1], 0)]
     return calculate_TCNN_shape(output_shape, filters[1:], strides[1:], desired_layer-1)

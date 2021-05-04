@@ -81,17 +81,19 @@ class MLP_Mutation(Mutation):
     def __init__(self, ev_hypers, max_lay, batch_normalization, drop, individual):
         super().__init__(ev_hypers, max_lay, batch_normalization, drop, individual)
         
-    def mut_add_layer(self, network):           # We add one layer
+    def mut_add_layer(self, network):# We add one layer
         layer_pos = np.random.randint(network.number_hidden_layers)+1
         lay_dims = np.random.randint(self.max_lay)+1
         init_w_function = initializations[np.random.randint(len(initializations))]
         init_a_function = activations[np.random.randint(len(activations))]
+        
         if not self.drop:
             dropout = np.random.randint(0, 2)
             drop_prob = np.random.rand()
         else:
             dropout = 0
             drop_prob = 0
+        
         if not self.batch_normalization:
             batch_norm = np.random.randint(0, 2)
         else:
@@ -113,7 +115,9 @@ class CNN_Mutation(Mutation):
         super().__init__(ev_hypers, max_lay, batch_normalization, drop, individual)
 
     def mut_add_conv_layer(self, network):
-        network.add_layer(np.random.randint(0, network.number_hidden_layers), np.random.randint(0, 3), [np.random.randint(1, 2), np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])])
+        network.add_layer(np.random.randint(0, network.number_hidden_layers), np.random.randint(0, 3), 
+                          [np.random.randint(1, network.max_stride), np.random.randint(2, network.max_filter),
+                           np.random.choice(activations[1:]),  np.random.choice(initializations[1:])])
     
     def mut_del_conv_layer(self, network):
         if network.number_hidden_layers > 1:
@@ -122,14 +126,14 @@ class CNN_Mutation(Mutation):
     def mut_stride_conv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
             
-        new_stride = np.random.randint(1, 2)
+        new_stride = np.random.randint(1, network.max_stride)
         network.change_stride(layer, new_stride)
     
     def mut_filter_conv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
         
-        channels = np.random.randint(0, 65)
-        new_filter_size = np.random.randint(2, 4)
+        channels = np.random.randint(0, network.MAX_NUM_FILTER)
+        new_filter_size = np.random.randint(2, network.max_filter)
         network.change_filters(layer, new_filter_size, channels)
             
 
@@ -139,21 +143,23 @@ class TCNN_Mutation(Mutation):
         super().__init__(ev_hypers, max_lay, batch_normalization, drop, individual)
          
     def mut_add_deconv_layer(self, network):
-        network.add_layer(np.random.randint(0, network.number_hidden_layers), [np.random.randint(1, 3), np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])])
+        network.add_layer(np.random.randint(0, network.number_hidden_layers),
+                          [np.random.randint(1, network.max_stride), np.random.randint(2, network.max_filter),
+                           np.random.choice(activations[1:]),  np.random.choice(initializations[1:])])
     
     def mut_del_deconv_layer(self, network):
         network.remove_random_layer()
     
     def mut_stride_deconv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
-        new_stride  =np.random.randint(1, 3)
+        new_stride = np.random.randint(1, network.max_stride)
         network.change_stride(layer, new_stride)
     
     def mut_filter_deconv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)
         
-        channels = np.random.randint(0, 65)
-        new_filter_size = np.random.randint(2, 4)
+        channels = np.random.randint(0, network.MAX_NUM_FILTER)
+        new_filter_size = np.random.randint(2, network.max_filter)
         network.change_filters(layer, new_filter_size, channels)
 
 class RNN_Mutation(Mutation):

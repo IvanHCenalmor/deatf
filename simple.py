@@ -29,14 +29,16 @@ if __name__ == "__main__":
     			 n_outputs=[[10]], 
     			 batch_size=150, 
     			 population=5, 
-    			 generations=10, 
+    			 generations=3, 
     			 iters=10, 
     			 n_layers=10, 
     			 max_layer_size=20,
                  seed=0,
                  dropout=False,
                  batch_norm=False,
-                 ev_alg='mu_plus_lambda')
+                 ev_alg='mu_plus_lambda',
+                 evol_kwargs={'mu':2, 'lambda_':5, 'cxpb':1., "mutpb": 0.},
+                 sel = 'best')
     
     a = e.evolve()
 

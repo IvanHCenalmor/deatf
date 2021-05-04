@@ -161,7 +161,8 @@ class Evolving:
                 if ev_alg == 'simple':
                     self.evol_kwargs = {"cxpb": self.cXp, "mutpb": self.mtp}
                 else:
-                    self.evol_kwargs = {"mu": self.population_size, "lambda_": self.population_size, "cxpb": self.cXp, "mutpb": self.mtp}
+                    self.evol_kwargs = {"mu": self.population_size, "lambda_": self.population_size, 
+                                        "cxpb": self.cXp, "mutpb": self.mtp}
     
         else:
             self.ev_alg = ev_alg
@@ -239,11 +240,13 @@ class Evolving:
 
         if not self.complex:  # Simple case
             network_descriptor["n0"] = MLPDescriptor()
-            network_descriptor["n0"].random_init(self.train_inputs["i0"].shape[1:], self.train_outputs["o0"].shape[1], self.nlayers, self.max_lay, None, None, dropout, batch_norm)
+            network_descriptor["n0"].random_init(self.train_inputs["i0"].shape[1:], self.train_outputs["o0"].shape[1], 
+                                                 self.nlayers, self.max_lay, None, None, dropout, batch_norm)
         else:  # Custom case
             for i, descriptor in enumerate(self.descriptors):
                 network_descriptor["n" + str(i)] = descriptor()
-                network_descriptor["n" + str(i)].random_init(self.n_inputs[i], self.n_outputs[i], self.nlayers, self.max_lay, self.max_stride, self.max_filter, dropout, batch_norm)
+                network_descriptor["n" + str(i)].random_init(self.n_inputs[i], self.n_outputs[i], self.nlayers, 
+                                                             self.max_lay, self.max_stride, self.max_filter, dropout, batch_norm)
         network_descriptor["hypers"] = {}
         if len(self.ev_hypers) > 0:
 
@@ -303,7 +306,8 @@ class Evolving:
             if "hypers" not in net:
                 nets[net] = descs[self.descriptors[index].__name__](individual.descriptor_list[net])
 
-        models = self.loss_function(nets, self.train_inputs, self.train_outputs, self.batch_size, individual.descriptor_list["hypers"])
+        models = self.loss_function(nets, self.train_inputs, self.train_outputs, self.batch_size, 
+                                    individual.descriptor_list["hypers"])
         
         ev = self.evaluation(models, self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
 
@@ -321,7 +325,8 @@ def mutations(ev_hypers, max_lay, batch_normalization, drop, custom_mutations, i
     :return: Mutated version of the DEAP individual.
     """
     
-    mutation_types = {'MLPDescriptor': MLP_Mutation, 'ConvDescriptor': CNN_Mutation, 'TConvDescriptor': TCNN_Mutation, 'RNNDescriptor': RNN_Mutation}
+    mutation_types = {'MLPDescriptor': MLP_Mutation, 'ConvDescriptor': CNN_Mutation, 
+                      'TConvDescriptor': TCNN_Mutation, 'RNNDescriptor': RNN_Mutation}
 
     nets = list(individual.descriptor_list.keys())
     nets.remove("hypers")
