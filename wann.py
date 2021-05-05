@@ -28,7 +28,7 @@ For this, we need to:
 """
 
 
-def train_wann(nets, train_inputs, train_outputs, batch_size, hypers):
+def eval_wann(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
     """
     This function takes care of arranging the model and training it. It is used by the evolutionary internally,
     and always is provided with the same parameters
@@ -51,7 +51,7 @@ def train_wann(nets, train_inputs, train_outputs, batch_size, hypers):
     parameters = 0
     for layer in model.layers:
         if layer.get_weights() != []:
-            parameters += layer.get_weights()[0].shape[0] * layer.get_weights()[0].shape[1]
+            parameters += np.prod(layer.get_weights()[0].shape)
     
     string = hypers["start"]
     while len(string) < parameters:
@@ -62,40 +62,30 @@ def train_wann(nets, train_inputs, train_outputs, batch_size, hypers):
     for layer in model.layers:
         lay = []
         if layer.get_weights() != []:
-            for i in range(layer.get_weights()[0].shape[0]):
-                lay += [[int(i) for i in string[aux:aux+layer.get_weights()[0].shape[1]]]]
-                aux += layer.get_weights()[0].shape[1]
-            lay = np.array(lay)
-            lay = np.where(lay == 0, hypers["weight1"], lay)
-            lay = np.where(lay == 1, hypers["weight2"], lay)
-            lay = [lay, layer.get_weights()[1]]
+            if len(layer.get_weights()[0].shape) == 2:
+                for i in range(layer.get_weights()[0].shape[0]):
+                    lay += [[int(i) for i in string[aux:aux+layer.get_weights()[0].shape[1]]]]
+                    aux += layer.get_weights()[0].shape[1]
+                lay = np.array(lay)
+                lay = np.where(lay == 0, hypers["weight1"], lay)
+                lay = np.where(lay == 1, hypers["weight2"], lay)
+                lay = [lay, layer.get_weights()[1]]
         ls += [lay]
     
     for i, layer in enumerate(model.layers):  # Este for asigna el valor a todos los pesos
-        layer.set_weights(ls[i])
+        if ls[i]:
+            layer.set_weights(ls[i])
 
     models["n0"] = model
 
-    return models
-
-
-def eval_wann(models, inputs, outputs, hypers):
-    """
-    Here we compute the fitness of the model. It is used by the evolutionary internally and always is provided with the same parameters
-    :param preds: Dictionary created in the arranging and training function
-    :param inputs: Data inputs for the model
-    :param outputs: Data outputs for the metric
-    :param _: hyperparameters, because we are evolving the optimizer selection and learning rate, they are unused when testing
-    :return: fitness of the model (as a tuple)
-    """
     global evals
     
-    preds = models["n0"].predict(inputs["i0"])
+    preds = models["n0"].predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
     
     res = np.argmax(res, axis=1)
-    res = 1 - np.sum(np.argmax(outputs["o0"], axis=1) == res) / res.shape[0]
+    res = 1 - np.sum(np.argmax(test_outputs["o0"], axis=1) == res) / res.shape[0]
 
     if len(evals) % 10000 == 0:
         np.save("temp_evals.npy", np.array(evals))
@@ -117,9 +107,9 @@ if __name__ == "__main__":
 
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
 
-    e = Evolving(loss=train_wann, desc_list=[MLPDescriptor], 
+    e = Evolving(evaluation=eval_wann, desc_list=[MLPDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test],
-                 evaluation=eval_wann, batch_size=150, population=10, generations=100, 
+                 batch_size=150, population=10, generations=100, 
                  n_inputs=[[28, 28]], n_outputs=[[2]], cxp=0, mtp=1,
                  batch_norm=False, dropout=False, 
                  hyperparameters={"weight1": np.arange(-2, 2, 0.5), "weight2": np.arange(-2, 2, 0.5), 

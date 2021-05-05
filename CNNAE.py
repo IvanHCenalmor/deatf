@@ -21,7 +21,7 @@ import tensorflow.keras.optimizers as opt
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 
-def train_cnn_ae(nets, train_inputs, _, batch_size, hypers):
+def eval_cnn_ae(nets, train_inputs, _, batch_size, test_inputs, __, hypers):
     models = {}
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
@@ -41,24 +41,27 @@ def train_cnn_ae(nets, train_inputs, _, batch_size, hypers):
             
     models["n0"] = model
                      
-    return models
-
-
-def eval_cnn_ae(models, inputs, _, __):
-
-    pred = models["n0"].predict(inputs["i0"])
+    
+    pred = models["n0"].predict(test_inputs["i0"])
     res = pred[:, :28, :28, :3] 
         
     if np.isnan(res).any():
         return 288,
     else:
-        return mean_squared_error(np.reshape(res, (-1)), np.reshape(inputs["i0"], (-1))),
+        return mean_squared_error(np.reshape(res, (-1)), np.reshape(test_inputs["i0"], (-1))),
 
 
 if __name__ == "__main__":
 
     x_train, y_train, x_test, y_test = load_fashion()
-
+    
+    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    x_train = x_train[:10000]
+    y_train = y_train[:10000]
+    x_test = x_test[:5000]
+    y_test = y_test[:5000]
+    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    
     x_train = np.expand_dims(x_train, axis=3)/255
     x_train = np.concatenate((x_train, x_train, x_train), axis=3)
 
@@ -71,8 +74,8 @@ if __name__ == "__main__":
 
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
     # Here we define a convolutional-transposed convolutional network combination
-    e = Evolving(loss=train_cnn_ae, 
-                 desc_list=[ConvDescriptor, TConvDescriptor], 
+    
+    e = Evolving(desc_list=[ConvDescriptor, TConvDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], 
                  x_tests=[x_test], y_tests=[y_test], 
                  evaluation=eval_cnn_ae, 
@@ -87,5 +90,6 @@ if __name__ == "__main__":
                  batch_norm=True, 
                  dropout=True)
     a = e.evolve()
-
+    
     print(a[-1])
+    

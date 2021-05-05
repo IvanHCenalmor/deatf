@@ -3,8 +3,6 @@ This is a use case of EvoFlow
 """
 from data import load_fashion
 import tensorflow as tf
-from sklearn.preprocessing import OneHotEncoder
-import numpy as np
 from evolution import Evolving, accuracy_error
 from Network import RNNDescriptor
 
@@ -17,13 +15,13 @@ import tensorflow.keras.optimizers as opt
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 
-def train_rnn(nets, train_inputs, train_outputs, batch_size, hypers):
+def eval_rnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
     models = {}
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
     model = Model(inputs=inp, outputs=out)
-    model.summary()
+    #model.summary()
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
     model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(), optimizer=opt, metrics=[])
     
@@ -32,16 +30,11 @@ def train_rnn(nets, train_inputs, train_outputs, batch_size, hypers):
             
     models["n0"] = model
                      
-    return models
-
-
-def eval_rnn(models, inputs, outputs, _):
-
-    preds = models["n0"].predict(inputs["i0"])
+    preds = models["n0"].predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
 
-    return accuracy_error(res, outputs["o0"]),
+    return accuracy_error(res, test_outputs["o0"]),
 
 if __name__ == "__main__":
 
@@ -58,7 +51,7 @@ if __name__ == "__main__":
     '''
     
     # Here we define a convolutional-transposed convolutional network combination
-    e = Evolving(loss=train_rnn, evaluation=eval_rnn, 
+    e = Evolving(evaluation=eval_rnn, 
                  desc_list=[RNNDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], 
                  x_tests=[x_test], y_tests=[y_test], 

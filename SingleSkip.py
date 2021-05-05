@@ -60,7 +60,7 @@ evolution.descs["ConvDescriptor"] = SkipCNN
 
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
-def train_cnn(nets, train_inputs, train_outputs, batch_size, hypers):
+def eval_cnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
 
     models = {}
     
@@ -71,29 +71,32 @@ def train_cnn(nets, train_inputs, train_outputs, batch_size, hypers):
     out = nets["n1"].building(out)
     
     model = Model(inputs=inp, outputs=out)
-    
+    #model.summary()
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
     model.compile(loss=tf.nn.softmax_cross_entropy_with_logits, optimizer=opt, metrics=[])
     
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=10, batch_size=batch_size, verbose=0)
             
     models["n0"] = model
-
-    return models
-
-
-def eval_cnn(models, inputs, outputs, _):
     
-    preds = models["n0"].predict(inputs["i0"])
+    preds = models["n0"].predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
 
-    return evolution.accuracy_error(res, outputs["o0"]),
+    return evolution.accuracy_error(res, test_outputs["o0"]),
 
 
 if __name__ == "__main__":
 
     x_train, y_train, x_test, y_test = load_fashion()
+    
+    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    x_train = x_train[:500]
+    y_train = y_train[:500]
+    x_test = x_test[:100]
+    y_test = y_test[:100]
+    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    
     # We fake a 3 channel dataset by copying the grayscale channel three times.
     x_train = np.expand_dims(x_train, axis=3)/255
     x_train = np.concatenate((x_train, x_train, x_train), axis=3)
@@ -107,9 +110,9 @@ if __name__ == "__main__":
 
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
     # Here we indicate that we want a CNN as the first network of the model
-    e = evolution.Evolving(loss=train_cnn, desc_list=[ConvDescriptor, MLPDescriptor], 
+    e = evolution.Evolving(evaluation=eval_cnn, desc_list=[ConvDescriptor, MLPDescriptor], 
                            x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test],
-                           evaluation=eval_cnn, batch_size=150, population=200, generations=10, 
+                           batch_size=150, population=2, generations=3, 
                            n_inputs=[[28, 28, 3], [20]], n_outputs=[[20], [10]], cxp=0.5, mtp=0.5, 
                            hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2], "skip": range(3, 10)}, 
                            batch_norm=True, dropout=True)

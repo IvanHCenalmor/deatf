@@ -17,7 +17,7 @@ from tensorflow.keras.models import Model
 
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
-def train_cnn(nets, train_inputs, train_outputs, batch_size, hypers):
+def eval_cnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
     models = {}
     
     inp = Input(shape=train_inputs["i0"].shape[1:])
@@ -35,21 +35,25 @@ def train_cnn(nets, train_inputs, train_outputs, batch_size, hypers):
     
     models["n0"] = model
     
-    return models
-
-
-def eval_cnn(models, inputs, outputs, _):
-    
-    preds = models["n0"].predict(inputs["i0"])
+    preds = models["n0"].predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
 
-    return accuracy_error(res, outputs["o0"]),
+    return accuracy_error(res, test_outputs["o0"]),
 
 
 if __name__ == "__main__":
 
     x_train, y_train, x_test, y_test = load_fashion()
+    
+    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    x_train = x_train[:10000]
+    y_train = y_train[:10000]
+    x_test = x_test[:5000]
+    y_test = y_test[:5000]
+    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    
+    
     # We fake a 3 channel dataset by copying the grayscale channel three times.
     x_train = np.expand_dims(x_train, axis=3)/255
     x_train = np.concatenate((x_train, x_train, x_train), axis=3)
@@ -64,8 +68,9 @@ if __name__ == "__main__":
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
     
     # Here we indicate that we want a CNN as the first network of the model
-    e = Evolving(loss=train_cnn, desc_list=[ConvDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test],
-                 evaluation=eval_cnn, batch_size=150, population=5, generations=10, n_inputs=[[28, 28, 3], [20]], n_outputs=[[20], [10]], cxp=0.5,
+    e = Evolving(desc_list=[ConvDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[y_train], 
+                 x_tests=[x_test], y_tests=[y_test], evaluation=eval_cnn, 
+                 batch_size=150, population=5, generations=10, n_inputs=[[28, 28, 3], [20]], n_outputs=[[20], [10]], cxp=0.5,
                  mtp=0.5, hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, batch_norm=True, dropout=True)
     a = e.evolve()
 

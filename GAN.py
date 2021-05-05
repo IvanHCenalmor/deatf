@@ -8,7 +8,8 @@ from data import load_fashion
 import tensorflow as tf
 import numpy as np
 from keras.models import model_from_json
-from evolution import Evolving, batch
+from evolution import Evolving
+from auxiliary_functions import batch
 from Network import MLPDescriptor
 from PIL import Image
 import matplotlib.pyplot as plt
@@ -30,7 +31,7 @@ def discriminator_loss(fake_out, real_out):
     d_loss = d_loss_real + d_loss_fake
     return d_loss
 
-def gan_train(nets, train_inputs, _, batch_size, __):
+def gan_eval(nets, train_inputs, _, batch_size, __, ___ ,____):
     
     models = {}
         
@@ -82,10 +83,6 @@ def gan_train(nets, train_inputs, _, batch_size, __):
     models['n0'] = d_model
     models['n1'] = g_model
     
-    return models
-
-def gan_eval(models, _, __, ___):
-
     noise = np.random.normal(size=(150, 10))
     
     generated_images = models['n1'](noise, training=False)
@@ -96,7 +93,7 @@ if __name__ == "__main__":
 
     x_train, _, x_test, _ = load_fashion()
     # The GAN evolutive process is a common 2-DNN evolution
-    e = Evolving(loss=gan_train, desc_list=[MLPDescriptor, MLPDescriptor], 
+    e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
                  x_trains=[x_train], y_trains=[x_train], 
                  x_tests=[x_test], y_tests=[x_test], 
                  evaluation=gan_eval, batch_size=150, 

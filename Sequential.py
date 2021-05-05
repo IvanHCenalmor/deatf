@@ -25,7 +25,7 @@ For this, we need to:
 """
 
 
-def train_sequential(nets, train_inputs, train_outputs, batch_size, hypers):
+def eval_sequential(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
     """
     This function takes care of arranging the model and training it. It is used by the evolutionary internally,
     and always is provided with the same parameters
@@ -54,24 +54,11 @@ def train_sequential(nets, train_inputs, train_outputs, batch_size, hypers):
 
     models["n0"] = model
 
-    return models
-
-
-def eval_sequential(models, inputs, outputs, _):
-    """
-    Here we compute the fitness of the model. It is used by the evolutionary internally and always is provided with the same parameters
-    :param preds: Dictionary created in the arranging and training function
-    :param inputs: Data inputs for the model
-    :param outputs: Data outputs for the metric
-    :param _: hyperparameters, because we are evolving the optimizer selection and learning rate, they are unused when testing
-    :return: fitness of the model (as a tuple)
-    """
-    
-    pred = models['n0'].predict(inputs['i0'])
+    pred = models['n0'].predict(test_inputs['i0'])
         
     res = tf.nn.softmax(pred)
 
-    return accuracy_error(res, outputs["o0"]),
+    return accuracy_error(res, test_outputs["o0"]),
 
 
 if __name__ == "__main__":
@@ -87,9 +74,11 @@ if __name__ == "__main__":
     # testing, fitness function, batch size, population size, number of generations, input and output dimensions of the networks, crossover and
     # mutation probability, the hyperparameters being evolved (name and possibilities), and whether batch normalization and dropout should be
     # present in evolution
-    e = Evolving(loss=train_sequential, desc_list=[MLPDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[y_train], x_tests=[x_test],
-                 y_tests=[y_test], evaluation=eval_sequential, batch_size=150, population=10, generations=10, n_inputs=[[28, 28], [10]],
-                 n_outputs=[[10], [10]], cxp=0.5, mtp=0.5, hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]},
+    e = Evolving(evaluation=eval_sequential, desc_list=[MLPDescriptor, MLPDescriptor], 
+                 x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test], 
+                 batch_size=150, population=10, generations=10, n_inputs=[[28, 28], [10]],
+                 n_outputs=[[10], [10]], cxp=0.5, mtp=0.5, 
+                 hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]},
                  batch_norm=False, dropout=False)
     a = e.evolve()
     print(a[-1])

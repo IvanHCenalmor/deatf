@@ -15,7 +15,7 @@ import numpy as np
 from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
 
-def train(nets, train_inputs, train_outputs, batch_size, _):
+def evaluation(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, _):
 
     models = {}
     
@@ -41,18 +41,13 @@ def train(nets, train_inputs, train_outputs, batch_size, _):
     
     models["n0"] = model
     
-    
-    return models
-
-def eval(models, inputs, outputs, _):
-
-    pred_0, pred_1 = models['n0'].predict([inputs['i0'], inputs['i1']])
+    pred_0, pred_1 = models['n0'].predict([test_inputs['i0'], test_inputs['i1']])
         
     res_0 = tf.nn.softmax(pred_0)
     res_1 = tf.nn.softmax(pred_1)
 
     # Return both accuracies
-    return accuracy_error(res_0, outputs["o0"]), accuracy_error(res_1, outputs["o1"])
+    return accuracy_error(res_0, test_outputs["o0"]), accuracy_error(res_1, test_outputs["o1"])
 
 
 if __name__ == "__main__":
@@ -71,11 +66,11 @@ if __name__ == "__main__":
     mnist_y_test = OHEnc.fit_transform(np.reshape(mnist_y_test, (-1, 1))).toarray()
 
     # In this case, we provide two data inputs and outputs
-    e = Evolving(loss=train, desc_list=[MLPDescriptor, MLPDescriptor], 
+    e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
                  x_trains=[fashion_x_train, mnist_x_train], y_trains=[fashion_y_train, mnist_y_train], 
                  x_tests=[fashion_x_test, mnist_x_test], y_tests=[fashion_y_test, mnist_y_test], 
-                 evaluation=eval, batch_size=150, population=10, generations=10, 
-                 n_inputs=[[28, 28], [28, 28]], n_outputs=[[10], [10]], sel=2)
+                 evaluation=evaluation, batch_size=150, population=10, generations=10, 
+                 n_inputs=[[28, 28], [28, 28]], n_outputs=[[10], [10]], sel='best')
     res = e.evolve()
 
     print(res[0])

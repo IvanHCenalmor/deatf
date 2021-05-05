@@ -34,9 +34,9 @@ class MyContainer(object):
 
 
 class Evolving:
-    def __init__(self, loss="XEntropy", desc_list=(MLPDescriptor, ), compl=False, 
+    def __init__(self, desc_list=(MLPDescriptor, ), compl=False, 
                  x_trains=None, y_trains=None, x_tests=None, y_tests=None, 
-                 evaluation="Accuracy_error", n_inputs=((28, 28),), n_outputs=((10,),), 
+                 evaluation="XEntropy", n_inputs=((28, 28),), n_outputs=((10,),), 
                  batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel='best',
                  n_layers=10, max_layer_size=100, max_filter=4, max_stride=3, seed=None , cxp=0, 
                  mtp=1, dropout=False, batch_norm=False, evol_kwargs={}, sel_kwargs={}, 
@@ -58,9 +58,8 @@ class Evolving:
         self.max_filter = max_filter                                    # Maximum size of filter
         self.max_stride = max_stride                                    # Maximum stride
         self.descriptors = desc_list                                    # Number of MLPs in the model
-        self.loss_function = None                                       # Loss function to be used for training the model
         self.evaluation = None                                          # Function for evaluating the model
-        self.define_loss_eval(loss, evaluation)                         # Assigning the values of the previous variables
+        self.define_evaluation(evaluation)                              # Assigning the values of the previous variables
 
         self.batch_size = batch_size                                    # Batch size for training
         self.predictions = {}                                           # dict {"Net_id": net_output}
@@ -71,7 +70,7 @@ class Evolving:
         self.test_inputs = {}                                           # Test data (X)
         self.test_outputs = {}                                          # Test data (y)
         self.data_save(x_trains, y_trains, x_tests, y_tests)            # Save data in the previous dicts
-        self.complex = self.is_complex(compl, loss, evaluation, hyperparameters)
+        self.complex = self.is_complex(compl, evaluation, hyperparameters)
         
         self.toolbox = base.Toolbox()
 
@@ -117,7 +116,7 @@ class Evolving:
                 self.test_inputs["i" + str(i)] = x
                 self.test_outputs["o" + str(i)] = y_tests[i]
 
-    def define_loss_eval(self, loss, evaluation):
+    def define_evaluation(self, evaluation):
         """
         Define the loss and evaluation function. Writing the (string) names of the predefined functions is accepted.
         :param loss: Loss function. Either string (predefined) or customized by the user.
@@ -125,14 +124,7 @@ class Evolving:
         :return:
         """
 
-        #losses = {"MSE": tf.losses.mean_squared_error, "XEntropy": tf.losses.softmax_cross_entropy}
-        losses = {"MSE": tf.losses.mean_squared_error, "XEntropy": tf.compat.v1.losses.softmax_cross_entropy}       
-        evals = {"MSE": mse, "Accuracy_error": accuracy_error}
-
-        if type(loss) is str:
-            self.loss_function = losses[loss]
-        else:
-            self.loss_function = loss
+        evals = {"MSE": tf.losses.mean_squared_error, "XEntropy": tf.nn.softmax_cross_entropy_with_logits}
 
         if type(evaluation) is str:
             self.evaluation = evals[evaluation]
@@ -167,10 +159,10 @@ class Evolving:
         else:
             self.ev_alg = ev_alg
     
-    def is_complex(self, compl, loss, evaluation, hyperparameters):
+    def is_complex(self, compl, evaluation, hyperparameters):
         if compl:
             return True
-        elif (type(loss) is not str) or (type(evaluation) is not str):
+        elif type(evaluation) is not str:
             return True
         elif self.descriptors[0] is not MLPDescriptor:
             return True
@@ -282,7 +274,7 @@ class Evolving:
         model = Model(inputs=inp, outputs=out)
 
         opt = tf.keras.optimizers.Adam(learning_rate=self.lrate)
-        model.compile(loss=self.loss_function, optimizer=opt, metrics=[])
+        model.compile(loss=self.evaluation, optimizer=opt, metrics=[])
         
         model.fit(self.train_inputs['i0'], self.train_outputs['o0'], epochs=self.iters, batch_size=self.batch_size, verbose=0)
         
@@ -306,10 +298,8 @@ class Evolving:
             if "hypers" not in net:
                 nets[net] = descs[self.descriptors[index].__name__](individual.descriptor_list[net])
 
-        models = self.loss_function(nets, self.train_inputs, self.train_outputs, self.batch_size, 
-                                    individual.descriptor_list["hypers"])
-        
-        ev = self.evaluation(models, self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
+        ev = self.evaluation(nets, self.train_inputs, self.train_outputs, self.batch_size, 
+                             self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
 
         return ev
 

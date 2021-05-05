@@ -6,7 +6,8 @@ We use the MobileNet model instead of Inception because it gave better accuracy 
 """
 import tensorflow as tf
 import numpy as np
-from evolution import Evolving, batch
+from evolution import Evolving
+from auxiliary_functions import batch
 from Network import MLPDescriptor
 from gaussians import mmd, plt_center_assignation, create_data
 import sys
@@ -32,7 +33,7 @@ def discriminator_loss(fake_out, real_out):
     return d_loss
 
 
-def gan_train(nets, train_inputs, _, batch_size, __):
+def gan_eval(nets, train_inputs, _, batch_size, __, test_outputs, ___):
 
     models = {}
     
@@ -86,21 +87,17 @@ def gan_train(nets, train_inputs, _, batch_size, __):
     models['n0'] = d_model
     models['n1'] = g_model
         
-    return models
-
-def gan_eval(models, _, outputs, __):
-
     global best_mmd
     global eval_tot
     
     noise = np.random.uniform(size=(n_samples, z_size))
     samples = models["n1"](noise)
 
-    mmd_value, centers = mmd(candidate=samples, target=outputs["o0"])
+    mmd_value, centers = mmd(candidate=samples, target=test_outputs["o0"])
     print(mmd_value)
     if mmd_value < best_mmd:
         best_mmd = mmd_value
-        plt.plot(outputs["o0"][:, 0], outputs["o0"][:, 1], "o")
+        plt.plot(test_outputs["o0"][:, 0], test_outputs["o0"][:, 1], "o")
         plt.plot(samples[:, 0], samples[:, 1], "o")
         plt.savefig("gaussian_results/Evoflow_" + str(n_gauss) + "_" + str(seed) + "_" + str(eval_tot) + "_" + str(np.round(mmd_value, decimals=3)) + ".jpg")
         plt.clf()
@@ -129,7 +126,7 @@ if __name__ == "__main__":
     x_test = x_test - np.min(x_test, axis=0)
     x_test = x_test / np.max(x_test, axis=0)
     # The GAN evolutive process is a common 2-DNN evolution
-    e = Evolving(loss=gan_train, desc_list=[MLPDescriptor, MLPDescriptor], 
+    e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
                  x_trains=[x_train], y_trains=[x_train], x_tests=[x_test], y_tests=[x_test], 
                  evaluation=gan_eval, batch_size=50, population=population, generations=generations, 
                  n_inputs=[[2], [z_size]], n_outputs=[[1], [2]], 
