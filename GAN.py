@@ -48,7 +48,7 @@ def gan_eval(nets, train_inputs, _, batch_size, __, ___ ,____):
     d_out = nets["n0"].building(d_out)
     
     d_model = Model(inputs=d_inp, outputs=d_out)
-
+    
     generator_optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
     discriminator_optimizer = tf.keras.optimizers.Adam(learning_rate=0.01)
 
