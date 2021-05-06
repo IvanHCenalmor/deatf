@@ -12,19 +12,22 @@ import tensorflow_datasets as tfds
 def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, population=5, 
          generations=10, iters=100, n_layers=10, max_layer_size=20, hyperparameters={}):
     
-    x_train, x_test, y_train, y_test, mode = load_dataset(dataset_name)
+    x_train, x_test, x_val, y_train, y_test, y_val, mode = load_dataset(dataset_name)
     
     if not isinstance(y_train[0], float):
         OHEnc = OneHotEncoder()
     
         y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
         y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
+        y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()
+        
     else:
         y_train = np.reshape(y_train, (-1, 1))
         y_test = np.reshape(y_test, (-1, 1))
+        y_val = np.reshape(y_val, (-1, 1))
         
     input_shape = x_train.shape[1:]
-    output_shape = y_train.shape[1:]
+    output_shape = y_val.shape[1:]
     
     if eval_func == None:
         eval_func = select_evaluation(mode)
@@ -32,7 +35,7 @@ def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, populatio
     e = Evolving(evaluation=eval_func, 
 			 desc_list=descriptors, 
 			 x_trains=[x_train], y_trains=[y_train], 
-			 x_tests=[x_test], y_tests=[y_test],
+			 x_tests=[x_val], y_tests=[y_val],
 			 n_inputs=[input_shape],
 			 n_outputs=[output_shape],
 			 batch_size=batch_size,
@@ -77,7 +80,15 @@ def load_dataset(dataset_name):
         
     X_train, X_test, y_train, y_test = train_test_split(features, labels, test_size=0.33, random_state=42)
     
-    return X_train, X_test, y_train, y_test, mode
+    dividing_indx = int(X_train.shape[0] * 0.7)
+
+    X_val = X_train[dividing_indx:]
+    y_val = y_train[dividing_indx:]
+    
+    X_train = X_train[:dividing_indx]
+    y_train = y_train[:dividing_indx]
+    
+    return X_train, X_test, X_val, y_train, y_test, y_val, mode
 
 def load_mushrooms():    
     features, labels = load_csv("./datasets/mushroom/mushroom.csv",'\\t', '.',
@@ -162,7 +173,7 @@ def load_csv(data_directory, data_sep, decimal, label_column, removed_columns):
 
 if __name__ == "__main__":
     #features, labels, model = load_air_quality()
-    features, labels, model = load_CNN('cifar10')
-    #X_train, X_test, y_train, y_test, mode = load_dataset('mushrooms')
+    #features, labels, model = load_CNN('cifar10')
+    X_train, X_test, X_val, y_train, y_test, y_val, mode = load_dataset('mushrooms')
     pass
         

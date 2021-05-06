@@ -96,19 +96,24 @@ def eval_wann(nets, train_inputs, train_outputs, batch_size, test_inputs, test_o
 
 if __name__ == "__main__":
 
-    x_train, y_train, x_test, y_test = load_fashion()
+    x_train, y_train, x_test, y_test, x_val, y_val = load_fashion()
+    
     x_train = x_train/255
     x_test = x_test/255
+    x_val = x_val/255
+    
     y_train = np.array([0 if x <= 4 else 1 for x in y_train])
     y_test = np.array([0 if x <= 4 else 1 for x in y_test])
+    y_val = np.array([0 if x <= 4 else 1 for x in y_val])
+
     OHEnc = OneHotEncoder()
 
     y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
-
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
+    y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()
 
     e = Evolving(evaluation=eval_wann, desc_list=[MLPDescriptor], 
-                 x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test],
+                 x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val],
                  batch_size=150, population=10, generations=100, 
                  n_inputs=[[28, 28]], n_outputs=[[2]], cxp=0, mtp=1,
                  batch_norm=False, dropout=False, 

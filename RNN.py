@@ -38,23 +38,18 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_ou
 
 if __name__ == "__main__":
 
-    x_train, y_train, x_test, y_test = load_fashion()
+    x_train, y_train, x_test, y_test, x_val, y_val = load_fashion()
 
     # Normalize the input data
     x_train = x_train/255
     x_test = x_test/255
-
-    '''
-    OHEnc = OneHotEncoder()
-    y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
-    y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
-    '''
+    x_val = x_val/255
     
     # Here we define a convolutional-transposed convolutional network combination
     e = Evolving(evaluation=eval_rnn, 
                  desc_list=[RNNDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], 
-                 x_tests=[x_test], y_tests=[y_test], 
+                 x_tests=[x_val], y_tests=[y_val], 
                  batch_size=150, population=2, generations=10, 
                  n_inputs=[[28, 28]], n_outputs=[[10]], 
                  cxp=0, mtp=1, 

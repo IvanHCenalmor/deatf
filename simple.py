@@ -12,16 +12,16 @@ from metrics import ret_evals
 
 if __name__ == "__main__":
 
-    x_train, y_train, x_test, y_test = load_fashion()
+    x_train, y_train, x_test, y_test, x_val, y_val = load_fashion()
 
     OHEnc = OneHotEncoder()
 
     y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
-
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
+    y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()
 
     e = Evolving(evaluation="XEntropy", desc_list=[MLPDescriptor], 
-    			 x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test], 
+    			 x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val], 
     			 n_inputs=[[28, 28]], n_outputs=[[10]], batch_size=150, 
     			 population=5, generations=3, iters=10, n_layers=10, max_layer_size=20,
                  seed=0, dropout=False, batch_norm=False, ev_alg='mu_plus_lambda',

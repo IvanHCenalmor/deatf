@@ -26,11 +26,10 @@ def test_MLP_all_datasets(eval_func=None, batch_size=150, population=5,
             x = test_MLP(dataset, eval_func=eval_func, batch_size=batch_size, 
                  population=population, generations=generations, iters=iters, 
                  n_layers=n_layers, max_layer_size=max_layer_size)
-            #print(x)
+            print(x)
         except Exception as e:
             print('An error ocurred executing the {} dataset.'.format(dataset))    
             print(e)
-            print(x)
     
         print('Time: ', time.time() - init_time)
 

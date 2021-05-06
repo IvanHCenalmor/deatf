@@ -125,9 +125,14 @@ if __name__ == "__main__":
     x_test = create_data(n_gauss, n_samples)
     x_test = x_test - np.min(x_test, axis=0)
     x_test = x_test / np.max(x_test, axis=0)
+
+    x_val = create_data(n_gauss, n_samples)
+    x_val = x_val - np.min(x_val, axis=0)
+    x_val = x_val / np.max(x_val, axis=0)
+
     # The GAN evolutive process is a common 2-DNN evolution
     e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
-                 x_trains=[x_train], y_trains=[x_train], x_tests=[x_test], y_tests=[x_test], 
+                 x_trains=[x_train], y_trains=[x_train], x_tests=[x_val], y_tests=[x_val], 
                  evaluation=gan_eval, batch_size=50, population=population, generations=generations, 
                  n_inputs=[[2], [z_size]], n_outputs=[[1], [2]], 
                  cxp=0.5, mtp=0.5, dropout=False, batch_norm=False)

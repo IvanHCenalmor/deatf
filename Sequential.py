@@ -63,19 +63,20 @@ def eval_sequential(nets, train_inputs, train_outputs, batch_size, test_inputs, 
 
 if __name__ == "__main__":
 
-    x_train, y_train, x_test, y_test = load_fashion()
+    x_train, y_train, x_test, y_test, x_val, y_val = load_fashion()
 
     OHEnc = OneHotEncoder()
 
     y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
-
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
+    y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()
+    
     # When calling the function, we indicate the training function, what we want to evolve (two MLPs), input and output data for training and
     # testing, fitness function, batch size, population size, number of generations, input and output dimensions of the networks, crossover and
     # mutation probability, the hyperparameters being evolved (name and possibilities), and whether batch normalization and dropout should be
     # present in evolution
     e = Evolving(evaluation=eval_sequential, desc_list=[MLPDescriptor, MLPDescriptor], 
-                 x_trains=[x_train], y_trains=[y_train], x_tests=[x_test], y_tests=[y_test], 
+                 x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val], 
                  batch_size=150, population=10, generations=10, n_inputs=[[28, 28], [10]],
                  n_outputs=[[10], [10]], cxp=0.5, mtp=0.5, 
                  hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]},

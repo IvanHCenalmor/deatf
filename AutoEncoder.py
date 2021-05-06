@@ -46,16 +46,18 @@ def ae_eval(nets, train_inputs, train_outputs, batch_size, test_inputs, test_out
 
 if __name__ == "__main__":
 
-    x_train, _, x_test, _ = load_fashion()
+    x_train, _, x_test, _, x_val, _ = load_fashion()
 
     x_train = np.reshape(x_train, (-1, 784))
     x_test = np.reshape(x_test, (-1, 784))
+    x_val = np.reshape(x_val, (-1, 784))
 
     x_train = x_train/1
     x_test = x_test/1
+    x_val = x_val/1
 
     e = Evolving(evaluation=ae_eval, desc_list=[MLPDescriptor], 
-                 x_trains=[x_train], y_trains=[x_train], x_tests=[x_test], y_tests=[x_test], 
+                 x_trains=[x_train], y_trains=[x_train], x_tests=[x_val], y_tests=[x_val], 
                  n_inputs=[[784]], n_outputs=[[784]], batch_size=150, 
                  hyperparameters={"lrate": [0.1, 0.5, 1]},
                  population=5, generations=20, iters=100, n_layers=10, max_layer_size=100, seed=0)

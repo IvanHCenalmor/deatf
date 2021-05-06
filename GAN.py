@@ -7,14 +7,11 @@ We use the MobileNet model instead of Inception because it gave better accuracy 
 from data import load_fashion
 import tensorflow as tf
 import numpy as np
-from keras.models import model_from_json
 from evolution import Evolving
 from auxiliary_functions import batch
 from Network import MLPDescriptor
-from PIL import Image
-import matplotlib.pyplot as plt
 
-from tensorflow.keras.layers import Input, Dense, Flatten, Reshape
+from tensorflow.keras.layers import Input, Flatten, Reshape
 from tensorflow.keras.models import Model
 
 def generator_loss(fake_out):
@@ -91,11 +88,11 @@ def gan_eval(nets, train_inputs, _, batch_size, __, ___ ,____):
     
 if __name__ == "__main__":
 
-    x_train, _, x_test, _ = load_fashion()
+    x_train, _, x_test, _, x_val, _ = load_fashion()
     # The GAN evolutive process is a common 2-DNN evolution
     e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
                  x_trains=[x_train], y_trains=[x_train], 
-                 x_tests=[x_test], y_tests=[x_test], 
+                 x_tests=[x_val], y_tests=[x_val], 
                  evaluation=gan_eval, batch_size=150, 
                  population=10, generations=10, 
                  n_inputs=[[28, 28], [10]], n_outputs=[[1], [784]], 

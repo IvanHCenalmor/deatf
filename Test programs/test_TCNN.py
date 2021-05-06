@@ -46,13 +46,15 @@ def test_TCNN_all_datasets(eval_func=None, batch_size=150, population=5,
 def test_TCNN(dataset_name, eval_func=None, batch_size=150, population=5, 
              generations=10, iters=100, n_layers=10, max_layer_size=20):
     
-    x_train, x_test, _, __, mode = load_dataset(dataset_name)
+    x_train, x_test, x_val, _, _, _, mode = load_dataset(dataset_name)
     
     x_train = x_train[:5000]
     x_test = x_test[:2500]
+    x_val = x_val[:2500]
     
     train_noise = np.random.normal(size=(x_train.shape[0], 7, 7, 1))
     test_noise = np.random.normal(size=(x_test.shape[0], 7, 7, 1))
+    val_noise = np.random.normal(size=(x_val.shape[0], 7, 7, 1))
     
     input_shape = train_noise.shape[1:]
     output_shape = x_train.shape[1:]
@@ -63,7 +65,7 @@ def test_TCNN(dataset_name, eval_func=None, batch_size=150, population=5,
     e = Evolving(evaluation=eval_func, 
 			 desc_list=[TConvDescriptor], 
 			 x_trains=[train_noise], y_trains=[x_train], 
-			 x_tests=[test_noise], y_tests=[x_test],
+			 x_tests=[val_noise], y_tests=[x_val],
 			 n_inputs=[input_shape],
 			 n_outputs=[output_shape],
 			 batch_size=batch_size,

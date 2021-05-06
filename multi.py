@@ -52,23 +52,23 @@ def evaluation(nets, train_inputs, train_outputs, batch_size, test_inputs, test_
 
 if __name__ == "__main__":
 
-    fashion_x_train, fashion_y_train, fashion_x_test, fashion_y_test = load_fashion()
-    mnist_x_train, mnist_y_train, mnist_x_test, mnist_y_test = load_mnist()
+    fashion_x_train, fashion_y_train, fashion_x_test, fashion_y_test, fashion_x_val, fashion_y_val = load_fashion()
+    mnist_x_train, mnist_y_train, mnist_x_test, mnist_y_test, mnist_x_val, mnist_y_val = load_mnist()
 
     OHEnc = OneHotEncoder()
 
     fashion_y_train = OHEnc.fit_transform(np.reshape(fashion_y_train, (-1, 1))).toarray()
-
     fashion_y_test = OHEnc.fit_transform(np.reshape(fashion_y_test, (-1, 1))).toarray()
+    fashion_y_val = OHEnc.fit_transform(np.reshape(fashion_y_val, (-1, 1))).toarray()
 
     mnist_y_train = OHEnc.fit_transform(np.reshape(mnist_y_train, (-1, 1))).toarray()
-
     mnist_y_test = OHEnc.fit_transform(np.reshape(mnist_y_test, (-1, 1))).toarray()
+    mnist_y_val = OHEnc.fit_transform(np.reshape(mnist_y_val, (-1, 1))).toarray()
 
     # In this case, we provide two data inputs and outputs
     e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
                  x_trains=[fashion_x_train, mnist_x_train], y_trains=[fashion_y_train, mnist_y_train], 
-                 x_tests=[fashion_x_test, mnist_x_test], y_tests=[fashion_y_test, mnist_y_test], 
+                 x_tests=[fashion_x_val, mnist_x_val], y_tests=[fashion_y_val, mnist_y_val], 
                  evaluation=evaluation, batch_size=150, population=10, generations=10, 
                  n_inputs=[[28, 28], [28, 28]], n_outputs=[[10], [10]], sel='best')
     res = e.evolve()

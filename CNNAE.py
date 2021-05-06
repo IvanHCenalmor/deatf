@@ -53,31 +53,37 @@ def eval_cnn_ae(nets, train_inputs, _, batch_size, test_inputs, __, hypers):
 
 if __name__ == "__main__":
 
-    x_train, y_train, x_test, y_test = load_fashion()
+    x_train, y_train, x_test, y_test, x_val, y_val = load_fashion()
     
-    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
     x_train = x_train[:10000]
     y_train = y_train[:10000]
     x_test = x_test[:5000]
     y_test = y_test[:5000]
-    print(x_train.shape, y_train.shape, x_test.shape, y_test.shape)
+    x_val = x_val[:5000]
+    y_val = y_val[:5000]
     
+    # We fake a 3 channel dataset by copying the grayscale channel three times.
     x_train = np.expand_dims(x_train, axis=3)/255
     x_train = np.concatenate((x_train, x_train, x_train), axis=3)
 
     x_test = np.expand_dims(x_test, axis=3)/255
     x_test = np.concatenate((x_test, x_test, x_test), axis=3)
 
+    x_val = np.expand_dims(x_val, axis=3)/255
+    x_val = np.concatenate((x_val, x_val, x_val), axis=3)
+    
     OHEnc = OneHotEncoder()
 
     y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
 
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
+    
+    y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()   
     # Here we define a convolutional-transposed convolutional network combination
     
     e = Evolving(desc_list=[ConvDescriptor, TConvDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], 
-                 x_tests=[x_test], y_tests=[y_test], 
+                 x_tests=[x_val], y_tests=[y_val], 
                  evaluation=eval_cnn_ae, 
                  batch_size=150, 
                  population=2, 
