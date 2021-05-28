@@ -27,7 +27,7 @@ def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, populatio
         y_train = np.reshape(y_train, (-1, 1))
         y_test = np.reshape(y_test, (-1, 1))
         y_val = np.reshape(y_val, (-1, 1))
-        
+
     input_shape = x_train.shape[1:]
     output_shape = y_val.shape[1:]
     

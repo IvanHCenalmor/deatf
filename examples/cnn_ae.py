@@ -22,7 +22,6 @@ import tensorflow.keras.optimizers as opt
 
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
-
 def eval_cnn_ae(nets, train_inputs, _, batch_size, test_inputs, __, hypers):
     models = {}
 
@@ -34,15 +33,15 @@ def eval_cnn_ae(nets, train_inputs, _, batch_size, test_inputs, __, hypers):
     out = nets["n1"].building(out)
     
     model = Model(inputs=inp, outputs=out)
-    
+
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
     model.compile(loss=tf.losses.mean_squared_error, optimizer=opt, metrics=[])
     
     # As the output has to be the same as the input, the input is passed twice
-    model.fit(train_inputs['i0'], train_inputs['i0'], epochs=10, batch_size=batch_size, verbose=0)
+    model.fit(train_inputs['i0'], train_inputs['i0'], epochs=4, batch_size=batch_size, verbose=0)
             
     models["n0"] = model
-                     
+    
     
     pred = models["n0"].predict(test_inputs["i0"])
     res = pred[:, :28, :28, :3] 
@@ -56,7 +55,7 @@ def eval_cnn_ae(nets, train_inputs, _, batch_size, test_inputs, __, hypers):
 if __name__ == "__main__":
 
     x_train, y_train, x_test, y_test, x_val, y_val = load_fashion()
-    
+        
     x_train = x_train[:10000]
     y_train = y_train[:10000]
     x_test = x_test[:5000]
@@ -88,12 +87,12 @@ if __name__ == "__main__":
                  x_tests=[x_val], y_tests=[y_val], 
                  evaluation=eval_cnn_ae, 
                  batch_size=150, 
-                 population=2, 
+                 population=6, 
                  generations=10, 
                  n_inputs=[[28, 28, 3], [7, 7, 1]], 
                  n_outputs=[[49], [28, 28, 3]], 
-                 cxp=0, 
-                 mtp=1, 
+                 cxp=0.5, 
+                 mtp=0.5, 
                  hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
                  batch_norm=True, 
                  dropout=True)

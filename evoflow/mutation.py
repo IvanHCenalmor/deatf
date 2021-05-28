@@ -147,7 +147,8 @@ class TCNN_Mutation(Mutation):
                            np.random.choice(activations[1:]),  np.random.choice(initializations[1:])])
     
     def mut_del_deconv_layer(self, network):
-        network.remove_random_layer()
+        if network.number_hidden_layers > 1:
+            network.remove_random_layer()
     
     def mut_stride_deconv(self, network):
         layer = np.random.randint(0, network.number_hidden_layers)

@@ -25,12 +25,11 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_ou
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
     model = Model(inputs=inp, outputs=out)
-    #model.summary()
+    model.summary()
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
-    model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(), optimizer=opt, metrics=[])
+    model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), optimizer=opt, metrics=[])
     
-    # As the output has to be the same as the input, the input is passed twice
-    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=10, batch_size=batch_size, verbose=0)
+    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=4, batch_size=batch_size, verbose=1)
             
     models["n0"] = model
                      

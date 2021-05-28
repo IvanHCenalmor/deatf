@@ -171,11 +171,11 @@ class MLPDescriptor(NetworkDescriptor):
         layer_pos = np.random.randint(0, self.number_hidden_layers)
         self.dims[layer_pos] = new_dim
 
-    def print_components(self, identifier):
-        print(identifier, ' n_hid:', self.number_hidden_layers)
-        print(identifier, ' Dims:', self.dims)
-        print(identifier, ' Init:', self.init_functions)
-        print(identifier, ' Act:', self.act_functions)
+    def print_components(self):
+        print('Num hidden layers:', self.number_hidden_layers)
+        print('Dims:', self.dims)
+        print('Init:', self.init_functions)
+        print('Act:', self.act_functions)
 
     def codify_components(self, max_hidden_layers, ref_list_init_functions, ref_list_act_functions):
 
@@ -415,13 +415,12 @@ class ConvDescriptor(NetworkDescriptor):
         if calculate_CNN_shape(self.input_dim, self.filters, aux_strides, self.number_hidden_layers)[0] > 0:
             self.strides = aux_strides
             
-    def print_components(self, identifier):
-        print(identifier, ' n_conv:', len([x for x in self.filters if not x == -1]))
-        print(identifier, ' n_pool:', len([x for x in self.filters if x == -1]))
-        print(identifier, ' Init:', self.init_functions)
-        print(identifier, ' Act:', self.act_functions)
-        print(identifier, ' filters:', self.filters)
-        print(identifier, ' strides:', self.strides)
+    def print_components(self):
+        print('Layers:', self.layers)
+        print('Init:', self.init_functions)
+        print('Act:', self.act_functions)
+        print('Filters:', self.filters)
+        print('Strides:', self.strides)
 
     def codify_components(self):
 
@@ -508,10 +507,6 @@ class TConvDescriptor(NetworkDescriptor):
 
         if batch_norm is not None and not batch_norm:
             self.batch_norm = np.random.choice([True, False])
-
-        for i in range(self.number_hidden_layers):
-            if self.strides[i][0] < 1:
-                print('Random init:',self.strides[i])
                 
     def add_layer(self, layer_pos, lay_params):
         """
@@ -520,28 +515,29 @@ class TConvDescriptor(NetworkDescriptor):
         :param lay_params: sizes of the filters.
         :return:
         """
+        
         self.number_hidden_layers += 1
         self.strides.insert(layer_pos, np.array([lay_params[0], lay_params[0], 1]))
         self.filters.insert(layer_pos, np.array([lay_params[1], lay_params[1], np.random.randint(0, self.MAX_NUM_FILTER)]))
         self.act_functions.insert(layer_pos, lay_params[2])
         self.init_functions.insert(layer_pos, lay_params[3])
-        
+            
         for i in range(layer_pos, self.number_hidden_layers):
+            
+            if i > self.number_hidden_layers - 1: #I the layers haev been removed
+                break
             
             output = calculate_TCNN_shape(self.input_dim, self.filters[:i], self.strides[:i], -1)
             
-            while output[0] * self.strides[i][0] > self.output_dim[0]:
+            while output[0] * self.strides[i][0] >= self.output_dim[0]:
                 self.strides[i] = np.array([self.strides[i][0] - 1, self.strides[i][1] - 1, self.strides[i][2]])
             if self.strides[i][0] == 0:
                 self.remove_layer(i)
-
+            
+        output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
         
-        for i in range(self.number_hidden_layers):
-            if self.strides[i][0] < 1:
-                print('Add layer:',self.strides[i])
-                
         return 0
 
     def remove_layer(self, layer_pos):
@@ -561,12 +557,11 @@ class TConvDescriptor(NetworkDescriptor):
         
         while output[0] * self.strides[-1][0] > self.output_dim[0]:
             self.strides[-1] = np.array([self.strides[-1][0] - 1, self.strides[-1][1] - 1, self.strides[-1][2]])
+        if self.strides[-1][0] == 0:
+                self.remove_layer(-1)
+        output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
-
-        for i in range(self.number_hidden_layers):
-            if self.strides[i][0] < 1:
-                print('Remove layer:',self.strides[i])
 
     def remove_random_layer(self):
         if self.number_hidden_layers > 1:
@@ -588,6 +583,8 @@ class TConvDescriptor(NetworkDescriptor):
         self.filters[layer_pos][2] = new_channel
         
         for i in range(layer_pos, self.number_hidden_layers):
+            if i > self.number_hidden_layers - 1: #I the layers haev been removed
+                break
             
             output = calculate_TCNN_shape(self.input_dim, self.filters[:i], self.strides[:i], -1)
             
@@ -596,14 +593,9 @@ class TConvDescriptor(NetworkDescriptor):
             if self.strides[i][0] == 0:
                 self.remove_layer(i)
 
+        output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
-        
-        for i in range(self.number_hidden_layers):
-            if self.strides[i][0] < 1:
-                print('Change filters:',self.strides[i])
-            if self.filters[i][0] < 1:
-                print('Change filters:',self.filteres[i])   
 
     def change_stride(self, layer_pos, new_stride):
         
@@ -611,7 +603,8 @@ class TConvDescriptor(NetworkDescriptor):
         self.strides[layer_pos][1] = new_stride
 
         for i in range(layer_pos, self.number_hidden_layers):
-            
+            if i > self.number_hidden_layers - 1: #I the layers haev been removed
+                break           
             output = calculate_TCNN_shape(self.input_dim, self.filters[:i], self.strides[:i], -1)
             
             while output[0] * self.strides[i][0] > self.output_dim[0]:
@@ -619,20 +612,15 @@ class TConvDescriptor(NetworkDescriptor):
             if self.strides[i][0] == 0:
                 self.remove_layer(i)
 
+        output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
         
-        for i in range(self.number_hidden_layers):
-            if self.strides[i][0] < 1:
-                print('Change filters:',self.strides[i])
-
-    def print_components(self, identifier):
-        print(identifier, ' n_conv:', len([x for x in self.filters if not x == -1]))
-        print(identifier, ' n_pool:', len([x for x in self.filters if x == -1]))
-        print(identifier, ' Init:', self.init_functions)
-        print(identifier, ' Act:', self.act_functions)
-        print(identifier, ' filters:', self.filters)
-        print(identifier, ' strides:', self.strides)
+    def print_components(self):
+        print('Init:', self.init_functions)
+        print('Act:', self.act_functions)
+        print('Filters:', self.filters)
+        print('Strides:', self.strides)
 
     def codify_components(self):
 
@@ -824,9 +812,9 @@ class TCNN(Network):
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
     
-    def building(self, x):
-        
+    def building(self, x):        
         for lay_indx in range(self.descriptor.number_hidden_layers):
+            
             x = Conv2DTranspose(self.descriptor.filters[lay_indx][2],
                                       [self.descriptor.filters[lay_indx][0],self.descriptor.filters[lay_indx][1]],
                                       strides=[self.descriptor.strides[lay_indx][0], self.descriptor.strides[lay_indx][1]],
