@@ -21,11 +21,9 @@ def evaluate(probabilities):
     loss = total_symmetry(probabilities[0])    
     return loss
 
-def eval_model(nets, train_inputs, _, __, test_inputs, ___, hypers):  
+def eval_model(nets, train_inputs, _, __, iters, test_inputs, ___, hypers):  
     
     data = train_inputs['i0']
-    training_iterations = 1000
-    
     
     inp = Input(shape=data.shape[1:])
     out = nets['n0'].building(inp)
@@ -47,7 +45,7 @@ def eval_model(nets, train_inputs, _, __, test_inputs, ___, hypers):
         opt.apply_gradients(zip(gradients_of_generator, model.trainable_variables))
         return loss
     
-    for epoch in range(training_iterations):
+    for epoch in range(iters):
         loss = train_step(data)
         
     #loss = evaluate(probabilities)
@@ -66,7 +64,7 @@ if __name__ == "__main__":
     
     e = Evolving(desc_list=[MLPDescriptor], x_trains=[data], y_trains=[data], 
                  x_tests=[data], y_tests=[data], evaluation=eval_model, 
-                 batch_size=150, population=5, generations=10, 
+                 batch_size=150, population=5, generations=10, iters=10, 
                  n_inputs=[[data.shape[1:]]], n_outputs=[[len(wanted_blocks)]+bounds], 
                  cxp=0., mtp=1., hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
                  batch_norm=True, dropout=True)

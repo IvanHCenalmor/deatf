@@ -293,7 +293,7 @@ class Evolving:
             if "hypers" not in net:
                 nets[net] = descs[self.descriptors[index].__name__](individual.descriptor_list[net])
 
-        ev = self.evaluation(nets, self.train_inputs, self.train_outputs, self.batch_size, 
+        ev = self.evaluation(nets, self.train_inputs, self.train_outputs, self.batch_size, self.iters,
                              self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
 
         return ev

@@ -19,12 +19,12 @@ import tensorflow.keras.optimizers as opt
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 
-def eval_rnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
+def eval_rnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     models = {}
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
-    out = Dense(10, activation='softmax') # Aa they are probability distributions, they have to be bewteen 0 an 1
+    out = Dense(10, activation='softmax')(out) # Aa they are probability distributions, they have to be bewteen 0 an 1
     model = Model(inputs=inp, outputs=out)
     
     model.summary()
@@ -32,7 +32,7 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_ou
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
     model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), optimizer=opt, metrics=[])
     
-    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=4, batch_size=batch_size, verbose=1)
+    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
             
     models["n0"] = model
                      
@@ -56,7 +56,7 @@ if __name__ == "__main__":
                  desc_list=[RNNDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], 
                  x_tests=[x_val], y_tests=[y_val], 
-                 batch_size=150, population=2, generations=10, 
+                 batch_size=150, population=2, generations=10, iters=10, 
                  n_inputs=[[28, 28]], n_outputs=[[10]], 
                  cxp=0, mtp=1, 
                  hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 

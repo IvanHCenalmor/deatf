@@ -32,7 +32,7 @@ def discriminator_loss(fake_out, real_out):
     d_loss = d_loss_real + d_loss_fake
     return d_loss
 
-def gan_eval(nets, train_inputs, _, batch_size, __, ___ ,____):
+def gan_eval(nets, train_inputs, _, batch_size, iters, __, ___ ,____):
     
     models = {}
         
@@ -74,7 +74,7 @@ def gan_eval(nets, train_inputs, _, batch_size, __, ___ ,____):
     
     aux_ind = 0        
     
-    for epoch in range(100):
+    for epoch in range(iters):
 
         image_batch = batch(train_inputs["i0"], batch_size, aux_ind)
         aux_ind = (aux_ind + batch_size) % train_inputs["i0"].shape[0]
@@ -97,7 +97,7 @@ if __name__ == "__main__":
     e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
                  x_trains=[x_train], y_trains=[x_train], 
                  x_tests=[x_val], y_tests=[x_val], 
-                 evaluation=gan_eval, batch_size=150, 
+                 evaluation=gan_eval, batch_size=150, iters=10, 
                  population=10, generations=10, 
                  n_inputs=[[28, 28], [10]], n_outputs=[[1], [784]], 
                  cxp=0.5, mtp=0.5)

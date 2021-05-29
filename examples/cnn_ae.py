@@ -22,7 +22,7 @@ import tensorflow.keras.optimizers as opt
 
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
-def eval_cnn_ae(nets, train_inputs, _, batch_size, test_inputs, __, hypers):
+def eval_cnn_ae(nets, train_inputs, _, batch_size, iters, test_inputs, __, hypers):
     models = {}
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
@@ -38,7 +38,7 @@ def eval_cnn_ae(nets, train_inputs, _, batch_size, test_inputs, __, hypers):
     model.compile(loss=tf.losses.mean_squared_error, optimizer=opt, metrics=[])
     
     # As the output has to be the same as the input, the input is passed twice
-    model.fit(train_inputs['i0'], train_inputs['i0'], epochs=4, batch_size=batch_size, verbose=0)
+    model.fit(train_inputs['i0'], train_inputs['i0'], epochs=iters , batch_size=batch_size, verbose=0)
             
     models["n0"] = model
     
@@ -88,7 +88,7 @@ if __name__ == "__main__":
                  evaluation=eval_cnn_ae, 
                  batch_size=150, 
                  population=6, 
-                 generations=10, 
+                 generations=10, iters=10, 
                  n_inputs=[[28, 28, 3], [7, 7, 1]], 
                  n_outputs=[[49], [28, 28, 3]], 
                  cxp=0.5, 

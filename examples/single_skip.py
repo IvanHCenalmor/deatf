@@ -66,7 +66,7 @@ evolution.descs["ConvDescriptor"] = SkipCNN
 
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
-def eval_cnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
+def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
 
     models = {}
     
@@ -81,7 +81,7 @@ def eval_cnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_ou
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
     model.compile(loss=tf.nn.softmax_cross_entropy_with_logits, optimizer=opt, metrics=[])
     
-    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=10, batch_size=batch_size, verbose=0)
+    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
             
     models["n0"] = model
     
@@ -123,7 +123,7 @@ if __name__ == "__main__":
     # Here we indicate that we want a CNN as the first network of the model
     e = evolution.Evolving(evaluation=eval_cnn, desc_list=[ConvDescriptor, MLPDescriptor], 
                            x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val],
-                           batch_size=150, population=2, generations=3, 
+                           batch_size=150, population=2, generations=3, iters=10, 
                            n_inputs=[[28, 28, 3], [20]], n_outputs=[[20], [10]], cxp=0.5, mtp=0.5, 
                            hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2], "skip": range(3, 10)}, 
                            batch_norm=True, dropout=True)

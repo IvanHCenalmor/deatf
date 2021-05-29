@@ -92,7 +92,7 @@ def test_RNN(dataset_name, is_time_series=True,
     a = e.evolve()
     return a
         
-def eval_rnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
+def eval_rnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     models = {}
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
@@ -111,7 +111,7 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_ou
     else:
         model.compile(loss=tf.keras.losses.mean_squared_error, optimizer=opt, metrics=[])
         
-    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=3, batch_size=batch_size, verbose=0)
+    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
             
     models["n0"] = model
                      

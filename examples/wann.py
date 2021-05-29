@@ -32,7 +32,7 @@ For this, we need to:
 """
 
 
-def eval_wann(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
+def eval_wann(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
     This function takes care of arranging the model and training it. It is used by the evolutionary internally,
     and always is provided with the same parameters
@@ -118,7 +118,7 @@ if __name__ == "__main__":
 
     e = Evolving(evaluation=eval_wann, desc_list=[MLPDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val],
-                 batch_size=150, population=10, generations=100, 
+                 batch_size=150, population=10, generations=100, iters=10, 
                  n_inputs=[[28, 28]], n_outputs=[[2]], cxp=0, mtp=1,
                  batch_norm=False, dropout=False, 
                  hyperparameters={"weight1": np.arange(-2, 2, 0.5), "weight2": np.arange(-2, 2, 0.5), 

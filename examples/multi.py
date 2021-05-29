@@ -19,7 +19,7 @@ from sklearn.preprocessing import OneHotEncoder
 from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
 
-def evaluation(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, _):
+def evaluation(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, _):
 
     models = {}
     
@@ -39,7 +39,7 @@ def evaluation(nets, train_inputs, train_outputs, batch_size, test_inputs, test_
     # As the output has to be the same as the input, the input is passed twice
     model.fit([train_inputs['i0'], train_inputs['i1']],
               [train_outputs['o0'], train_outputs['o1']],
-               epochs=10, batch_size=batch_size, verbose=0)
+               epochs=iters, batch_size=batch_size, verbose=0)
     
     #tf.keras.utils.plot_model(model, "multi_input_and_output_model.png", show_shapes=True)
     
@@ -73,7 +73,7 @@ if __name__ == "__main__":
     e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
                  x_trains=[fashion_x_train, mnist_x_train], y_trains=[fashion_y_train, mnist_y_train], 
                  x_tests=[fashion_x_val, mnist_x_val], y_tests=[fashion_y_val, mnist_y_val], 
-                 evaluation=evaluation, batch_size=150, population=10, generations=10, 
+                 evaluation=evaluation, batch_size=150, population=10, generations=10, iters=10, 
                  n_inputs=[[28, 28], [28, 28]], n_outputs=[[10], [10]], sel='best')
     res = e.evolve()
 

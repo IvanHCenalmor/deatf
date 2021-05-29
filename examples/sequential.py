@@ -30,7 +30,7 @@ For this, we need to:
 """
 
 
-def eval_sequential(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
+def eval_sequential(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
     This function takes care of arranging the model and training it. It is used by the evolutionary internally,
     and always is provided with the same parameters
@@ -55,7 +55,7 @@ def eval_sequential(nets, train_inputs, train_outputs, batch_size, test_inputs, 
     
     model.compile(loss=tf.nn.softmax_cross_entropy_with_logits, optimizer=opt, metrics=[])
     
-    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=10, batch_size=batch_size, verbose=0)
+    model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
 
     models["n0"] = model
 
@@ -82,8 +82,8 @@ if __name__ == "__main__":
     # present in evolution
     e = Evolving(evaluation=eval_sequential, desc_list=[MLPDescriptor, MLPDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val], 
-                 batch_size=150, population=10, generations=10, n_inputs=[[28, 28], [10]],
-                 n_outputs=[[10], [10]], cxp=0.5, mtp=0.5, 
+                 batch_size=150, population=10, generations=10, iters=10, 
+                 n_inputs=[[28, 28], [10]], n_outputs=[[10], [10]], cxp=0.5, mtp=0.5, 
                  hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]},
                  batch_norm=False, dropout=False)
     a = e.evolve()

@@ -22,7 +22,7 @@ def hand_made_tf_mse(target, prediction):
 def hand_made_np_mse(target, prediction):
     return np.mean(np.square(target-prediction))
 
-def ae_eval(nets, train_inputs, train_outputs, batch_size, test_inputs, test_outputs, hypers):
+def ae_eval(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
     Function for evolving a single individual. No need of the user providing a evaluation function
     :param individual: DEAP individual
@@ -37,7 +37,7 @@ def ae_eval(nets, train_inputs, train_outputs, batch_size, test_inputs, test_out
     opt = tf.keras.optimizers.Adam(learning_rate=hypers["lrate"])
     model.compile(loss=hand_made_tf_mse, optimizer=opt, metrics=[])
     
-    model.fit(train_inputs['i0'], train_inputs['i0'], epochs=10, batch_size=batch_size, verbose=0)
+    model.fit(train_inputs['i0'], train_inputs['i0'], epochs=iters, batch_size=batch_size, verbose=0)
     
     prediction = model.predict(test_inputs['i0'])
     
@@ -62,7 +62,7 @@ if __name__ == "__main__":
 
     e = Evolving(evaluation=ae_eval, desc_list=[MLPDescriptor], 
                  x_trains=[x_train], y_trains=[x_train], x_tests=[x_val], y_tests=[x_val], 
-                 n_inputs=[[784]], n_outputs=[[784]], batch_size=150, 
+                 n_inputs=[[784]], n_outputs=[[784]], batch_size=150, iters=10, 
                  hyperparameters={"lrate": [0.1, 0.5, 1]},
                  population=5, generations=20, iters=100, n_layers=10, max_layer_size=100, seed=0)
     a = e.evolve()
