@@ -11,7 +11,7 @@ from evoflow.network import RNNDescriptor
 from evoflow.evolution import Evolving
 from evoflow.data import load_fashion
 
-from tensorflow.keras.layers import Input
+from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.models import Model
 import tensorflow.keras.optimizers as opt
 
@@ -24,8 +24,11 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_ou
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
+    out = Dense(10, activation='softmax') # Aa they are probability distributions, they have to be bewteen 0 an 1
     model = Model(inputs=inp, outputs=out)
+    
     model.summary()
+    
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
     model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), optimizer=opt, metrics=[])
     

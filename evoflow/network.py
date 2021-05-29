@@ -8,7 +8,7 @@ from functools import reduce
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, \
-                                    MaxPooling2D, AveragePooling2D, Bidirectional, SimpleRNN, LSTM, GRU
+                                    MaxPooling2D, AveragePooling2D, Bidirectional, SimpleRNN, LSTM, GRU, Reshape
 from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNormal, GlorotUniform
 
 activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.sigmoid, tf.nn.tanh]
@@ -843,16 +843,10 @@ class RNN(Network):
         
             if self.descriptor.dropout:
                 x = Dropout(self.descriptor.dropout_probs[lay_indx])(x)
-            
-        # Last layer is the one that decide the type of output: single or seguence
-        if len(self.descriptor.output_dim) == 1:
-            return_sequence = False
-        else:
-            return_sequence = True
-            
+                
         rnn_layer = self.descriptor.rnn_layers[self.descriptor.number_hidden_layers - 1](
                         units=self.descriptor.units_in_layer[self.descriptor.number_hidden_layers - 1],
-                        return_sequences=return_sequence,
+                        return_sequences=False,
                         activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers - 1],
                         kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers - 1]())
         
@@ -860,8 +854,6 @@ class RNN(Network):
             x = Bidirectional(rnn_layer)(x)
         else:
             x = rnn_layer(x)
-            
-        x = Dense(self.descriptor.output_dim[-1], activation='softmax')(x)
             
         return x
 

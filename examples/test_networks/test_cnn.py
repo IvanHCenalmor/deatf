@@ -73,5 +73,5 @@ def eval_cnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_ou
     return accuracy_error(res, test_outputs["o0"]),
     
 if __name__ == "__main__":
-    #test_CNN('binary_alpha_digits', eval_func=eval_cnn, batch_size=150, population=20, generations=5, iters=10)
+    #evaluated = test_CNN('binary_alpha_digits', eval_func=eval_cnn, batch_size=150, population=20, generations=5, iters=10)
     test_CNN_all_datasets(eval_func=eval_cnn, batch_size=150, population=2, generations=2, iters=5)

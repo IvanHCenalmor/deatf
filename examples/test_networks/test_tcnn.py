@@ -103,6 +103,6 @@ def eval_tcnn(nets, train_inputs, train_outputs, batch_size, test_inputs, test_o
     return ev,
     
 if __name__ == "__main__":
-    evaluated = test_TCNN('fashion_mnist', eval_func=eval_tcnn, batch_size=150, population=4, 
-                          generations=3, iters=3, n_layers=10, max_layer_size=20)
-    #test_TCNN_all_datasets(eval_func=eval_tcnn, batch_size=150, population=2, generations=4, iters=10)
+    #evaluated = test_TCNN('fashion_mnist', eval_func=eval_tcnn, batch_size=150, population=4, 
+    #                      generations=3, iters=3, n_layers=10, max_layer_size=20)
+    test_TCNN_all_datasets(eval_func=eval_tcnn, batch_size=150, population=2, generations=4, iters=10)

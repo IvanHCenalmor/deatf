@@ -8,13 +8,16 @@ from evoflow.evolution import Evolving
 
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
+from sklearn.preprocessing import MinMaxScaler
 
 import tensorflow_datasets as tfds
 
-def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, population=5, 
+def test(dataset_name, is_time_series=False, series_input_width=30, series_label_width=1, 
+         descriptors=[], eval_func=None, batch_size=150, population=5, 
          generations=10, iters=100, n_layers=10, max_layer_size=20, hyperparameters={}):
     
-    x_train, x_test, x_val, y_train, y_test, y_val, mode = load_dataset(dataset_name)
+    x_train, x_test, x_val, y_train, y_test, y_val, mode = load_dataset(dataset_name, 
+            is_time_series=is_time_series, series_input_width=series_input_width, series_label_width=series_label_width)
     
     if not isinstance(y_train[0], float):
         OHEnc = OneHotEncoder()
@@ -60,7 +63,7 @@ def select_evaluation(mode):
         
     return loss
 
-def load_dataset(dataset_name):
+def load_dataset(dataset_name, is_time_series=False, series_input_width=30, series_label_width=1):
     
     datasets = {'mushrooms': load_mushrooms,
                 'air_quality': load_air_quality,
@@ -75,6 +78,8 @@ def load_dataset(dataset_name):
     
     if dataset_name in datasets.keys():
         features, labels, mode = datasets[dataset_name]()
+        if is_time_series:
+            features, labels = transform_to_time_series(features, labels, series_input_width, series_label_width)
     elif dataset_name in datasets_CNN:
         features, labels, mode = load_CNN(dataset_name)
     else:
@@ -99,7 +104,7 @@ def load_mushrooms():
 
 def load_air_quality():
     features, labels = load_csv("./datasets/air_quality/AirQualityUCI.csv",';', ',',
-                                'CO(GT)',['Date','Time','Unnamed: 15','Unnamed: 16'])
+                                'RH',['Date','Time','Unnamed: 15','Unnamed: 16'])
     
     labels = list(map(float, labels))
     
@@ -169,13 +174,30 @@ def load_csv(data_directory, data_sep, decimal, label_column, removed_columns):
 
     data = data.drop(columns=label_column)
     features = np.array(data)
+
+    scaler = MinMaxScaler(feature_range=(0, 1))
+    features = scaler.fit_transform(features)
+    labels = scaler.fit_transform(labels.reshape(-1, 1)).flatten()
     
     return features, labels
 
+def transform_to_time_series(features, labels, input_width, label_width):
+        
+    x, y = [], []
+    
+    for i in range(len(features)-(input_width+label_width)+1):
+        x.append(features[i:i+input_width])
+    x = np.array(x)
+    for i in range(label_width):
+        y.append(labels[i+input_width:len(labels)-label_width+i+input_width-1])
+    y = np.array(y)
+    y = np.transpose(y)
+
+    return x, y
+    
 
 if __name__ == "__main__":
     #features, labels, model = load_air_quality()
     #features, labels, model = load_CNN('cifar10')
-    X_train, X_test, X_val, y_train, y_test, y_val, mode = load_dataset('mushrooms')
-    pass
-        
+    X_train, X_test, X_val, y_train, y_test, y_val, mode = load_dataset('air_quality', True, 30, 1)
+    #x,y = transform_to_time_series(features, labels, 30, 1)
