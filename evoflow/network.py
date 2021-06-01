@@ -8,28 +8,28 @@ from functools import reduce
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '2'
 
 from tensorflow.keras.layers import Dense, BatchNormalization, Dropout, Conv2D, Conv2DTranspose, \
-                                    MaxPooling2D, AveragePooling2D, Bidirectional, SimpleRNN, LSTM, GRU, Reshape
+                                    MaxPooling2D, AveragePooling2D, Bidirectional, SimpleRNN, LSTM, GRU
 from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNormal, GlorotUniform
 
 activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.sigmoid, tf.nn.tanh]
 initializations = [RandomNormal, RandomUniform, GlorotNormal, GlorotUniform]
 
 class NetworkDescriptor:
-
-    def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1, init_functions=None, act_functions=None, 
-                 dropout=False, dropout_probs=(), batch_norm=False):
-        """
-        This class implements the descriptor of a generic network. Subclasses of this are the ones evolved.
-        :param number_hidden_layers: Number of hidden layers in the network
-        :param input_dim: Dimension of the input data (can have one or more dimensions)
-        :param output_dim: Expected output of the network (similarly, can have one or more dimensions)
-        :param init_functions: Weight initialization functions. Can have different ranges, depending on the subclass
-        :param act_functions: Activation functions to be applied after each layer
-        :param dropout: A 0-1 array of the length number_hidden_layers indicating  whether a dropout "layer" is to be
-        applied AFTER the activation function
-        :param batch_norm: A 0-1 array of the length number_hidden_layers indicating  whether a batch normalization
-        "layer" is to be applied BEFORE the activation function
-        """
+    """
+    This class implements the descriptor of a generic network. Subclasses of this are the evolved ones.
+    
+    :param number_hidden_layers: Number of hidden layers in the network.
+    :param input_dim: Dimension of the input data (can have one or more dimensions).
+    :param output_dim: Expected output of the network (similarly, can have one or more dimensions).
+    :param init_functions: Weight initialization functions. Can have different ranges, depending on the subclass.
+    :param act_functions: Activation functions to be applied after each layer.
+    :param batch_norm: A boolean that indicates if batch normalization is applied after each layer in the network.
+    :param dropout: A boolean that indicates if dropout is applied after each layer in the network.
+    :param dropout_probs: The different probabilities of the dropout after each layer.
+    """
+    def __init__(self, number_hidden_layers=None, input_dim=None, output_dim=None, 
+                 init_functions=[], act_functions=[], 
+                 dropout=False, dropout_probs=[], batch_norm=False):
         self.number_hidden_layers = number_hidden_layers
         self.input_dim = input_dim
         self.output_dim = output_dim
@@ -39,81 +39,149 @@ class NetworkDescriptor:
         self.dropout = dropout
         self.dropout_probs = dropout_probs
 
-    def remove_layer(self, _):  # Defined just in case the user redefines classes and forgets to define this function
+    def remove_layer(self, layer_pos):  
+        """
+        Removes the layer in the position received by parameter from the network.
+        
+        :param layer_pos: Position of the layer that is going to be removed.
+        """
+        # Defined just in case the user redefines classes and forgets to define this function
         pass
 
     def remove_random_layer(self):
+        """
+        Selects and removes a random layer from the network.
+        """
         layer_pos = np.random.randint(self.number_hidden_layers)
         self.remove_layer(layer_pos)
 
     def change_activation(self, layer_pos, new_act_fn):
-        # If not within feasible bounds, return
+        """
+        Exchanges the activation function in the selected layer for a new one passed by parameter.
+        
+        :param layer_pos: Position of the layer whose activation function wants to be changed.
+        :param new_act_fn: New activation fucntion that is going to be asigned.
+        """
         if layer_pos < 0 or layer_pos > self.number_hidden_layers:
+            # If not within feasible bounds, quit.
             return
         self.act_functions[layer_pos] = new_act_fn
 
     def change_weight_init(self, layer_pos, new_weight_fn):
-        # If not within feasible bounds, return
+        """
+        Exchanges the weight initialization function in the selected layer for a new one passed by parameter.
+        
+        :param layer_pos: Position of the layer whose activation function wants to be changed.
+        :param new_act_fn: New activation fucntion that is going to be asigned.
+        """
         if layer_pos < 0 or layer_pos > self.number_hidden_layers:
+            # If not within feasible bounds, quit.
             return
         self.init_functions[layer_pos] = new_weight_fn
 
     def change_dropout(self):
-        # Change dropout
+        """
+        Change the dropout conditional. If dropout layers are used, quit them; otherwise, add them.
+        """
         self.dropout = not self.dropout
     
     def change_dropout_prob(self):
+        """
+        The dropout probability for each layer is changed by a new random one (between 0 and 1).
+        """
         self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
     
     def change_batch_norm(self):
-        # Change batch normalization
+        """
+        Change the batch normalization conditional. If batch normalization is used, quit it; otherwise, add it.
+        """
         self.batch_norm = not self.batch_norm
+        
+    def print_components(self):
+        """
+        Codifies all the components of the network in a string.
+        
+        :return: A string with all the components of the network.
+        """
+        components = self.codify_components()
+        
+        text = f"{self.__name__()} has the following parameters: \n"
+        for component in components:
+            if isinstance(component[1], list) or isinstance(component[1], np.ndarray):
+                text += f"\t-{component[0]}:\n"
+                for lay_indx, element in enumerate(component[1]):
+                    try:
+                        text += f"\t\tLayer {lay_indx} -> {element.__name__}\n"
+                    except AttributeError:
+                        text += f"\t\tLayer {lay_indx} -> {element}\n"
+            else:
+                text += f"\t-{component[0]}: {component[1]}\n"
+
+        return text
+
+
+    def __str__(self):
+        return self.print_components()
 
 class MLPDescriptor(NetworkDescriptor):
-    def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1,  dims=None, init_functions=None, 
-                 act_functions=None, dropout=False, batch_norm=False):
-        """
-        :param number_hidden_layers: Number of hidden layers in the network
-        :param input_dim: Dimension of the input data (can have one or more dimensions)
-        :param output_dim: Expected output of the network (similarly, can have one or more dimensions)
-        :param init_functions: Weight initialization functions. Can have different ranges, depending on the subclass
-        :param dims: Number of neurons in each layer
-        :param act_functions: Activation functions to be applied after each layer
-        :param dropout: A 0-1 array of the length number_hidden_layers indicating  whether a dropout "layer" is to be
-        applied AFTER the activation function
-        :param batch_norm: A 0-1 array of the length number_hidden_layers indicating  whether a batch normalization
-        "layer" is to be applied BEFORE the activation function
-        """
+    """
+    Descriptor of a Multi Layer Perceptron, formed by hidden layers and with the possibility of
+    selecting the number of neurons in each layer and including dropout and batch normalization.
+    
+    :param number_hidden_layers: Number of hidden layers in the network.
+    :param input_dim: Dimension of the input data (can have one or more dimensions).
+    :param output_dim: Expected output of the network (similarly, can have one or more dimensions).
+    :param init_functions: Weight initialization functions. Can have different ranges, depending on the subclass.
+    :param act_functions: Activation functions to be applied after each layer.
+    :param batch_norm: A boolean that indicates if batch normalization is applied after each layer in the network.
+    :param dropout: A boolean that indicates if dropout is applied after each layer in the network.
+    :param dropout_probs: The different probabilities of the dropout after each layer.
 
-        super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, init_functions=init_functions, act_functions=act_functions, dropout=dropout, batch_norm=batch_norm)
+    :param dims: Number of neurons in each layer.
+    """
+    def __init__(self, number_hidden_layers=None, input_dim=None, output_dim=None,  
+                 dims=[], init_functions=[], act_functions=[], 
+                 dropout=False, dropout_probs=[], batch_norm=False):
+        
+        super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
+                         init_functions=init_functions, act_functions=act_functions, 
+                         dropout=dropout, dropout_probs=dropout_probs, batch_norm=batch_norm)
         self.dims = dims  # Number of neurons in each layer
 
-    def random_init(self, input_size=None, output_size=None, nlayers=None, max_layer_size=None, 
-                    _=None, __=None, dropout=None, batch_norm=None):
-
-        # If the incoming/outgoing sizes have more than one dimension compute the size of the flattened sizes
-        if input_size is not None:
-            if hasattr(input_size, '__iter__'):
-                self.input_dim = reduce(lambda x, y: x*y, input_size)
-            else:
-                self.input_dim = input_size
-        if output_size is not None:
-            if hasattr(output_size, '__iter__'):
-                self.output_dim = reduce(lambda x, y: x*y, output_size)
-            else:
-                self.output_dim = output_size
-
-        # Random initialization
-        if nlayers is not None and max_layer_size is not None:
-            self.number_hidden_layers = np.random.randint(nlayers)+1
-            self.dims = [np.random.randint(4, max_layer_size)+1 for _ in range(self.number_hidden_layers)]
-            self.init_functions = np.random.choice(initializations, size=self.number_hidden_layers+1)
-            self.act_functions = np.random.choice(activations, size=self.number_hidden_layers+1)
+    def random_init(self, input_size, output_size, max_num_layers, max_num_neurons, _, __, dropout, batch_norm):
+        """
+        Given the input, the output and some limits for the parametes of the 
+        network, a random initialization of the object (the network descriptor) is done. 
         
-        if batch_norm is not None and batch_norm:
+        :param input_size: Input size of the network (it will be flattened in order to fit in the MLP).
+        :param output_size: Output size of the network (it will be flattened in order to fit in the MLP).
+        :param max_num_layers: Maximum number of layers that can be in the network.
+        :param max_num_neurons: Maximum number fo neurons that can be in each layer of the network.
+        :param dropout: A boolean value that indicates if the networks can have dropout.
+        :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
+        """
+
+        if hasattr(input_size, '__iter__'):
+            # If the incoming/outgoing sizes have more than one dimension compute the size of the flattened sizes
+            self.input_dim = reduce(lambda x, y: x*y, input_size)
+        else:
+            self.input_dim = input_size
+            
+
+        if hasattr(output_size, '__iter__'):
+            self.output_dim = reduce(lambda x, y: x*y, output_size)
+        else:
+            self.output_dim = output_size
+
+        self.number_hidden_layers = np.random.randint(max_num_layers)+1
+        self.dims = [np.random.randint(4, max_num_neurons)+1 for _ in range(self.number_hidden_layers)]
+        self.init_functions = np.random.choice(initializations, size=self.number_hidden_layers+1)
+        self.act_functions = np.random.choice(activations, size=self.number_hidden_layers+1)
+        
+        if batch_norm:
             self.batch_norm = np.random.choice([True, False])
             
-        if dropout is not None and dropout:
+        if dropout:
             self.dropout = np.random.choice([True, False])
             self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
         else:
@@ -121,19 +189,19 @@ class MLPDescriptor(NetworkDescriptor):
 
     def add_layer(self, layer_pos, lay_dims, init_w_function, init_a_function, dropout, drop_prob, batch_norm):
         """
-        This function adds a layer in the layer_pos position
-        :param layer_pos: Position of the layer
-        :param lay_dims: Number of neurons in the layer
-        :param init_w_function: function for initializing the layer
-        :param init_a_function: activation function to be applied after the layer
-        :param dropout: Whether dropout is applied or not in the layer
-        :param drop_prob: probability of dropout
-        :param batch_norm: Whether batch normalization is applied after the layer
-        :return:
+        Adds a layer in the given position with all the characteristics indicated by parameters.
+        
+        :param layer_pos: Position of the layer.
+        :param lay_dims: Number of neurons in the layer.
+        :param init_w_function: Function for initializing the weights of the layer.
+        :param init_a_function: Activation function to be applied.
+        :param dropout: Whether dropout is applied or not in the layer.
+        :param drop_prob: Probability of dropout.
+        :param batch_norm: Whether batch normalization is applied after the layer.
         """
 
-        # If not within feasible bounds, return
         if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
+            # If not within feasible bounds, return
             return
 
         # We create the new layer and add it to the network descriptor
@@ -145,19 +213,15 @@ class MLPDescriptor(NetworkDescriptor):
 
     def remove_layer(self, layer_pos):
         """
-        This function deletes a layer
-        :param layer_pos: Position of the layer to be deleted
-        :return:
+        Removes the layer in the position received by parameter from the network.
+        
+        :param layer_pos: Position of the layer that is going to be removed.
         """
 
-        # If not within feasible bounds, return
+        # If not within feasible bounds, quit.
         if layer_pos <= 1 or layer_pos > self.number_hidden_layers:
             return
-
-        # We set the number of input and output dimensions for the layer to be
-        # added and for the ones in the architecture that will be connected to it
-
-        # We delete the layer in pos layer_pos
+        
         self.dims = np.delete(self.dims, layer_pos)
         self.init_functions = np.delete(self.init_functions, layer_pos)
         self.act_functions = np.delete(self.act_functions, layer_pos)
@@ -166,91 +230,96 @@ class MLPDescriptor(NetworkDescriptor):
         # Finally the number of hidden layers is updated
         self.number_hidden_layers = self.number_hidden_layers - 1
 
-    def change_layer_dimension(self, new_dim):
-
-        layer_pos = np.random.randint(0, self.number_hidden_layers)
+    def change_layer_dimension(self, layer_pos, new_dim):
+        """
+        Changes the dimension of the layer in position given by parameter.
+        
+        :param layer_pos: Position of the layer that will be changed.
+        :param new_dim: Dimension that will be changed to.
+        """
         self.dims[layer_pos] = new_dim
 
-    def print_components(self):
-        print('Num hidden layers:', self.number_hidden_layers)
-        print('Dims:', self.dims)
-        print('Init:', self.init_functions)
-        print('Act:', self.act_functions)
 
-    def codify_components(self, max_hidden_layers, ref_list_init_functions, ref_list_act_functions):
+    def codify_components(self):
+        """
+        Codifies all the components of the network in a list of tuples, where the 
+        first element of the tuple is a description of the value that is in the 
+        second element of the tuple.
+        
+        :return: List with all the components of the network.
+        """
+        
+        return [('Number of layers', self.number_hidden_layers),
+                ('Input dimension', self.input_dim),
+                ('Output dimension', self.output_dim),
+                ('Neurons in each layer', self.dims),
+                ('Initialization functions', self.init_functions),
+                ('Activation functions', self.act_functions),
+                ('Dropout', self.dropout),
+                ('Dropout probabilities', self.dropout_probs),
+                ('Batch normalization', self.batch_norm)
+               ]
 
-        max_total_layers = max_hidden_layers + 1
-        # The first two elements of code are the number of layers and number of loops
-        code = [self.number_hidden_layers]
-
-        # We add all the layer dimension and fill with zeros all positions until max_layers
-        code = code + self.dims + [-1]*(max_total_layers-len(self.dims))
-
-        # We add the indices of init_functions in each layer
-        # and fill with zeros all positions until max_layers
-        aux_f = []
-        for init_f in self.init_functions:
-            aux_f.append(ref_list_init_functions.index(init_f))
-        code = code + aux_f + [-1]*(max_total_layers-len(aux_f))
-
-        # We add the indices of act_functions in each layer
-        # and fill with zeros all positions until max_layers
-        aux_a = []
-        for act_f in self.act_functions:
-            aux_a.append(ref_list_act_functions.index(act_f))
-        code = code + aux_a + [-1]*(max_total_layers-len(aux_a))
-
-        return code
+    def __name__(self):
+        return 'Multi Layer Perceptron descriptor'
 
 
 class ConvDescriptor(NetworkDescriptor):
-
+    
     MAX_NUM_FILTER = 65
+    
+    """
+    Descriptor of a Convolutional Neural Network, formed by convolutional and pooling layers and 
+    with the possibility of selecting the filters and strides in each layer and including 
+    batch normalization, but not including dropout.
+    
+    :param number_hidden_layers: Number of hidden layers in the network.
+    :param input_dim: Dimension of the input data (can have one or more dimensions).
+    :param output_dim: Expected output of the network (similarly, can have one or more dimensions).
+    :param init_functions: Weight initialization functions. Can have different ranges, depending on the subclass.
+    :param act_functions: Activation functions to be applied after each layer.
+    :param batch_norm: A boolean that indicates if batch normalization is applied after each layer in the network.
+    :param dropout: A boolean that indicates if dropout is applied after each layer in the network.
+    :param dropout_probs: The different probabilities of the dropout after each layer.
 
-    def __init__(self, number_hidden_layers=2, input_dim=(28, 28, 3), output_dim=(7, 7, 1), op_type=(2, 1), 
-                 max_filter=3, max_stride=2, filters=((3, 3, 2), (3, 3, 2)), strides=((1, 1, 1), (1, 1, 1)), 
-                 list_init_functions=(0, 0), list_act_functions=(0, 0), dropout=(), batch_norm=()):
-        """
-        Descriptor for convolutional cells
-        :param number_hidden_layers: Number of hidden layers (it's changed afterwards)
-        :param input_dim: Dimension of the input
-        :param output_dim: Expected dimension of the output (could be greater)
-        :param op_type: Type of layer (Mean pooling, max pooling, or convolutional. it's changed afterwards)
-        :param filters: list of dimensions of filters (it's changed afterwards)
-        :param strides: list of strides (it's changed afterwards)
-        :param list_init_functions: list of initialization functions of the filter weights (it's changed afterwards)
-        :param list_act_functions: list of activation functions after filters (it's changed afterwards)
-        :param dropout: list of booleans defining whether dropout is applied to each layer (it's changed afterwards)
-        :param batch_norm: list of booleans defining whether batch normalization is applied to each layer (it's changed afterwards)
-        """
+    :param layers: List of indeces that reference the type of layer.
+    :param filters: List of filters sizes in each layer.
+    :param strides: List of strides sizes in each layer.
+    :param max_filter: Maximum size that filters can have.
+    :param max_stride: Maximum size that stride can have.
+    """
+    
+    def __init__(self, number_hidden_layers=None, input_dim=None, output_dim=None, 
+                 layer_types=[], max_filter=None, max_stride=None, filters=[], strides=[], 
+                 init_functions=[], act_functions=[], batch_norm=False):
 
         super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
-                         init_functions=list_init_functions, act_functions=list_act_functions, dropout=False, 
-                         batch_norm=False)
-        self.layers = op_type
+                         init_functions=init_functions, act_functions=act_functions, 
+                         dropout=False, dropout_probs=[], batch_norm=batch_norm)
+        self.layers = layer_types
         self.filters = filters
         self.strides = strides
-        self.max_stride = max_stride
         self.max_filter = max_filter
+        self.max_stride = max_stride
         
-    def random_init(self, input_size, output_size, nlayers, _, max_stride, max_filter, dropout, batch_norm):
+    def random_init(self, input_size, output_size, max_layer_size, _, max_stride, max_filter, dropout, batch_norm):
         """
-        This function randomly initializes the descriptor. This function is susceptible of being modified by the user with specific creation needs
-        :param input_size:  Dimension of the input
-        :param output_size: Expected dimension of the output (could be greater)
-        :param nlayers: maximum number of layers
-        :param _: unused
-        :param max_stride: maximum stride possible (used as 2)
-        :param max_filter: maximum filter size possible (used as 3)
+        Given the input, the output and some limits for the parametes of the 
+        network, a random initialization of the object (the network descriptor) is done. 
+        
+        :param input_size: Dimension of the input.
+        :param output_size: Dimension of the output.
+        :param max_layer_size: Maximum number of layers.
+        :param max_stride: Maximum stride possible (used as 2)
+        :param max_filter: Maximum filter size possible (used as 3)
         :param dropout: Whether dropout is a possibility in the network
         :param batch_norm: Whether batch normalization is a possibility in the network
-        :return:
         """
 
         self.input_dim = input_size
         self.output_dim = output_size
 
-        self.number_hidden_layers = np.random.randint(nlayers)+1
+        self.number_hidden_layers = np.random.randint(max_layer_size)+1
         self.layers = []
         self.max_stride = max_stride
         self.strides = []
@@ -307,11 +376,11 @@ class ConvDescriptor(NetworkDescriptor):
 
     def add_layer(self, layer_pos, lay_type, lay_params):
         """
-        This function adds a layer in the layer_pos position
-        :param layer_pos: Position of the layer
-        :param lay_type: Type of operation (0, 1: pooling, 2 convolutional)
-        :param lay_params: sizes of the *filters*.
-        :return:
+        Adds a layer in the given position with all the characteristics indicated by parameters.
+        
+        :param layer_pos: Position of the layer.
+        :param lay_type: Type of operation (0, 1: pooling, 2 convolutional).
+        :param lay_params: Sizes of the filters and strides.
         """
         
         aux_filters = copy.deepcopy(self.filters)
@@ -351,9 +420,9 @@ class ConvDescriptor(NetworkDescriptor):
 
     def remove_layer(self, layer_pos):
         """
-        This function deletes a layer
-        :param layer_pos: Position of the layer to be deleted
-        :return:
+        Removes the layer in the position received by parameter from the network.
+        
+        :param layer_pos: Position of the layer that is going to be removed.
         """
  
         self.layers.pop(layer_pos)
@@ -374,24 +443,21 @@ class ConvDescriptor(NetworkDescriptor):
 
     def remove_random_layer(self):
         """
-        Select a random layer and execute the deletion
-        :return:
+        Selects and removes a random layer from the network if it is possible.
         """
         # np.sum(self.layers) > 3 means that are least are two convolutional layers
         if np.sum(self.layers) > 3: 
             layer_pos = np.random.randint(self.number_hidden_layers)
             self.remove_layer(layer_pos)
-            return 0
-        else:
-            return -1
 
     def change_filters(self, layer_pos, new_kernel_size, new_channel):
         """
-        Change the size of one layer filter
-        :param layer_pos: Position of the filter to be changed
-        :param new_kernel_size: Height and width of the filter (only square filters are allowed)
-        :param new_channel: Number of output channels
-        :return:
+        Changes the filter of the layer in the position received by parameter for 
+        a new filter specified with the size and channels received also by parameters.
+        
+        :param layer_pos: Position of the filter to be changed.
+        :param new_kernel_size: Height and width of the filter (only square filters are allowed).
+        :param new_channel: Number of output channels.
         """
         aux_filters = copy.deepcopy(self.filters)
         aux_filters[layer_pos][0] = new_kernel_size
@@ -403,10 +469,11 @@ class ConvDescriptor(NetworkDescriptor):
 
     def change_stride(self, layer_pos, new_stride):
         """
-        Change the stride of a filter in a layer
-        :param layer_pos: Layer which stride is changed
-        :param new_stride: self-explanatory
-        :return:
+        Changes the stride of the layer in the position received by parameter 
+        for a new stried specified with the data received also by parameters.
+        
+        :param layer_pos: Position of the filter to be changed.
+        :param new_stride: Stride assigned to that layer. 
         """
         aux_strides = copy.deepcopy(self.strides)
         aux_strides[layer_pos][0] = new_stride
@@ -415,71 +482,82 @@ class ConvDescriptor(NetworkDescriptor):
         if calculate_CNN_shape(self.input_dim, self.filters, aux_strides, self.number_hidden_layers)[0] > 0:
             self.strides = aux_strides
             
-    def print_components(self):
-        print('Layers:', self.layers)
-        print('Init:', self.init_functions)
-        print('Act:', self.act_functions)
-        print('Filters:', self.filters)
-        print('Strides:', self.strides)
-
     def codify_components(self):
-
-        filters = [str(x) for x in self.filters]
-        init_funcs = [str(x) for x in self.init_functions]
-        act_funcs = [str(x) for x in self.act_functions]
-        sizes = [[str(y) for y in x] for x in self.filters]
-        strides = [str(x) for x in self.strides]
-        return str(self.input_dim) + "_" + str(self.output_dim) + "_" + ",".join(filters) + "*" + \
-                    ",".join(["/".join(szs) for szs in sizes]) + "*" + ",".join(strides) + "_" + \
-                    ",".join(init_funcs) + "_" + ",".join(act_funcs)
-
+        """
+        Codifies all the components of the network in a list of tuples, where the 
+        first element of the tuple is a description of the value that is in the 
+        second element of the tuple.
+        
+        :return: List with all the components of the network.
+        """
+        
+        return [('Number of layers', self.number_hidden_layers),
+                ('Input dimension', self.input_dim),
+                ('Output dimension', self.output_dim),
+                ('Layer types', self.layers),
+                ('Filters in each layer', self.filters),
+                ('Strides in each layer', self.strides),
+                ('Maximum filter size', self.max_filter),
+                ('Maximum stride size', self.max_stride),
+                ('Initialization functions', self.init_functions),
+                ('Activation functions', self.act_functions),
+                ('Dropout', self.dropout),
+                ('Dropout probabilities', self.dropout_probs),
+                ('Batch normalization', self.batch_norm)
+               ]
+        
+    def __name__(self):
+        return 'Convolutional Neural Network descriptor'
 
 class TConvDescriptor(NetworkDescriptor):
     
     MAX_NUM_FILTER = 65
+
+    """
+    Descriptor of a Transposed Convolutional Neural Network, formed by transposed convolutional 
+    layers and with the possibility of selecting the filters and strides in each layer and including 
+    batch normalization, but not including dropout.
     
-    def __init__(self, number_hidden_layers=2, input_dim=(7, 7, 50), output_dim=(28, 28, 3), 
-                 max_filter=3, filters=((3, 3, 2), (3, 3, 2)), max_stride=2, strides=((1, 1, 1), (1, 1, 1)), 
-                 list_init_functions=(0, 0), list_act_functions=(0, 0), dropout=(), batch_norm=()):
-        """
-       Descriptor for transposed convolutional cells
-       :param number_hidden_layers: Number of hidden layers (it's changed afterwards)
-       :param input_dim: Dimension of the input
-       :param output_dim: Expected dimension of the output (could be greater)
-       :param filters: list of dimensions of filters (it's changed afterwards)
-       :param strides: list of strides (it's changed afterwards)
-       :param list_init_functions: list of initialization functions of the filter weights (it's changed afterwards)
-       :param list_act_functions: list of activation functions after filters (it's changed afterwards)
-       :param dropout: list of booleans defining whether dropout is applied to each layer (it's changed afterwards)
-       :param batch_norm: list of booleans defining whether batch normalization is applied to each layer (it's changed afterwards)
-       """
+    :param number_hidden_layers: Number of hidden layers in the network.
+    :param input_dim: Dimension of the input data (can have one or more dimensions).
+    :param output_dim: Expected output of the network (similarly, can have one or more dimensions).
+    :param init_functions: Weight initialization functions. Can have different ranges, depending on the subclass.
+    :param act_functions: Activation functions to be applied after each layer.
+    :param batch_norm: A boolean that indicates if batch normalization is applied after each layer in the network.
+    :param dropout: A boolean that indicates if dropout is applied after each layer in the network.
+    :param dropout_probs: The different probabilities of the dropout after each layer.
 
+    :param filters: List of filters sizes in each layer.
+    :param strides: List of strides sizes in each layer.
+    :param max_filter: Maximum size that filters can have.
+    :param max_stride: Maximum size that stride can have.
+    """
+    
+    def __init__(self, number_hidden_layers=None, input_dim=None, output_dim=None, 
+                 max_filter=None, max_stride=None, filters=[], strides=[], 
+                 init_functions=[], act_functions=[], batch_norm=False):
         super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
-                         init_functions=list_init_functions, act_functions=list_act_functions, dropout=False, 
-                         batch_norm=False)
-
-        self.max_stride = max_stride
+                         init_functions=init_functions, act_functions=act_functions, 
+                         dropout=False, dropout_probs=[], batch_norm=batch_norm)
+        self.filters = filters
         self.strides = strides
         self.max_filter = max_filter
-        self.filters = filters
+        self.max_stride = max_stride
 
     def random_init(self, input_size, output_size, _, __, max_stride, max_filter, dropout, batch_norm):
         """
-        This function randomly initializes the descriptor. This function is susceptible of being modified by the user with specific creation needs
-        :param input_size:  Dimension of the input
-        :param output_size: Expected dimension of the output (could be greater)
-        :param _: unused
-        :param __: unused
-        :param max_stride: maximum stride possible (used as 2)
-        :param max_filter: maximum filter size possible (used as 3)
+        Given the input, the output and some limits for the parametes of the 
+        network, a random initialization of the object (the network descriptor) is done. 
+        
+        :param input_size: Dimension of the input.
+        :param output_size: Dimension of the output.
+        :param max_stride: Maximum stride possible (used as 2)
+        :param max_filter: Maximum filter size possible (used as 3)
         :param dropout: Whether dropout is a possibility in the network
         :param batch_norm: Whether batch normalization is a possibility in the network
-        :return:
         """
         self.input_dim = input_size
         self.output_dim = output_size
-
-        # Random initialization
         
         self.max_stride = max_stride
         self.strides = []
@@ -510,10 +588,10 @@ class TConvDescriptor(NetworkDescriptor):
                 
     def add_layer(self, layer_pos, lay_params):
         """
-        This function adds a layer in the layer_pos position
-        :param layer_pos: Position of the layer
-        :param lay_params: sizes of the filters.
-        :return:
+        Adds a layer in the given position with all the characteristics indicated by parameters.
+        
+        :param layer_pos: Position of the layer.
+        :param lay_params: Sizes of the filters and strides.
         """
         
         self.number_hidden_layers += 1
@@ -542,9 +620,9 @@ class TConvDescriptor(NetworkDescriptor):
 
     def remove_layer(self, layer_pos):
         """
-        This function deletes a layer
-        :param layer_pos: Position of the layer to be deleted
-        :return:
+        Removes the layer in the position received by parameter from the network.
+        
+        :param layer_pos: Position of the layer that is going to be removed.
         """
 
         self.filters.pop(layer_pos)
@@ -564,20 +642,22 @@ class TConvDescriptor(NetworkDescriptor):
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
 
     def remove_random_layer(self):
+        """
+        Selects and removes a random layer from the network if it is possible.
+        """
         if self.number_hidden_layers > 1:
             layer_pos = np.random.randint(self.number_hidden_layers)
             self.remove_layer(layer_pos)
-            return 0
-        else:
-            return -1
-        
-    def change_activation(self, layer_pos, new_act_fn):
-        self.act_functions[layer_pos] = new_act_fn
-
-    def change_weight_init(self, layer_pos, new_weight_fn):
-        self.init_functions[layer_pos] = new_weight_fn
 
     def change_filters(self, layer_pos, new_kernel_size, new_channel):
+        """
+        Changes the filter of the layer in the position received by parameter for 
+        a new filter specified with the size and channels received also by parameters.
+        
+        :param layer_pos: Position of the filter to be changed.
+        :param new_kernel_size: Height and width of the filter (only square filters are allowed).
+        :param new_channel: Number of output channels.
+        """
         self.filters[layer_pos][0] = new_kernel_size
         self.filters[layer_pos][1] = new_kernel_size
         self.filters[layer_pos][2] = new_channel
@@ -598,6 +678,13 @@ class TConvDescriptor(NetworkDescriptor):
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
 
     def change_stride(self, layer_pos, new_stride):
+        """
+        Changes the stride of the layer in the position received by parameter 
+        for a new stried specified with the data received also by parameters.
+        
+        :param layer_pos: Position of the stride to be changed.
+        :param new_stride: Stride assigned to that layer.
+        """
         
         self.strides[layer_pos][0] = new_stride
         self.strides[layer_pos][1] = new_stride
@@ -616,27 +703,57 @@ class TConvDescriptor(NetworkDescriptor):
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
         
-    def print_components(self):
-        print('Init:', self.init_functions)
-        print('Act:', self.act_functions)
-        print('Filters:', self.filters)
-        print('Strides:', self.strides)
-
     def codify_components(self):
-
-        filters = [str(x) for x in self.filters]
-        init_funcs = [str(x) for x in self.init_functions]
-        act_funcs = [str(x) for x in self.act_functions]
-        sizes = [[str(y) for y in x] for x in self.filters]
-        strides = [str(x) for x in self.strides]
-        return str(self.input_dim) + "_" + str(self.output_dim) + "_" + ",".join(filters) + "*" + \
-                    ",".join(["/".join(szs) for szs in sizes]) + "*" + ",".join(strides) + "_" + \
-                    ",".join(init_funcs) + "_" + ",".join(act_funcs)
+        """
+        Codifies all the components of the network in a list of tuples, where the 
+        first element of the tuple is a description of the value that is in the 
+        second element of the tuple.
+        
+        :return: List with all the components of the network.
+        """
+        
+        return [('Number of layers', self.number_hidden_layers),
+                ('Input dimension', self.input_dim),
+                ('Output dimension', self.output_dim),
+                ('Filters in each layer', self.filters),
+                ('Strides in each layer', self.strides),
+                ('Maximum filter size', self.max_filter),
+                ('Maximum stride size', self.max_stride),
+                ('Initialization functions', self.init_functions),
+                ('Activation functions', self.act_functions),
+                ('Dropout', self.dropout),
+                ('Dropout probabilities', self.dropout_probs),
+                ('Batch normalization', self.batch_norm)
+               ]
+        
+    def __name__(self):
+        return 'Transposed Convolutional Neural Network descriptor'
 
 class RNNDescriptor(NetworkDescriptor):
-    def __init__(self, number_hidden_layers=1, input_dim=1, output_dim=1, init_functions=None,
-                 rnn_layers = [SimpleRNN], bidirectional=[False], units_in_layer=[64], max_units=128, 
-                 act_functions=None, dropout=False, batch_norm=False):
+    """
+    Descriptor of a Recurrent Neural Network, formed by recurrent layers and with
+     the possibility of selecting the type and number of unit in the recurrent
+    layer and allowing bidirectional layers.
+    
+    :param number_hidden_layers: Number of hidden layers in the network.
+    :param input_dim: Dimension of the input data (can have one or more dimensions).
+    :param output_dim: Expected output of the network (similarly, can have one or more dimensions).
+    :param init_functions: Weight initialization functions. Can have different ranges, depending on the subclass.
+    :param act_functions: Activation functions to be applied after each layer.
+    :param batch_norm: A boolean that indicates if batch normalization is applied after each layer in the network.
+    :param dropout: A boolean that indicates if dropout is applied after each layer in the network.
+    :param dropout_probs: The different probabilities of the dropout after each layer.
+
+    :param rnn_layers: List of the types of recurrent layers.
+    :param units_in_layer: List of number of units in each layer.
+    :param max_units: Maximum numbers of units that layers can have.
+    :param bidirectional: A boolean value to indicate if bidirectional layers are allowed.
+    """
+    
+    def __init__(self, number_hidden_layers=None, input_dim=None, output_dim=None, 
+                 rnn_layers = [], bidirectional=[], units_in_layer=[], max_units=None,
+                 init_functions=[], act_functions=[], 
+                 dropout=False, dropout_prob=[], batch_norm=False):
         
         super().__init__(number_hidden_layers=number_hidden_layers, input_dim=input_dim, output_dim=output_dim, 
              init_functions=init_functions, act_functions=act_functions, dropout=dropout, batch_norm=batch_norm)
@@ -645,15 +762,25 @@ class RNNDescriptor(NetworkDescriptor):
         self.max_units = max_units
         self.bidirectional = bidirectional
         
-    def random_init(self, input_size, output_size, nlayers, max_layer_size, _, __, dropout, batch_norm):
+    def random_init(self, input_size, output_size, max_num_layers, max_num_neurons, _, __, dropout, batch_norm):
+        """
+        Given the input, the output and some limits for the parametes of the 
+        network, a random initialization of the object (the network descriptor) is done. 
         
+        :param input_size: Input size of the network (it will be flattened in order to fit in the MLP).
+        :param output_size: Output size of the network (it will be flattened in order to fit in the MLP).
+        :param max_num_layers: Maximum number of layers that can be in the network.
+        :param max_num_neurons: Maximum number fo neurons that can be in each layer of the network.
+        :param dropout: A boolean value that indicates if the networks can have dropout.
+        :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
+        """
         self.input_dim = input_size
         self.output_dim = output_size
         
-        self.max_units = np.random.randint(2,4) * 32
+        self.max_units = max_num_neurons
         
         # Random initialization
-        self.number_hidden_layers = np.random.randint(nlayers)+1
+        self.number_hidden_layers = np.random.randint(max_num_layers)+1
         self.units_in_layer = [np.random.randint(1, self.max_units)+1 for _ in range(self.number_hidden_layers)]
         self.init_functions = list(np.random.choice(initializations, size=self.number_hidden_layers+1))
         self.act_functions = list(np.random.choice(activations, size=self.number_hidden_layers+1))
@@ -668,6 +795,13 @@ class RNNDescriptor(NetworkDescriptor):
             self.dropout_probs = np.zeros(self.number_hidden_layers+1)
     
     def add_layer(self, layer_pos, lay_params):
+        """
+        Adds a layer in the given position with all the characteristics indicated by parameters.
+        
+        :param layer_pos: Position of the layer.
+        :param lay_params: Sizes of the filters and strides.
+        """
+        
         self.number_hidden_layers += 1
         self.rnn_layers.insert(layer_pos, lay_params[0])
         self.units_in_layer.insert(layer_pos, min(lay_params[1], self.max_units))
@@ -676,6 +810,12 @@ class RNNDescriptor(NetworkDescriptor):
         self.init_functions.insert(layer_pos, lay_params[4])
     
     def remove_layer(self, layer_pos):
+        """
+        Removes the layer in the position received by parameter from the network.
+        
+        :param layer_pos: Position of the layer that is going to be removed.
+        """
+        
         self.number_hidden_layers -= 1
         self.rnn_layers.pop(layer_pos)
         self.units_in_layer.pop(layer_pos)
@@ -684,62 +824,106 @@ class RNNDescriptor(NetworkDescriptor):
         self.init_functions.pop(layer_pos)
     
     def remove_random_layer(self):
+        """
+        Selects and removes a random layer from the network if it is possible.
+        """
         if self.number_hidden_layers > 1:
             layer_pos = np.random.randint(self.number_hidden_layers)
             self.remove_layer(layer_pos)
-            return 0
-        else:
-            return -1
         
-    def change_layer_type(self, layer_pos):
+    def change_layer_type(self, layer_pos): 
+        """
+        Changes the type of the layer in the position received by parameter 
+        for a new one selected randomly.
+        
+        :param layer_pos: Position of the filter to be changed.
+        """
         layer_type = self.rnn_layers[layer_pos]
         possible_types = [SimpleRNN, LSTM, GRU]
         possible_types.remove(layer_type)
         self.rnn_layers[layer_pos] = np.random.choice(possible_types)
         
     def change_units(self, layer_pos, new_units):
+        """
+        Changes the number of units of the layer in the position received by parameter 
+        for a new number specified with the data received also by parameters.
+        
+        :param layer_pos: Position of the filter to be changed.
+        :param new_units: Number of units assigned to that layer. 
+        """
         self.units_in_layer[layer_pos] = new_units
         
     def change_bidirectional(self, layer_pos):
+        """
+        Changes the layer in the position received by parameter 
+        for a bidirectional if is not already; otherwise, for a non
+        bidirectional one.
+        
+        :param layer_pos: Position of the filter to be changed.
+        """
         self.bidirectional[layer_pos] = not self.bidirectional[layer_pos]
         
     def change_max_units(self, max_units):
+        """
+        Changes the stride of the layer in the position received by parameter 
+        for a new stried specified with the data received also by parameters.
+        
+        :param layer_pos: Position of the filter to be changed.
+        :param new_stride: Stride assigned to that layer. 
+        """
         self.max_units = max_units
         self.units_in_layer = [min(unit, self.max_units) for unit in self.units_in_layer]        
     
-    def print_components(self, identifier):
-        print(identifier, ' RNN_layers:', self.rnn_layers)
-        print(identifier, ' Max units:', self.max_units)
-        print(identifier, ' Units:', self.units_in_layer)
-        print(identifier, ' Bidirectional:', self.bidirectional)
-        print(identifier, ' Init:', self.init_functions)
-        print(identifier, ' Act:', self.act_functions)
     def codify_components(self):
-        units = [str(x) for x in self.units_in_layer]
-        bidirectional = [str(x) for x in self.bidirectional]
-        init_funcs = [str(x) for x in self.init_functions]
-        act_funcs = [str(x) for x in self.act_functions]
-        return str(self.input_dim) + "_" + str(self.output_dim) + "_" + str(self.rnn_layers) + "_" + ",".join(units) + \
-               "_" + ",".join(bidirectional) + "_" + ",".join(init_funcs) + "_" + ",".join(act_funcs)
+        """
+        Codifies all the components of the network in a list of tuples, where the 
+        first element of the tuple is a description of the value that is in the 
+        second element of the tuple.
+        
+        :return: List with all the components of the network.
+        """
+        
+        return [('Number of layers', self.number_hidden_layers),
+                ('Input dimension', self.input_dim),
+                ('Output dimension', self.output_dim),
+                ('Layer types', self.rnn_layers),
+                ('Maximum number of units', self.max_units),
+                ('Units in each layer', self.units_in_layer),
+                ('Bidirectional layers are allowed', self.bidirectional),
+                ('Initialization functions', self.init_functions),
+                ('Activation functions', self.act_functions),
+                ('Dropout', self.dropout),
+                ('Dropout probabilities', self.dropout_probs),
+                ('Batch normalization', self.batch_norm)
+               ]
+        
+    def __name__(self):
+        return 'Recurrent Neural Network descriptor'
     
 class Network:
+    """
+    This class contains the TensorFlow definition of the networks (i.e., the "implementation" of the descriptors).
+    
+    :param network_descriptor: The descriptor with the information to generate this class (the network).
+    """
     def __init__(self, network_descriptor):
-        """
-        This class contains the tensorflow definition of the networks (i.e., the "implementation" of the descriptors)
-        :param network_descriptor: The descriptor this class is implementing
-        """
         self.descriptor = network_descriptor
 
 class MLP(Network):
-
+    """
+    TensorFlow definition of the Multi Layer Perceptron.
+    
+    :param network_descriptor: Descriptor of the MLP.
+    """
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
 
     def building(self, x):
         """
-        This function creates the MLP's model
-        :param _: Convenience
-        :return: Generated Keras model representing the MLP
+        Given a TensorFlow layer, this functions continues adding more layers of a MLP.
+        
+        :param x: A layer from TensorFlow.
+        :return: The layer received from parameter with the MLP concatenated to it.
         """
         
         for lay_indx in range(self.descriptor.number_hidden_layers):
@@ -764,16 +948,22 @@ class MLP(Network):
 
 
 class CNN(Network):
-
+    """
+    TensorFlow definition of the Convolutional Neural Network.
+    
+    :param network_descriptor: Descriptor of the CNN.
+    """
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
 
     def building(self, x):
         """
-        Using the filters defined in the initialization function, create the CNN
-        :param layer: Input of the network
-        :return: Output of the network
+        Given a TensorFlow layer, this functions continues adding more layers of a CNN.
+        
+        :param x: A layer from TensorFlow.
+        :return: The layer received from parameter with the CNN concatenated to it.
         """
+        
         lay_indx = 0
         while lay_indx < self.descriptor.number_hidden_layers:
             
@@ -807,12 +997,20 @@ class CNN(Network):
 
 class TCNN(Network):
     """
-    Almost identical to CNN
+    TensorFlow definition of the Transposed Convolutional Neural Network.
+    
+    :param network_descriptor: Descriptor of the TCNN.
     """
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
-    
-    def building(self, x):        
+
+    def building(self, x):
+        """
+        Given a TensorFlow layer, this functions continues adding more layers of a TCNN.
+        
+        :param x: A layer from TensorFlow.
+        :return: The layer received from parameter with the TCNN concatenated to it.
+        """       
         for lay_indx in range(self.descriptor.number_hidden_layers):
             
             x = Conv2DTranspose(self.descriptor.filters[lay_indx][2],
@@ -825,10 +1023,21 @@ class TCNN(Network):
         return x
 
 class RNN(Network):
+    """
+    TensorFlow definition of the Recurrent Neural Network.
+    
+    :param network_descriptor: Descriptor of the RNN.
+    """
     def __init__(self, network_descriptor):
         super().__init__(network_descriptor)
-        
+
     def building(self, x):
+        """
+        Given a TensorFlow layer, this functions continues adding more layers of a RNN.
+        
+        :param x: A layer from TensorFlow.
+        :return: The layer received from parameter with the RNN concatenated to it.
+        """
         for lay_indx in range(self.descriptor.number_hidden_layers - 1):
             
             rnn_layer = self.descriptor.rnn_layers[lay_indx](units=self.descriptor.units_in_layer[lay_indx],
@@ -858,6 +1067,19 @@ class RNN(Network):
         return x
 
 def calculate_CNN_shape(input_shape, filters, strides, desired_layer):
+    """
+    Given the input shape and the filters and strides that have been applied to that
+    input by using convolutional and pooling layers, it return the output shape 
+    in the desired layer.
+    
+    :param input_shape: Shape of the input given to the convolutional layers.
+    :param filters: List with the filters that convolutional and pooling layers use.
+    :param strides: List with the strides that convolutional and pooling layers use.
+    :param desired_layer: Position of the layer where the output shape is wanted (if 
+                          -1 is passed, it calculates until the last layer). 
+        
+    :return: The output shape after applying those operations.
+    """
     if desired_layer == -1:
         return calculate_CNN_shape(input_shape, filters, strides, len(filters))
     if desired_layer == 0:
@@ -870,6 +1092,19 @@ def calculate_CNN_shape(input_shape, filters, strides, desired_layer):
 
 
 def calculate_TCNN_shape(input_shape, filters, strides, desired_layer):
+    """
+    Given the input shape and the filters and strides that have been applied to that
+    input by using transposed convolutional layers, it return the output shape 
+    in the desired layer.
+    
+    :param input_shape: Shape of the input given to the transposed convolutional layers.
+    :param filters: List with the filters that transposed convolutional layers use.
+    :param strides: List with the strides that transposed convolutional layers use.
+    :param desired_layer: Position of the layer where the output shape is wanted (if 
+                          -1 is passed, it calculates until the last layer). 
+        
+    :return: The output shape after applying those operations.
+    """
     if desired_layer == -1:
         return calculate_TCNN_shape(input_shape, filters, strides, len(filters))
     if desired_layer == 0:

@@ -105,7 +105,10 @@ class MLP_Mutation(Mutation):
         network.remove_random_layer()
 
     def mut_dimension(self, network):              # We change the number of neurons in layer
-        network.change_layer_dimension(self.max_lay)
+        layer_pos = np.random.randint(0, self.number_hidden_layers)
+        new_dim = np.random.randint(0, self.max_lay)
+        
+        network.change_layer_dimension(layer_pos, new_dim)
      
         
 class CNN_Mutation(Mutation):

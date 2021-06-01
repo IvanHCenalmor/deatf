@@ -12,7 +12,6 @@ import numpy as np
 from evoflow.network import MLPDescriptor
 from evoflow.evolution import Evolving
 from evoflow.data import load_fashion
-from evoflow.metrics import ret_evals
 
 from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
@@ -125,5 +124,4 @@ if __name__ == "__main__":
                                   "start": ["0", "1"], "p1": ["01", "10"],
                                   "p2": ["001", "010", "011", "101", "110", "100"]})  # Los pesos, que también evolucionan
     a = e.evolve()
-    np.save("simple_res_rand.npy", np.array(ret_evals()))
     print(a[-1])

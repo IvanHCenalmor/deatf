@@ -10,7 +10,6 @@ import numpy as np
 
 from evoflow.network import MLPDescriptor
 from evoflow.evolution import Evolving
-from evoflow.metrics import ret_evals
 from evoflow.data import load_fashion
 
 from sklearn.preprocessing import OneHotEncoder
@@ -35,5 +34,4 @@ if __name__ == "__main__":
     
     a = e.evolve()
 
-    np.save("simple_res_rand.npy", np.array(ret_evals()))
     print(a)
