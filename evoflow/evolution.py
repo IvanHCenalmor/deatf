@@ -29,7 +29,7 @@ class MyContainer(object):
 
 
 class Evolving:
-    def __init__(self, desc_list=(MLPDescriptor, ), compl=False, 
+    def __init__(self, desc_list=[MLPDescriptor, ], compl=False, 
                  x_trains=None, y_trains=None, x_tests=None, y_tests=None, 
                  evaluation="XEntropy", n_inputs=((28, 28),), n_outputs=((10,),), 
                  batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel='best',
@@ -189,7 +189,7 @@ class Evolving:
 
         self.toolbox.register("evaluate", self.eval_individual)
         self.toolbox.register("mate", cross, creator.Individual)
-        self.toolbox.register("mutate", mutations, self.ev_hypers, self.max_lay, batch_norm, dropout, custom_mutations)
+        self.toolbox.register("mutate", mutations, self.ev_hypers, self.max_lay, custom_mutations)
 
         self.toolbox.register("select", self.selection, **sel_kwargs)
 
@@ -299,7 +299,7 @@ class Evolving:
         return ev
 
 
-def mutations(ev_hypers, max_lay, batch_normalization, drop, custom_mutations, individual):
+def mutations(ev_hypers, max_num_layers, custom_mutations, individual):
     """
     Mutation operators for individuals. They can affect any network or the hyperparameters.
     :param ev_hypers: Hyperparameters not included in the networks to be evolved
@@ -314,18 +314,18 @@ def mutations(ev_hypers, max_lay, batch_normalization, drop, custom_mutations, i
                       'TConvDescriptor': TCNN_Mutation, 'RNNDescriptor': RNN_Mutation}
 
     nets = list(individual.descriptor_list.keys())
+    hyperparameters = individual.descriptor_list["hypers"]
     nets.remove("hypers")
 
     network = individual.descriptor_list[np.random.choice(nets)]
-    
-    network_mutation = mutation_types[network.__class__.__name__](ev_hypers, max_lay, batch_normalization, drop, individual)
-        
+
     if not custom_mutations:
         network_custom_mutations = [] # If no custom mutations are passed, each network's mutations will be applied
     else:
         network_custom_mutations = custom_mutations[network.__class__.__name__]
     
-    network_mutation.apply_random_mutation(network, network_custom_mutations)
+    network_mutation = mutation_types[network.__class__.__name__](ev_hypers, max_num_layers, network, hyperparameters, network_custom_mutations)
+    network_mutation.apply_random_mutation()
     
     return individual,
 

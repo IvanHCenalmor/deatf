@@ -45,8 +45,9 @@ def test_CNN_all_datasets(eval_func=None, batch_size=150, population=5,
 def test_CNN(dataset_name, eval_func=None, batch_size=150, population=5, 
              generations=10, iters=100, n_layers=10, max_layer_size=20):
     
-    return test(dataset_name, [ConvDescriptor], eval_func, batch_size, 
-                population, generations, iters, n_layers, max_layer_size,  
+    return test(dataset_name, descriptors=[ConvDescriptor], eval_func=eval_func, 
+                batch_size=batch_size, population=population, generations=generations, 
+                iters=iters, n_layers=n_layers, max_layer_size=max_layer_size,  
                 hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]})    
         
 def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):

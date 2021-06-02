@@ -12,9 +12,9 @@ from sklearn.preprocessing import MinMaxScaler
 
 import tensorflow_datasets as tfds
 
-def test(dataset_name, is_time_series=False, series_input_width=30, series_label_width=1, 
-         descriptors=[], eval_func=None, batch_size=150, population=5, 
-         generations=10, iters=100, n_layers=10, max_layer_size=20, hyperparameters={}):
+def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, population=5, 
+         generations=10, iters=100, n_layers=10, max_layer_size=20, hyperparameters={},
+         is_time_series=False, series_input_width=30, series_label_width=1):
     
     x_train, x_test, x_val, y_train, y_test, y_val, mode = load_dataset(dataset_name, 
             is_time_series=is_time_series, series_input_width=series_input_width, series_label_width=series_label_width)

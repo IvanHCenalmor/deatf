@@ -36,8 +36,10 @@ def test_MLP_all_datasets(eval_func=None, batch_size=150, population=5,
 def test_MLP(dataset_name, eval_func=None, batch_size=150, population=5, 
              generations=10, iters=100, n_layers=10, max_layer_size=20):
     
-    return test(dataset_name, [MLPDescriptor], eval_func, batch_size, 
-                population, generations, iters, n_layers, max_layer_size)
+    
+    return test(dataset_name, descriptors=[MLPDescriptor], eval_func=eval_func, 
+                batch_size=batch_size, population=population, generations=generations, 
+                iters=iters, n_layers=n_layers, max_layer_size=max_layer_size)
 
 if __name__ == "__main__":
     #evaluated = test_MLP('air_quality', batch_size=200, population=2, generations = 2, iters=10)

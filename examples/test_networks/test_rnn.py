@@ -46,11 +46,10 @@ def test_RNN_all_datasets(eval_func=None, is_time_series=True,series_input_width
             
         print('Time: ', time.time() - init_time)
 
-def test_RNN(dataset_name, is_time_series=True,
-             series_input_width=30, series_label_width=1,
-             eval_func=None, batch_size=150, population=5, 
+def test_RNN(dataset_name,eval_func=None, batch_size=150, population=5, 
              generations=10, iters=100, n_layers=10, max_layer_size=20, 
-             hyperparameters={}):
+             hyperparameters={}, is_time_series=True,
+             series_input_width=30, series_label_width=1,):
     
     x_train, x_test, x_val, y_train, y_test, y_val, mode = load_dataset(dataset_name,is_time_series=is_time_series, 
                                         series_input_width=series_input_width, series_label_width=series_label_width)

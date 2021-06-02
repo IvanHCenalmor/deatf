@@ -187,7 +187,7 @@ class MLPDescriptor(NetworkDescriptor):
         else:
             self.dropout_probs = np.zeros(self.number_hidden_layers+1)
 
-    def add_layer(self, layer_pos, lay_dims, init_w_function, init_a_function, dropout, drop_prob, batch_norm):
+    def add_layer(self, layer_pos, lay_dims, init_function, act_function, drop_prob):
         """
         Adds a layer in the given position with all the characteristics indicated by parameters.
         
@@ -206,8 +206,8 @@ class MLPDescriptor(NetworkDescriptor):
 
         # We create the new layer and add it to the network descriptor
         self.dims = np.insert(self.dims, layer_pos, lay_dims)
-        self.init_functions = np.insert(self.init_functions, layer_pos, init_w_function)
-        self.act_functions = np.insert(self.act_functions, layer_pos, init_a_function)
+        self.init_functions = np.insert(self.init_functions, layer_pos, init_function)
+        self.act_functions = np.insert(self.act_functions, layer_pos, act_function)
         self.number_hidden_layers = self.number_hidden_layers + 1
         self.dropout_probs = np.insert(self.dropout_probs, layer_pos, drop_prob)
 
