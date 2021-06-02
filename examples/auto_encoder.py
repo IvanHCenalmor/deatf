@@ -64,7 +64,8 @@ if __name__ == "__main__":
                  x_trains=[x_train], y_trains=[x_train], x_tests=[x_val], y_tests=[x_val], 
                  n_inputs=[[784]], n_outputs=[[784]], batch_size=150, iters=10, 
                  hyperparameters={"lrate": [0.1, 0.5, 1]},
-                 population=5, generations=20, iters=100, n_layers=10, max_layer_size=100, seed=0)
+                 population=5, generations=20, iters=100, 
+                 max_num_layers=10, max_num_neurons=100, seed=0)
     a = e.evolve()
 
     print(a)

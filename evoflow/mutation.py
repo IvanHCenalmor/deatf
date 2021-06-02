@@ -193,13 +193,13 @@ class CNN_Mutation(Mutation):
         new_layer_pos = np.random.randint(0, self.network.number_hidden_layers)
         new_lay_type = np.random.randint(0, 3)
         
-        new_filters = np.random.randint(1, self.network.max_stride)
-        new_strides = np.random.randint(2, self.network.max_filter)
-        new_act_functions = np.random.choice(activations[1:])
-        new_init_functions = np.random.choice(initializations[1:])
-        lay_params = [new_filters, new_strides, new_act_functions, new_init_functions]
+        new_filter_size = np.random.randint(1, self.network.max_stride)
+        new_stride_size = np.random.randint(2, self.network.max_filter)
+        new_act_function = np.random.choice(activations[1:])
+        new_init_function = np.random.choice(initializations[1:])
         
-        self.network.add_layer(new_layer_pos, new_lay_type, lay_params)
+        self.network.add_layer(new_layer_pos, new_lay_type, new_filter_size, 
+                               new_stride_size, new_act_function, new_init_function)
         
     def mut_remove_conv_layer(self):
         """
@@ -255,13 +255,13 @@ class TCNN_Mutation(Mutation):
         """
         new_layer_pos = np.random.randint(0, self.network.number_hidden_layers)
         
-        new_filters = np.random.randint(1, self.network.max_stride)
-        new_strides = np.random.randint(2, self.network.max_filter)
-        new_act_functions = np.random.choice(activations[1:])
-        new_init_functions = np.random.choice(initializations[1:])
-        lay_params = [new_filters, new_strides, new_act_functions, new_init_functions]
+        new_filter_size = np.random.randint(1, self.network.max_stride)
+        new_stride_size = np.random.randint(2, self.network.max_filter)
+        new_act_function = np.random.choice(activations[1:])
+        new_init_function = np.random.choice(initializations[1:])
         
-        self.network.add_layer(new_layer_pos, lay_params)
+        self.network.add_layer(new_layer_pos, new_filter_size, new_stride_size, 
+                               new_act_function, new_init_function)
     
     def mut_remove_deconv_layer(self):
         """
@@ -321,7 +321,7 @@ class RNN_Mutation(Mutation):
         act_function = np.random.choice(activations[1:])
         init_function = np.random.choice(initializations[1:])
         
-        self.network.add_layer(layer_pos, [rnn_type, units_in_layer, bidirectional, act_function, init_function])
+        self.network.add_layer(layer_pos, rnn_type, units_in_layer, bidirectional, act_function, init_function)
         
     def mut_remove_rnn_layer(self):
         """

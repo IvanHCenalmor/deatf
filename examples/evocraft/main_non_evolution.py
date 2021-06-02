@@ -57,7 +57,7 @@ if __name__ == '__main__':
     
     desc = MLPDescriptor(10,3,len(wanted_blocks))
     desc.random_init(input_size=3, output_size=[len(wanted_blocks)]+bounds, 
-                     nlayers=10, max_layer_size=200, 
+                     max_num_layers=10, max_num_neurons=200, 
                      dropout=True, batch_norm=True)
     network = MLP(desc)
     

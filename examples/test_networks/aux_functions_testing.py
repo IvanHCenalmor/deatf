@@ -13,7 +13,7 @@ from sklearn.preprocessing import MinMaxScaler
 import tensorflow_datasets as tfds
 
 def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, population=5, 
-         generations=10, iters=100, n_layers=10, max_layer_size=20, hyperparameters={},
+         generations=10, iters=100, max_num_layers=10, max_num_neurons=20, hyperparameters={},
          is_time_series=False, series_input_width=30, series_label_width=1):
     
     x_train, x_test, x_val, y_train, y_test, y_val, mode = load_dataset(dataset_name, 
@@ -47,8 +47,8 @@ def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, populatio
 			 population=population,
 			 generations=generations,
 			 iters=iters, 
-			 n_layers=n_layers, 
-			 max_layer_size=max_layer_size,
+			 max_num_layers=max_num_layers, 
+			 max_num_neurons=max_num_neurons,
              hyperparameters=hyperparameters)   
      
     a = e.evolve()
@@ -100,6 +100,7 @@ def load_dataset(dataset_name, is_time_series=False, series_input_width=30, seri
 def load_mushrooms():    
     features, labels = load_csv("./datasets/mushroom/mushroom.csv",'\\t', '.',
                                 'class',[])
+    labels = [int(l) for l in labels]
     return features, labels, 'class'
 
 def load_air_quality():
@@ -136,6 +137,7 @@ def load_forest_types():
 def load_parkinsons():
     features, labels = load_csv("./datasets/parkinsons/parkinsons.csv", ',', ',',
                                 'status',['name'])
+    labels = [int(l) for l in labels]
     return features, labels, 'class'
 
 def load_CNN(dataset_name):

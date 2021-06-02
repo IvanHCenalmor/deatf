@@ -301,15 +301,15 @@ class ConvDescriptor(NetworkDescriptor):
         self.strides = strides
         self.max_filter = max_filter
         self.max_stride = max_stride
-        
-    def random_init(self, input_size, output_size, max_layer_size, _, max_stride, max_filter, dropout, batch_norm):
+
+    def random_init(self, input_size, output_size, max_num_layers, _, max_stride, max_filter, dropout, batch_norm):
         """
         Given the input, the output and some limits for the parametes of the 
         network, a random initialization of the object (the network descriptor) is done. 
         
         :param input_size: Dimension of the input.
         :param output_size: Dimension of the output.
-        :param max_layer_size: Maximum number of layers.
+        :param max_num_layers: Maximum number of layers.
         :param max_stride: Maximum stride possible (used as 2)
         :param max_filter: Maximum filter size possible (used as 3)
         :param dropout: Whether dropout is a possibility in the network
@@ -319,7 +319,7 @@ class ConvDescriptor(NetworkDescriptor):
         self.input_dim = input_size
         self.output_dim = output_size
 
-        self.number_hidden_layers = np.random.randint(max_layer_size)+1
+        self.number_hidden_layers = np.random.randint(max_num_layers)+1
         self.layers = []
         self.max_stride = max_stride
         self.strides = []
@@ -374,13 +374,17 @@ class ConvDescriptor(NetworkDescriptor):
         if batch_norm is not None and not batch_norm:
             self.batch_norm = np.random.choice([True, False])
 
-    def add_layer(self, layer_pos, lay_type, lay_params):
+    
+    def add_layer(self, layer_pos, lay_type, filter_size, stride_size, act_function, init_function):
         """
         Adds a layer in the given position with all the characteristics indicated by parameters.
         
         :param layer_pos: Position of the layer.
         :param lay_type: Type of operation (0, 1: pooling, 2 convolutional).
-        :param lay_params: Sizes of the filters and strides.
+        :param filter_size: Filter size.
+        :param stride_size: Stride size.
+        :param act_function: Activation function.
+        :param init_function: Initialization function.
         """
         
         aux_filters = copy.deepcopy(self.filters)
@@ -391,21 +395,22 @@ class ConvDescriptor(NetworkDescriptor):
             layer_pos += 1
         
         aux_number_hidden_layers += 1
-        aux_filters.insert(layer_pos, np.array([lay_params[1], lay_params[1], np.random.randint(0, self.MAX_NUM_FILTER)]))
-        aux_strides.insert(layer_pos, np.array([lay_params[0], lay_params[0], 1]))
+        aux_filters.insert(layer_pos, np.array([filter_size, filter_size, np.random.randint(0, self.MAX_NUM_FILTER)]))
+        aux_strides.insert(layer_pos, np.array([stride_size, stride_size, 1]))
         if lay_type < 2:
             aux_number_hidden_layers += 1
-            pool_params = [1, np.random.randint(2, 4), np.random.choice(activations[1:]), np.random.choice(initializations[1:])]
+            pool_filters = np.random.randint(2, 4)
+            pool_strides = 1
             
-            aux_filters.insert(layer_pos, np.array([pool_params[1], pool_params[1], np.random.randint(0, self.MAX_NUM_FILTER)]))
-            aux_strides.insert(layer_pos, np.array([pool_params[0], pool_params[0], 1]))
+            aux_filters.insert(layer_pos, np.array([pool_filters, pool_filters, np.random.randint(0, self.MAX_NUM_FILTER)]))
+            aux_strides.insert(layer_pos, np.array([pool_strides, pool_strides, 1]))
             
         if calculate_CNN_shape(self.input_dim, aux_filters, aux_strides, aux_number_hidden_layers)[0] > 0:
         
             self.layers.insert(layer_pos, 2)
             # A convolutional layer is added always
-            self.act_functions.insert(layer_pos, lay_params[2])
-            self.init_functions.insert(layer_pos, lay_params[3])
+            self.act_functions.insert(layer_pos, act_function)
+            self.init_functions.insert(layer_pos, init_function)
     
             if lay_type < 2:
                 # If a max_pool or avg_pool has to be added
@@ -586,19 +591,22 @@ class TConvDescriptor(NetworkDescriptor):
         if batch_norm is not None and not batch_norm:
             self.batch_norm = np.random.choice([True, False])
                 
-    def add_layer(self, layer_pos, lay_params):
+    def add_layer(self, layer_pos, filter_size, stride_size, act_function, init_function):
         """
         Adds a layer in the given position with all the characteristics indicated by parameters.
         
         :param layer_pos: Position of the layer.
-        :param lay_params: Sizes of the filters and strides.
+        :param filter_size: Filter size.
+        :param stride_size: Stride size.
+        :param act_function: Activation function.
+        :param init_function: Initialization function.
         """
         
         self.number_hidden_layers += 1
-        self.strides.insert(layer_pos, np.array([lay_params[0], lay_params[0], 1]))
-        self.filters.insert(layer_pos, np.array([lay_params[1], lay_params[1], np.random.randint(0, self.MAX_NUM_FILTER)]))
-        self.act_functions.insert(layer_pos, lay_params[2])
-        self.init_functions.insert(layer_pos, lay_params[3])
+        self.filters.insert(layer_pos, np.array([filter_size, filter_size, np.random.randint(0, self.MAX_NUM_FILTER)]))
+        self.strides.insert(layer_pos, np.array([stride_size, stride_size, 1]))
+        self.act_functions.insert(layer_pos, act_function)
+        self.init_functions.insert(layer_pos, init_function)
             
         for i in range(layer_pos, self.number_hidden_layers):
             
@@ -770,7 +778,7 @@ class RNNDescriptor(NetworkDescriptor):
         :param input_size: Input size of the network (it will be flattened in order to fit in the MLP).
         :param output_size: Output size of the network (it will be flattened in order to fit in the MLP).
         :param max_num_layers: Maximum number of layers that can be in the network.
-        :param max_num_neurons: Maximum number fo neurons that can be in each layer of the network.
+        :param max_num_neurons: Maximum number fo units that can be in each recurrent layer of the network.
         :param dropout: A boolean value that indicates if the networks can have dropout.
         :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """
@@ -794,20 +802,20 @@ class RNNDescriptor(NetworkDescriptor):
         else:
             self.dropout_probs = np.zeros(self.number_hidden_layers+1)
     
-    def add_layer(self, layer_pos, lay_params):
+    def add_layer(self, layer_pos, rnn_type, units_in_layer, bidirectional, act_function, init_function):
         """
         Adds a layer in the given position with all the characteristics indicated by parameters.
         
         :param layer_pos: Position of the layer.
-        :param lay_params: Sizes of the filters and strides.
+        :param lay_params: Type of recurrent layer, how many units, etc..
         """
         
         self.number_hidden_layers += 1
-        self.rnn_layers.insert(layer_pos, lay_params[0])
-        self.units_in_layer.insert(layer_pos, min(lay_params[1], self.max_units))
-        self.bidirectional.insert(layer_pos, lay_params[2])
-        self.act_functions.insert(layer_pos, lay_params[3])
-        self.init_functions.insert(layer_pos, lay_params[4])
+        self.rnn_layers.insert(layer_pos, rnn_type)
+        self.units_in_layer.insert(layer_pos, min(units_in_layer, self.max_units))
+        self.bidirectional.insert(layer_pos, bidirectional)
+        self.act_functions.insert(layer_pos, act_function)
+        self.init_functions.insert(layer_pos, init_function)
     
     def remove_layer(self, layer_pos):
         """

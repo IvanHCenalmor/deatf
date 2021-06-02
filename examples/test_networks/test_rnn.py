@@ -18,7 +18,7 @@ import tensorflow.keras.optimizers as opt
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 def test_RNN_all_datasets(eval_func=None, is_time_series=True,series_input_width=30, series_label_width=1, 
-                      batch_size=150, population=5, generations=10, iters=100, n_layers=10, max_layer_size=20,
+                      batch_size=150, population=5, generations=10, iters=100, max_num_layers=10, max_num_neurons=20,
                       hyperparameters={}):
     
     dataset_collection = ['mnist', 'kmnist', 'air_quality', 'estambul_values']
@@ -27,8 +27,8 @@ def test_RNN_all_datasets(eval_func=None, is_time_series=True,series_input_width
         
         print('\nEvaluating the {} dataset with the following configuration:'.format(dataset),
               '\nBatch size:  {}\nPopulation of networks:  {}\nGenerations:  {}'.format(batch_size, population, generations),
-              '\nIterations in each network:  {}\nMaximum number of layers:  {}'.format(iters, n_layers),
-              '\nMaximum number of neurons in each layer: {}'.format(max_layer_size))
+              '\nIterations in each network:  {}\nMaximum number of layers:  {}'.format(iters, max_num_layers),
+              '\nMaximum number of neurons in each layer: {}'.format(max_num_neurons))
 
         init_time = time.time()
         
@@ -37,7 +37,7 @@ def test_RNN_all_datasets(eval_func=None, is_time_series=True,series_input_width
                  series_input_width=series_input_width, series_label_width=series_label_width,
                  eval_func=eval_func, batch_size=batch_size, 
                  population=population, generations=generations, iters=iters, 
-                 n_layers=n_layers, max_layer_size=max_layer_size,
+                 max_num_layers=max_num_layers, max_num_neurons=max_num_neurons,
                  hyperparameters=hyperparameters)
             print(x)
         except Exception as e:
@@ -47,7 +47,7 @@ def test_RNN_all_datasets(eval_func=None, is_time_series=True,series_input_width
         print('Time: ', time.time() - init_time)
 
 def test_RNN(dataset_name,eval_func=None, batch_size=150, population=5, 
-             generations=10, iters=100, n_layers=10, max_layer_size=20, 
+             generations=10, iters=100, max_num_layers=10, max_num_neurons=20, 
              hyperparameters={}, is_time_series=True,
              series_input_width=30, series_label_width=1,):
     
@@ -84,8 +84,8 @@ def test_RNN(dataset_name,eval_func=None, batch_size=150, population=5,
 			 population=population,
 			 generations=generations,
 			 iters=iters, 
-			 n_layers=n_layers, 
-			 max_layer_size=max_layer_size,
+			 max_num_layers=max_num_layers, 
+			 max_num_neurons=max_num_neurons,
              hyperparameters=hyperparameters)   
      
     a = e.evolve()
@@ -131,9 +131,9 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
 if __name__ == "__main__":
     #evaluated = test_RNN('estambul_values', is_time_series=True, series_input_width=50, series_label_width=1,
     #                     eval_func=eval_rnn, batch_size=300, population=4, 
-    #                     generations=5, iters=3, n_layers=10, max_layer_size=20,                  
+    #                     generations=5, iters=3, max_num_layers=10, max_num_neurons=20,                  
     #                     hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]})
     test_RNN_all_datasets(is_time_series=True, series_input_width=50, series_label_width=1,
                           eval_func=eval_rnn, batch_size=150, population=2, 
-                          generations=2, iters=10, n_layers=10, max_layer_size=20,                  
+                          generations=2, iters=10, max_num_layers=10, max_num_neurons=20,                  
                           hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]})
