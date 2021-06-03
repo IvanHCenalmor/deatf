@@ -1,4 +1,4 @@
-auto\_encoder module
+Auto Encoder
 ====================
 
 .. automodule:: auto_encoder

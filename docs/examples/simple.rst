@@ -1,5 +1,5 @@
-simple module
-=============
+Multi Layer Perceptron
+======================
 
 .. automodule:: simple
    :members:

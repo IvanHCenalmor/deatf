@@ -1,5 +1,5 @@
-sequential module
-=================
+Sequential
+==========
 
 .. automodule:: sequential
    :members:

@@ -1,5 +1,5 @@
-cnn\_class module
-=================
+Convolutional Neural Network
+============================
 
 .. automodule:: cnn_class
    :members:

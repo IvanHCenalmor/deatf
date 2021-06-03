@@ -1,5 +1,5 @@
-gan module
-==========
+Genetic Adversarial Network
+===========================
 
 .. automodule:: gan
    :members:

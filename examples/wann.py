@@ -18,8 +18,6 @@ from tensorflow.keras.models import Model
 import tensorflow.keras.optimizers as opt
 from sklearn.preprocessing import OneHotEncoder
 
-evals = []
-
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 """
@@ -82,8 +80,6 @@ def eval_wann(nets, train_inputs, train_outputs, batch_size, iters, test_inputs,
             layer.set_weights(ls[i])
 
     models["n0"] = model
-
-    global evals
     
     preds = models["n0"].predict(test_inputs["i0"])
     
@@ -91,10 +87,6 @@ def eval_wann(nets, train_inputs, train_outputs, batch_size, iters, test_inputs,
     
     res = np.argmax(res, axis=1)
     res = 1 - np.sum(np.argmax(test_outputs["o0"], axis=1) == res) / res.shape[0]
-
-    if len(evals) % 10000 == 0:
-        np.save("temp_evals.npy", np.array(evals))
-    evals += [res]
 
     return res,
 

@@ -1,7 +1,7 @@
-rnn module
-==========
+Multi-network
+=============
 
-.. automodule:: rnn
+.. automodule:: multi
    :members:
    :undoc-members:
    :show-inheritance:

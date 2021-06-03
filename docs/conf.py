@@ -17,7 +17,7 @@ sys.path.append(os.path.abspath('../examples'))
 
 # -- Project information -----------------------------------------------------
 
-project = 'EvoFlow-2'
+project = 'DEATF'
 copyright = '2021, Iván Hidalgo'
 author = 'Iván Hidalgo'
 
@@ -52,3 +52,7 @@ html_theme = 'default'
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 html_static_path = ['_static']
+
+html_sidebars = {
+    'index': ['indexsidebar.html'],
+}

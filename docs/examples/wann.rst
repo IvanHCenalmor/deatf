@@ -1,5 +1,5 @@
-wann module
-===========
+Weighted Neural Network
+=======================
 
 .. automodule:: wann
    :members:

@@ -1,5 +1,5 @@
-multi module
-============
+Multi-network
+=============
 
 .. automodule:: multi
    :members:

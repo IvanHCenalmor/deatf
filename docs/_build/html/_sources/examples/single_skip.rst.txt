@@ -1,7 +1,7 @@
-cnn\_ae module
-==============
+Single Skip
+===========
 
-.. automodule:: cnn_ae
+.. automodule:: single_skip
    :members:
    :undoc-members:
    :show-inheritance:
