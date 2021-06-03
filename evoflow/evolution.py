@@ -37,8 +37,8 @@ class Evolving:
     This is the main class in charge of evolving model descriptors. It contains 
     all the needed functions and atributes in order to realize the evolution.
     For evolving the desired network, these are the two stepts to follow:
-        1.- Initialize this class with all the desired qualities.
-        2.- Call evolve() function.
+    1.- Initialize this class with all the desired qualities.
+    2.- Call evolve() function.
         
     :param n_inputs: List of lists with the dimensions of the input sizes of each network.
     :param n_outputs: List of lists with the dimensions of the output sizes of each network.
@@ -72,7 +72,7 @@ class Evolving:
     :param ev_alg: String that indicates the evolution algorithm that will be used.
                    Possibilities are: 'simple', 'mu_plus_lambda' or 'mu_comm_lambda'.
     :param evol_kwargs: Dictionary with parameters for the main DEAP function. The keys 
-                        for that parameters are:' mu', 'lambda_', 'cxpb' or 'mutpb'. Being
+                        for that parameters are:' mu', 'lambda', 'cxpb' or 'mutpb'. Being
                         mu and lambda to float values for the mu_plus_lambda algorithm 
                         from DEAP. And cxpb and mutpb the crossover and mutation probabliites
                         respectively.
@@ -284,6 +284,7 @@ class Evolving:
         print the mean, standard, minimum and maximum values obtained form the individuals in
         each generation. Finally, it return the individuals from the lasta generation, the stats
         and the best individuals found during the algorithm.
+        
         :return: The last generation, a log book (stats) and the hall of fame (the best 
                  individuals found).
         """

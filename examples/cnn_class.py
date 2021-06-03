@@ -23,6 +23,18 @@ import tensorflow.keras.optimizers as opt
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
+    """
+    
+    :param nets:
+    :param train_inputs:
+    :param train_outputs:
+    :param batch_size:
+    :param iters:
+    :param test_inputs:
+    :param test_outputs:
+    :param hypers:
+    """
+  
     models = {}
     
     inp = Input(shape=train_inputs["i0"].shape[1:])

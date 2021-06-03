@@ -740,7 +740,7 @@ class TConvDescriptor(NetworkDescriptor):
 class RNNDescriptor(NetworkDescriptor):
     """
     Descriptor of a Recurrent Neural Network, formed by recurrent layers and with
-     the possibility of selecting the type and number of unit in the recurrent
+    the possibility of selecting the type and number of unit in the recurrent
     layer and allowing bidirectional layers.
     
     :param number_hidden_layers: Number of hidden layers in the network.

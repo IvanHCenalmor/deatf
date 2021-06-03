@@ -41,6 +41,18 @@ def eval_sequential(nets, train_inputs, train_outputs, batch_size, iters, test_i
     :param hypers: Optional hyperparameters being evolved in case they were defined for evolution (in this case we also evolve optimizer selection and learning rate)
     :return: A dictionary with the tf layer which makes the predictions
     """
+    """
+    
+    :param nets:
+    :param train_inputs:
+    :param train_outputs:
+    :param batch_size:
+    :param iters:
+    :param test_inputs:
+    :param test_outputs:
+    :param hypers:
+    """
+  
 
     models = {}
     

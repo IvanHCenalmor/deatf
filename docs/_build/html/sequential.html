@@ -1,0 +1,114 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>sequential module &#8212; EvoFlow-2  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">EvoFlow-2  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">sequential module</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="module-sequential">
+<span id="sequential-module"></span><h1>sequential module<a class="headerlink" href="#module-sequential" title="Permalink to this headline">¶</a></h1>
+<p>This is a use case of EvoFlow</p>
+<p>In this instance, we handle a classification problem, which is to be solved by two DNNs combined in a sequential layout.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="sequential.eval_sequential">
+<span class="sig-prename descclassname"><span class="pre">sequential.</span></span><span class="sig-name descname"><span class="pre">eval_sequential</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#sequential.eval_sequential" title="Permalink to this definition">¶</a></dt>
+<dd><p>This function takes care of arranging the model and training it. It is used by the evolutionary internally,
+and always is provided with the same parameters
+:param nets: Dictionary with the Networks (“n0”, “n1”, …, “nm”, in the same order as they have been requested in the <em>desc_list</em> parameter)
+:param train_inputs: Data to be used for training
+:param train_outputs: Data to be used for training
+:param batch_size: Batch_size to be used when training. It is not mandatory to use it
+:param hypers: Optional hyperparameters being evolved in case they were defined for evolution (in this case we also evolve optimizer selection and learning rate)
+:return: A dictionary with the tf layer which makes the predictions</p>
+</dd></dl>
+
+<dl class="py data">
+<dt class="sig sig-object py" id="sequential.optimizers">
+<span class="sig-prename descclassname"><span class="pre">sequential.</span></span><span class="sig-name descname"><span class="pre">optimizers</span></span><em class="property"> <span class="pre">=</span> <span class="pre">[&lt;class</span> <span class="pre">'tensorflow.python.keras.optimizer_v2.adadelta.Adadelta'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tensorflow.python.keras.optimizer_v2.adagrad.Adagrad'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;]</span></em><a class="headerlink" href="#sequential.optimizers" title="Permalink to this definition">¶</a></dt>
+<dd><p>This is not a straightforward task as we need to “place” the models in the sequential order.
+For this, we need to:
+1- Tell the model the designed arrangement.
+2- Define the training process.
+3- Implement a fitness function to test the models.</p>
+</dd></dl>
+
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/sequential.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">EvoFlow-2  documentation</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">sequential module</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Iván Hidalgo.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

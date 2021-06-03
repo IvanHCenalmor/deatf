@@ -17,16 +17,36 @@ from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
 
 def hand_made_tf_mse(target, prediction):
+    """
+    Calculates the mean squared error by using TensorFlow operators.
+    
+    :param target: Ground of truth data.
+    :param prediction: Predicted data.
+    :return: Mean squared error in a Tensor form.
+    """
     return tf.reduce_mean(tf.math.squared_difference(target, prediction))
 
 def hand_made_np_mse(target, prediction):
+    """
+    Calculates the mean squared error by using NumPy operators.
+    
+    :param target: Ground of truth data.
+    :param prediction: Predicted data.
+    :return: Mean squared error in a NumPy form.
+    """
     return np.mean(np.square(target-prediction))
 
 def ae_eval(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
-    Function for evolving a single individual. No need of the user providing a evaluation function
-    :param individual: DEAP individual
-    :return: Fitness value
+    
+    :param nets:
+    :param train_inputs:
+    :param train_outputs:
+    :param batch_size:
+    :param iters:
+    :param test_inputs:
+    :param test_outputs:
+    :param hypers:
     """
     
     inp = Input(shape=train_inputs["i0"].shape[1:])
@@ -49,7 +69,7 @@ def ae_eval(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, t
     return ev
 
 if __name__ == "__main__":
-
+    
     x_train, _, x_test, _, x_val, _ = load_fashion()
 
     x_train = np.reshape(x_train, (-1, 784))
@@ -62,9 +82,9 @@ if __name__ == "__main__":
 
     e = Evolving(evaluation=ae_eval, desc_list=[MLPDescriptor], 
                  x_trains=[x_train], y_trains=[x_train], x_tests=[x_val], y_tests=[x_val], 
-                 n_inputs=[[784]], n_outputs=[[784]], batch_size=150, iters=10, 
+                 n_inputs=[[784]], n_outputs=[[784]],
                  hyperparameters={"lrate": [0.1, 0.5, 1]},
-                 population=5, generations=20, iters=100, 
+                 population=5, generations=20,  batch_size=150, iters=100, 
                  max_num_layers=10, max_num_neurons=100, seed=0)
     a = e.evolve()
 

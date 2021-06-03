@@ -1,0 +1,1639 @@
+
+<!DOCTYPE html>
+
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Evoflow &#8212; EvoFlow-2  documentation</title>
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/classic.css" />
+    
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
+    <script src="_static/jquery.js"></script>
+    <script src="_static/underscore.js"></script>
+    <script src="_static/doctools.js"></script>
+    
+    <link rel="index" title="Index" href="genindex.html" />
+    <link rel="search" title="Search" href="search.html" />
+    <link rel="next" title="Examples" href="examples.html" />
+    <link rel="prev" title="evoflow" href="modules.html" /> 
+  </head><body>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             accesskey="I">index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples"
+             accesskey="N">next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="evoflow"
+             accesskey="P">previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">EvoFlow-2  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" accesskey="U">evoflow</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Evoflow</a></li> 
+      </ul>
+    </div>  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          <div class="body" role="main">
+            
+  <div class="section" id="evoflow">
+<h1>Evoflow<a class="headerlink" href="#evoflow" title="Permalink to this headline">¶</a></h1>
+<div class="section" id="module-evoflow.auxiliary_functions">
+<span id="evoflow-auxiliary-functions-module"></span><h2>evoflow.auxiliary_functions module<a class="headerlink" href="#module-evoflow.auxiliary_functions" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.auxiliary_functions.batch">
+<span class="sig-prename descclassname"><span class="pre">evoflow.auxiliary_functions.</span></span><span class="sig-name descname"><span class="pre">batch</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">data</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">n</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">i</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.auxiliary_functions.batch" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>data</strong> – Set of solutions intended to be fed to the network.</p></li>
+<li><p><strong>n</strong> – Size of the desired batch.</p></li>
+<li><p><strong>i</strong> – Index of the last solution used in the last epoch.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The batch of data form x with size n since the index i of the data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-evoflow.data">
+<span id="evoflow-data-module"></span><h2>evoflow.data module<a class="headerlink" href="#module-evoflow.data" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.data.load_fashion">
+<span class="sig-prename descclassname"><span class="pre">evoflow.data.</span></span><span class="sig-name descname"><span class="pre">load_fashion</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.data.load_fashion" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Data of fashion mnist dataset divided in train, test and validation
+(x_train, y_train, x_test, y_test, x_val, y_val).</p>
+</dd>
+<dt class="field-even">Rtype x_train</dt>
+<dd class="field-even"><p>uint8 NumPy array of grayscale image data with shapes (42000, 28, 28), 
+containing the training data.</p>
+</dd>
+<dt class="field-odd">Rtype y_train</dt>
+<dd class="field-odd"><p>uint8 NumPy array of labels (integers in range 0-9) with shape (42000,) 
+for the training data.</p>
+</dd>
+<dt class="field-even">Rtype x_test</dt>
+<dd class="field-even"><p>uint8 NumPy array of grayscale image data with shapes (10000, 28, 28), 
+containing the test data.</p>
+</dd>
+<dt class="field-odd">Rtype y_test</dt>
+<dd class="field-odd"><p>uint8 NumPy array of labels (integers in range 0-9) with shape (10000,) 
+for the test data.</p>
+</dd>
+<dt class="field-even">Rtype x_val</dt>
+<dd class="field-even"><p>uint8 NumPy array of grayscale image data with shapes (18000, 28, 28), 
+containing the validation data.</p>
+</dd>
+<dt class="field-odd">Rtype y_val</dt>
+<dd class="field-odd"><p>uint8 NumPy array of labels (integers in range 0-9) with shape (18000,) 
+for the validation data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.data.load_mnist">
+<span class="sig-prename descclassname"><span class="pre">evoflow.data.</span></span><span class="sig-name descname"><span class="pre">load_mnist</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.data.load_mnist" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>Data of fashion mnist dataset divided in train, test and validation
+(x_train, y_train, x_test, y_test, x_val, y_val).</p>
+</dd>
+<dt class="field-even">Rtype x_train</dt>
+<dd class="field-even"><p>uint8 NumPy array of grayscale image data with shapes (42000, 28, 28), 
+containing the training data. Pixel values range from 0 to 255.</p>
+</dd>
+<dt class="field-odd">Rtype y_train</dt>
+<dd class="field-odd"><p>uint8 NumPy array of labels (integers in range 0-9) with shape (42000,) 
+for the training data.</p>
+</dd>
+<dt class="field-even">Rtype x_test</dt>
+<dd class="field-even"><p>uint8 NumPy array of grayscale image data with shapes (10000, 28, 28), 
+containing the test data. Pixel values range from 0 to 255.</p>
+</dd>
+<dt class="field-odd">Rtype y_test</dt>
+<dd class="field-odd"><p>uint8 NumPy array of labels (integers in range 0-9) with shape (10000,)
+for the test data.</p>
+</dd>
+<dt class="field-even">Rtype x_val</dt>
+<dd class="field-even"><p>uint8 NumPy array of grayscale image data with shapes (18000, 28, 28), 
+containing the validation data. Pixel values range from 0 to 255.</p>
+</dd>
+<dt class="field-odd">Rtype y_val</dt>
+<dd class="field-odd"><p>uint8 NumPy array of labels (integers in range 0-9) with shape (18000,) 
+for the validation data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-evoflow.evolution">
+<span id="evoflow-evolution-module"></span><h2>evoflow.evolution module<a class="headerlink" href="#module-evoflow.evolution" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.evolution.DescriptorContainer">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.evolution.</span></span><span class="sig-name descname"><span class="pre">DescriptorContainer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">descriptor_list</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.DescriptorContainer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>Auxiliar class for DEAP algorithm. This object will represent the individual
+that will be evolved in the Genetic Algorithm. It contains a dictionary
+with the networks descriptors and the hyperparameters that will be evolved.
+This class does not require a fitness attribute because it will be added 
+later by the DEAP’s creator.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>descriptor_list</strong> – A dictionary containing the descriptors of the 
+networks and hyperparameters that will be evolved 
+with DEAP algorithm.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.evolution.</span></span><span class="sig-name descname"><span class="pre">Evolving</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="pre">desc_list=[&lt;class</span> <span class="pre">'evoflow.network.MLPDescriptor'&gt;],</span> <span class="pre">compl=False,</span> <span class="pre">x_trains=None,</span> <span class="pre">y_trains=None,</span> <span class="pre">x_tests=None,</span> <span class="pre">y_tests=None,</span> <span class="pre">evaluation='XEntropy',</span> <span class="pre">n_inputs=((28,</span> <span class="pre">28),),</span> <span class="pre">n_outputs=((10,),),</span> <span class="pre">batch_size=100,</span> <span class="pre">population=20,</span> <span class="pre">generations=20,</span> <span class="pre">iters=10,</span> <span class="pre">lrate=0.01,</span> <span class="pre">sel='best',</span> <span class="pre">max_num_layers=10,</span> <span class="pre">max_num_neurons=100,</span> <span class="pre">max_filter=4,</span> <span class="pre">max_stride=3,</span> <span class="pre">seed=None,</span> <span class="pre">cxp=0,</span> <span class="pre">mtp=1,</span> <span class="pre">dropout=False,</span> <span class="pre">batch_norm=False,</span> <span class="pre">evol_kwargs={},</span> <span class="pre">sel_kwargs={},</span> <span class="pre">ev_alg='mu_plus_lambda',</span> <span class="pre">hyperparameters={},</span> <span class="pre">custom_mutations={},</span> <span class="pre">add_obj=0</span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This is the main class in charge of evolving model descriptors. It contains 
+all the needed functions and atributes in order to realize the evolution.
+For evolving the desired network, these are the two stepts to follow:
+1.- Initialize this class with all the desired qualities.
+2.- Call evolve() function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>n_inputs</strong> – List of lists with the dimensions of the input sizes of each network.</p></li>
+<li><p><strong>n_outputs</strong> – List of lists with the dimensions of the output sizes of each network.</p></li>
+<li><p><strong>max_num_layers</strong> – Maximum number of layers.</p></li>
+<li><p><strong>max_num_neurons</strong> – Maximum number of neurons in all layers (only relevant with MLP descriptors).</p></li>
+<li><p><strong>max_filter</strong> – Maximum size of filter (only relevant with CNN and TCNN descriptors).</p></li>
+<li><p><strong>max_stride</strong> – Maximum size of stride (only relevant with CNN and TCNN descriptors).</p></li>
+<li><p><strong>descriptors</strong> – List with all the network descriptors that are wanted to be evolved.</p></li>
+<li><p><strong>evaluation</strong> – Function for evaluating the model. A string in simple cases (‘MSE’ or ‘XEntropy’)
+and one defined by the user in complex cases.</p></li>
+<li><p><strong>batch_size</strong> – Number of samples per batch are used during training process.</p></li>
+<li><p><strong>lrate</strong> – Learning rate used during training process.</p></li>
+<li><p><strong>iters</strong> – Number of iterations that each model is trained.</p></li>
+<li><p><strong>train_inputs</strong> – Dictionary with the trainig input features for each network. The key is ‘iX’
+being X the network for which the data is and the value is the actual data.</p></li>
+<li><p><strong>train_outputs</strong> – Dictionary with the trainig output labels for each network. The key is ‘oX’
+being X the network for which the data is and the value is the actual data.</p></li>
+<li><p><strong>test_inputs</strong> – Dictionary with the testing input features for each network. The key is ‘iX’
+being X the network for which the data is and the value is the actual data.</p></li>
+<li><p><strong>test_outputs</strong> – Dictionary with the testing output labels for each network. The key is ‘oX’
+being X the network for which the data is and the value is the actual data.</p></li>
+<li><p><strong>complex</strong> – A boolean valeu that indicates if the network that is going to be evaluated is complex
+or not. The conditions for being complex are: if is indicated in initialization, if 
+user defined evalutaion method is used, if more than one network descriptor are 
+evolved or if the network descriptor to be evolved is different from a MLP. It is complex
+if occurs any of these conditions; otherwise, if none of the condition are true,
+is is considered simple (not complex).</p></li>
+<li><p><strong>toolbox</strong> – Obect Toolbox() from deap.base in the DEAP algorithm.</p></li>
+<li><p><strong>selection</strong> – String that indicates the selection method used in the evolution. 
+Possibilities are: ‘best’, ‘tournament’, ‘roulette’, ‘random’ or ‘nsga2’.</p></li>
+<li><p><strong>ev_alg</strong> – String that indicates the evolution algorithm that will be used.
+Possibilities are: ‘simple’, ‘mu_plus_lambda’ or ‘mu_comm_lambda’.</p></li>
+<li><p><strong>evol_kwargs</strong> – Dictionary with parameters for the main DEAP function. The keys 
+for that parameters are:’ mu’, ‘lambda’, ‘cxpb’ or ‘mutpb’. Being
+mu and lambda to float values for the mu_plus_lambda algorithm 
+from DEAP. And cxpb and mutpb the crossover and mutation probabliites
+respectively.</p></li>
+<li><p><strong>cXp</strong> – Float value indicating the crossover probability. It will be 0 if there is only
+one descriptor to be evolved.</p></li>
+<li><p><strong>mtp</strong> – Float value indicating the crossover probability. It will be 1 if there is only
+one descriptor to be evolved.</p></li>
+<li><p><strong>generations</strong> – Number of generations that the evolution algorithm will be running.</p></li>
+<li><p><strong>population_size</strong> – Population of individuals that will be evaluated in the evolution algorithm.</p></li>
+<li><p><strong>ev_hypers</strong> – Hyperparameters to be evolved in the algorithm (e.g., optimizer, batch size).</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.data_save">
+<span class="sig-name descname"><span class="pre">data_save</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x_trains</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_trains</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x_tests</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">y_tests</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.data_save" title="Permalink to this definition">¶</a></dt>
+<dd><p>Load data given by parameters in the atributes of data from
+the class Evolving, it initialices those atributes (train_inputs, 
+train_outputs, test_inputs and test_outputs).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>x_trains</strong> – Features data for training.</p></li>
+<li><p><strong>y_trains</strong> – Labels data for training.</p></li>
+<li><p><strong>x_tests</strong> – Features data for testing.</p></li>
+<li><p><strong>y_tests</strong> – Labels data for testing.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.define_evaluation">
+<span class="sig-name descname"><span class="pre">define_evaluation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">evaluation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.define_evaluation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the evaluation function. It accepts an string (‘MSE’ or ‘XEntropy)
+and it will use the predifined functions from TensorFlow; this will be done
+in simple cases. Otherwise, the evaluation function will be defined and passed
+by parameter by the user.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>evaluation</strong> – Evaluation function. Either string (predefined) or customized by the user.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.define_evolving">
+<span class="sig-name descname"><span class="pre">define_evolving</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ev_alg</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.define_evolving" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the evolutionary algorithm for the evolution. It uses predefined algorithms
+from DEAP library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>selection</strong> – String that indicates the evolutionary algorithm 
+(‘simple’, ‘mu_plus_lambda’ or ‘mu_comm_lambda’).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.define_selection">
+<span class="sig-name descname"><span class="pre">define_selection</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">selection</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.define_selection" title="Permalink to this definition">¶</a></dt>
+<dd><p>Define the selection method for the evolution algorithm. It uses predefined methods
+from DEAP library.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>selection</strong> – String that indicates the selection method (‘best’, ‘tournament’, ‘roulette’,
+‘random’ or ‘nsga2’).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.eval_individual">
+<span class="sig-name descname"><span class="pre">eval_individual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.eval_individual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function used for evaluating a DEAP individual during the evolutionary algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>individual</strong> – DEAP individual.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value obtained from the evaluation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.eval_multinetwork">
+<span class="sig-name descname"><span class="pre">eval_multinetwork</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.eval_multinetwork" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluation in the complex case. Function for evolving individuals in a 
+complex case.  The user must have implemented the training and evaluation functions.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>individual</strong> – DEAP individual</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value obtained from the evaluation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.evolve">
+<span class="sig-name descname"><span class="pre">evolve</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.evolve" title="Permalink to this definition">¶</a></dt>
+<dd><p>Function that actualy applies the evolutionary algorithm. Using all the information
+provided in the initialization of the class, this function does the evolution. It will
+print the mean, standard, minimum and maximum values obtained form the individuals in
+each generation. Finally, it return the individuals from the lasta generation, the stats
+and the best individuals found during the algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>The last generation, a log book (stats) and the hall of fame (the best 
+individuals found).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.init_individual">
+<span class="sig-name descname"><span class="pre">init_individual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.init_individual" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initializes the individual that is going to be used and evolved during the evolutionary
+algorithm. It will be used s dictionary with the string network id as key and the network 
+descriptor as a value, i.e., {“net_id”: net_desc}.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init_ind</strong> – DEAP function for transforming a network descriptor, or a list of 
+descriptors + evolvable hyperparameters into a DEAP individual.</p></li>
+<li><p><strong>batch_norm</strong> – A boolean value that indicates whether batch normalization is 
+included into the evolution or not.</p></li>
+<li><p><strong>dropout</strong> – A boolean value that incidates whether dropout is included into 
+the evolution or not.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>A DEAP individual totaly initialized.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.initialize_deap">
+<span class="sig-name descname"><span class="pre">initialize_deap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sel_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.initialize_deap" title="Permalink to this definition">¶</a></dt>
+<dd><p>Initialize DEAP function and atributes in order to be ready for evolutionary algorithm.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>sel</strong> – Selection method.</p></li>
+<li><p><strong>sel_kwargs</strong> – Hyperparameters for the selection methods (e.g., size of the tournament 
+if that method is selected).</p></li>
+<li><p><strong>ev_alg</strong> – DEAP evolutionary algorithm.</p></li>
+<li><p><strong>ev_kwargs</strong> – Hyperparameters for the evolutionary algorithm,(e.g., mutation or 
+crossover probability).</p></li>
+<li><p><strong>batch_norm</strong> – Whether the evolutive process includes batch normalization in the 
+networks or not.</p></li>
+<li><p><strong>dropout</strong> – Whether the evolutive process includes dropout in the networks or not.</p></li>
+<li><p><strong>add_obj</strong> – Number of additional objectives.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.is_complex">
+<span class="sig-name descname"><span class="pre">is_complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.is_complex" title="Permalink to this definition">¶</a></dt>
+<dd><p>Determines if the case that will be evolved is a simple or a complex case.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>compl</strong> – A boolean value that directly indicates if is a simple or 
+complex case.</p></li>
+<li><p><strong>evaluation</strong> – Evaluation parameter that is used for initialization 
+(string or function).</p></li>
+<li><p><strong>hyperparameters</strong> – Dictionary with the hyperparameters to ve evolved.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>True boolean value if is a complex case and False boolean value
+if is a simple case.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.evolution.Evolving.single_net_eval">
+<span class="sig-name descname"><span class="pre">single_net_eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.Evolving.single_net_eval" title="Permalink to this definition">¶</a></dt>
+<dd><p>Evaluation in the simple case. Function for evolving a single individual. 
+No need of the user providing a evaluation function.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>individual</strong> – DEAP individual</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Value obtained from the evaluation.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.evolution.cross">
+<span class="sig-prename descclassname"><span class="pre">evoflow.evolution.</span></span><span class="sig-name descname"><span class="pre">cross</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">init_ind</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">ind2</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.cross" title="Permalink to this definition">¶</a></dt>
+<dd><p>Crossover operator for individuals. Cannot be applied in the simple case, as it randomly 
+interchanges model components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>init_ind</strong> – DEAP function for initializing dicts (in this case) as DEAP individuals.</p></li>
+<li><p><strong>ind1</strong> – 1st individual to be crossed (first parent).</p></li>
+<li><p><strong>ind2</strong> – 2st individual to be crossed (second parent).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two new DEAP individuals, the crossed versions of the incoming 
+parameters (the offspring).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.evolution.mutations">
+<span class="sig-prename descclassname"><span class="pre">evoflow.evolution.</span></span><span class="sig-name descname"><span class="pre">mutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ev_hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">individual</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.evolution.mutations" title="Permalink to this definition">¶</a></dt>
+<dd><p>Mutation operators for individuals. They can affect any network or the hyperparameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ev_hypers</strong> – Hyperparameters not included in the networks to be evolved.</p></li>
+<li><p><strong>max_num_layers</strong> – Maximum number of layers in networks.</p></li>
+<li><p><strong>batch_normalization</strong> – Whether batch normalization is part of the evolution or not.</p></li>
+<li><p><strong>drop</strong> – Whether dropout is part of the evolution or not.</p></li>
+<li><p><strong>individual</strong> – DEAP individual. Contains a dict where the keys are the components of the model.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Mutated version of the DEAP individual.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-evoflow.metrics">
+<span id="evoflow-metrics-module"></span><h2>evoflow.metrics module<a class="headerlink" href="#module-evoflow.metrics" title="Permalink to this headline">¶</a></h2>
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.metrics.accuracy_error">
+<span class="sig-prename descclassname"><span class="pre">evoflow.metrics.</span></span><span class="sig-name descname"><span class="pre">accuracy_error</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.metrics.accuracy_error" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>true</strong> – True data, is the ground of truth in the evaluation.</p></li>
+<li><p><strong>prediction</strong> – Predicted data, is the data that is evaluated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The accuracy error calculated between the true and predicted data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.metrics.balanced_accuracy">
+<span class="sig-prename descclassname"><span class="pre">evoflow.metrics.</span></span><span class="sig-name descname"><span class="pre">balanced_accuracy</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.metrics.balanced_accuracy" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>true</strong> – True data, is the ground of truth in the evaluation.</p></li>
+<li><p><strong>prediction</strong> – Predicted data, is the data that is evaluated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The balaced accuracy error calculated between the true and predicted data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.metrics.mse">
+<span class="sig-prename descclassname"><span class="pre">evoflow.metrics.</span></span><span class="sig-name descname"><span class="pre">mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">true</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.metrics.mse" title="Permalink to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>true</strong> – True data, is the ground of truth in the evaluation.</p></li>
+<li><p><strong>prediction</strong> – Predicted data, is the data that is evaluated.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The mean squared error calculated between the true and predicted data.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-evoflow.mutation">
+<span id="evoflow-mutation-module"></span><h2>evoflow.mutation module<a class="headerlink" href="#module-evoflow.mutation" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.mutation.CNN_Mutation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.mutation.</span></span><span class="sig-name descname"><span class="pre">CNN_Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ev_hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_neurons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.CNN_Mutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.mutation.Mutation" title="evoflow.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.mutation.Mutation</span></code></a></p>
+<p>This class implements the possible mutations that can be applied 
+specialy to the CNN descriptors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ev_hypers</strong> – List with the hyperparameters to be evolved.</p></li>
+<li><p><strong>max_num_neurons</strong> – Maximum number of neurons in each layer that the descriptor can have.</p></li>
+<li><p><strong>network</strong> – CNN descriptor that will be mutated.</p></li>
+<li><p><strong>hyperparameters</strong> – Hyperparameters that are in the mutated network.</p></li>
+<li><p><strong>custom_mutation_list</strong> – Optinal list with the mutations that can be applied
+to the network. Is defined by the user with the mutations
+wanted, if is not defined, all possible mutations could be applied.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.CNN_Mutation.mut_add_conv_layer">
+<span class="sig-name descname"><span class="pre">mut_add_conv_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.CNN_Mutation.mut_add_conv_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A new convolutional or pooling layer is added to the CNN descriptor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.CNN_Mutation.mut_filter_conv">
+<span class="sig-name descname"><span class="pre">mut_filter_conv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.CNN_Mutation.mut_filter_conv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter of a random layer is changed to a new random
+filter with size from 2 to maximum filter size described 
+in the network descriptor and with channels from 1 to 65.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.CNN_Mutation.mut_remove_conv_layer">
+<span class="sig-name descname"><span class="pre">mut_remove_conv_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.CNN_Mutation.mut_remove_conv_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a random layer from the CNN descriptor if it is possible (if there is only
+one layer, it can not be removed).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.CNN_Mutation.mut_stride_conv">
+<span class="sig-name descname"><span class="pre">mut_stride_conv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.CNN_Mutation.mut_stride_conv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stride of a random layer is changed to a new random
+stride from 1 to maximum stride size described 
+in the network descriptor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.mutation.MLP_Mutation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.mutation.</span></span><span class="sig-name descname"><span class="pre">MLP_Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ev_hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_neurons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.MLP_Mutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.mutation.Mutation" title="evoflow.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.mutation.Mutation</span></code></a></p>
+<p>This class implements the possible mutations that can be applied 
+specialy to the MLP descriptors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ev_hypers</strong> – List with the hyperparameters to be evolved.</p></li>
+<li><p><strong>max_num_neurons</strong> – Maximum number of neurons in each layer that the descriptor can have.</p></li>
+<li><p><strong>network</strong> – MLP descriptor that will be mutated.</p></li>
+<li><p><strong>hyperparameters</strong> – Hyperparameters that are in the mutated network.</p></li>
+<li><p><strong>custom_mutation_list</strong> – Optinal list with the mutations that can be applied
+to the network. Is defined by the user with the mutations
+wanted, if is not defined, all possible mutations could be applied.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.MLP_Mutation.mut_add_layer">
+<span class="sig-name descname"><span class="pre">mut_add_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.MLP_Mutation.mut_add_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A new dense layer is added to the MLP descriptor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.MLP_Mutation.mut_dimension">
+<span class="sig-name descname"><span class="pre">mut_dimension</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.MLP_Mutation.mut_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of neurons of a random layer are changed to a new random
+number of neurons from 1 to maximum number of neurons described 
+in the initialization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.MLP_Mutation.mut_remove_layer">
+<span class="sig-name descname"><span class="pre">mut_remove_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.MLP_Mutation.mut_remove_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a random layer from the MLP descriptor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.mutation.</span></span><span class="sig-name descname"><span class="pre">Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ev_hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_neurons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class implements the possible mutations that can be applied for a generic
+networks descriptors. This class contains the general mutations that could be 
+applied to any descriptor, subclases will have specific mutations for their own
+network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ev_hypers</strong> – List with the hyperparameters to be evolved.</p></li>
+<li><p><strong>max_num_neurons</strong> – Maximum number of neurons in each layer that the descriptor can have.</p></li>
+<li><p><strong>network</strong> – Network descriptor that will be mutated.</p></li>
+<li><p><strong>hyperparameters</strong> – Hyperparameters that are in the mutated network.</p></li>
+<li><p><strong>custom_mutation_list</strong> – Optinal list with the mutations that can be applied
+to the network. Is defined by the user with the mutations
+wanted, if is not defined, all possible mutations could be applied.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.apply_mutation">
+<span class="sig-name descname"><span class="pre">apply_mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">mutation</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.apply_mutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a mutation method and a network, it applies that mutation to the 
+network if it is possible; if not it raises a ValueError. This function
+is mainly though for the case where the user define the mutation list, in
+order to ensure that all the described mutation can be done.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>mutation</strong> – Mutation that will be applied to the network.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.apply_random_mutation">
+<span class="sig-name descname"><span class="pre">apply_random_mutation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.apply_random_mutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>It selects all the available mutations for the network and after selecting
+one randomly, it applies that mutation.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.methods">
+<span class="sig-name descname"><span class="pre">methods</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.methods" title="Permalink to this definition">¶</a></dt>
+<dd><p>Finds and returns all the possible mutations for that mutation class.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the possible mutations that can be applied.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.mut_activation">
+<span class="sig-name descname"><span class="pre">mut_activation</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.mut_activation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the activation function in a random layer for a new random 
+activation function.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.mut_batch_norm">
+<span class="sig-name descname"><span class="pre">mut_batch_norm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.mut_batch_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the batch normalization boolean.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.mut_dropout">
+<span class="sig-name descname"><span class="pre">mut_dropout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.mut_dropout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the dropout boolean.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.mut_dropout_prob">
+<span class="sig-name descname"><span class="pre">mut_dropout_prob</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.mut_dropout_prob" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the dropout probabilites.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.mut_hyper">
+<span class="sig-name descname"><span class="pre">mut_hyper</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.mut_hyper" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes one of the hyperparameters of the network for a new one selected
+randomly from the list of evolvable hyperparameters described in the initialization.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.Mutation.mut_weight_init">
+<span class="sig-name descname"><span class="pre">mut_weight_init</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.Mutation.mut_weight_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the weight initialization in a random layer for a new random 
+weight initialization function.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.mutation.RNN_Mutation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.mutation.</span></span><span class="sig-name descname"><span class="pre">RNN_Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ev_hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_neurons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.RNN_Mutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.mutation.Mutation" title="evoflow.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.mutation.Mutation</span></code></a></p>
+<p>This class implements the possible mutations that can be applied 
+specialy to the RNN descriptors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ev_hypers</strong> – List with the hyperparameters to be evolved.</p></li>
+<li><p><strong>max_num_neurons</strong> – Maximum number of neurons in each layer that the descriptor can have.</p></li>
+<li><p><strong>network</strong> – RNN descriptor that will be mutated.</p></li>
+<li><p><strong>hyperparameters</strong> – Hyperparameters that are in the mutated network.</p></li>
+<li><p><strong>custom_mutation_list</strong> – Optinal list with the mutations that can be applied
+to the network. Is defined by the user with the mutations
+wanted, if is not defined, all possible mutations could be applied.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.RNN_Mutation.mut_add_rnn_layer">
+<span class="sig-name descname"><span class="pre">mut_add_rnn_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.RNN_Mutation.mut_add_rnn_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A new recurrent layer is added to the RNN descriptor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.RNN_Mutation.mut_change_bidirectional">
+<span class="sig-name descname"><span class="pre">mut_change_bidirectional</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.RNN_Mutation.mut_change_bidirectional" title="Permalink to this definition">¶</a></dt>
+<dd><p>A random layer is changed to be biderctional if is not; otherwise,
+it stops beeing bidirectional.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.RNN_Mutation.mut_change_layer_type">
+<span class="sig-name descname"><span class="pre">mut_change_layer_type</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.RNN_Mutation.mut_change_layer_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Type of a random layer is changed to a new random type.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.RNN_Mutation.mut_change_max_units">
+<span class="sig-name descname"><span class="pre">mut_change_max_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.RNN_Mutation.mut_change_max_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Maximum number of units allowed in the network is change by a new
+randomly selected one from a value between 2 and 10 multiplied by 32.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.RNN_Mutation.mut_change_units">
+<span class="sig-name descname"><span class="pre">mut_change_units</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.RNN_Mutation.mut_change_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Number of units in a random layer is changed to a new random 
+number of units from 1 to maximum number of units described in 
+network descriptor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.RNN_Mutation.mut_remove_rnn_layer">
+<span class="sig-name descname"><span class="pre">mut_remove_rnn_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.RNN_Mutation.mut_remove_rnn_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a random layer from the RNN descriptor.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.mutation.TCNN_Mutation">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.mutation.</span></span><span class="sig-name descname"><span class="pre">TCNN_Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ev_hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_neurons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.TCNN_Mutation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.mutation.Mutation" title="evoflow.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.mutation.Mutation</span></code></a></p>
+<p>This class implements the possible mutations that can be applied 
+specialy to the TCNN descriptors.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>ev_hypers</strong> – List with the hyperparameters to be evolved.</p></li>
+<li><p><strong>max_num_neurons</strong> – Maximum number of neurons in each layer that the descriptor can have.</p></li>
+<li><p><strong>network</strong> – TCNN descriptor that will be mutated.</p></li>
+<li><p><strong>hyperparameters</strong> – Hyperparameters that are in the mutated network.</p></li>
+<li><p><strong>custom_mutation_list</strong> – Optinal list with the mutations that can be applied
+to the network. Is defined by the user with the mutations
+wanted, if is not defined, all possible mutations could be applied.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.TCNN_Mutation.mut_add_deconv_layer">
+<span class="sig-name descname"><span class="pre">mut_add_deconv_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.TCNN_Mutation.mut_add_deconv_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>A new transposed convolutional layer is added to the TCNN descriptor.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.TCNN_Mutation.mut_filter_deconv">
+<span class="sig-name descname"><span class="pre">mut_filter_deconv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.TCNN_Mutation.mut_filter_deconv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Filter of a random layer is changed to a new random
+filter with size from 2 to maximum filter size described 
+in the network descriptor and with channels from 1 to 65.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.TCNN_Mutation.mut_remove_deconv_layer">
+<span class="sig-name descname"><span class="pre">mut_remove_deconv_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.TCNN_Mutation.mut_remove_deconv_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes a random layer from the TCNN descriptor if it is possible (if there is only
+one layer, it can not be removed).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.mutation.TCNN_Mutation.mut_stride_deconv">
+<span class="sig-name descname"><span class="pre">mut_stride_deconv</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.mutation.TCNN_Mutation.mut_stride_deconv" title="Permalink to this definition">¶</a></dt>
+<dd><p>Stride of a random layer is changed to a new random
+stride from 1 to maximum stride size described 
+in the network descriptor.</p>
+</dd></dl>
+
+</dd></dl>
+
+</div>
+<div class="section" id="module-evoflow.network">
+<span id="evoflow-network-module"></span><h2>evoflow.network module<a class="headerlink" href="#module-evoflow.network" title="Permalink to this headline">¶</a></h2>
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.CNN">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">CNN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_descriptor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.CNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.network.Network" title="evoflow.network.Network"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.network.Network</span></code></a></p>
+<p>TensorFlow definition of the Convolutional Neural Network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>network_descriptor</strong> – Descriptor of the CNN.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.CNN.building">
+<span class="sig-name descname"><span class="pre">building</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.CNN.building" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a TensorFlow layer, this functions continues adding more layers of a CNN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – A layer from TensorFlow.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The layer received from parameter with the CNN concatenated to it.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">ConvDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">layer_types</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.ConvDescriptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.network.NetworkDescriptor" title="evoflow.network.NetworkDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.network.NetworkDescriptor</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor.MAX_NUM_FILTER">
+<span class="sig-name descname"><span class="pre">MAX_NUM_FILTER</span></span><em class="property"> <span class="pre">=</span> <span class="pre">65</span></em><a class="headerlink" href="#evoflow.network.ConvDescriptor.MAX_NUM_FILTER" title="Permalink to this definition">¶</a></dt>
+<dd><p>Descriptor of a Convolutional Neural Network, formed by convolutional and pooling layers and 
+with the possibility of selecting the filters and strides in each layer and including 
+batch normalization, but not including dropout.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_hidden_layers</strong> – Number of hidden layers in the network.</p></li>
+<li><p><strong>input_dim</strong> – Dimension of the input data (can have one or more dimensions).</p></li>
+<li><p><strong>output_dim</strong> – Expected output of the network (similarly, can have one or more dimensions).</p></li>
+<li><p><strong>init_functions</strong> – Weight initialization functions. Can have different ranges, depending on the subclass.</p></li>
+<li><p><strong>act_functions</strong> – Activation functions to be applied after each layer.</p></li>
+<li><p><strong>batch_norm</strong> – A boolean that indicates if batch normalization is applied after each layer in the network.</p></li>
+<li><p><strong>dropout</strong> – A boolean that indicates if dropout is applied after each layer in the network.</p></li>
+<li><p><strong>dropout_probs</strong> – The different probabilities of the dropout after each layer.</p></li>
+<li><p><strong>layers</strong> – List of indeces that reference the type of layer.</p></li>
+<li><p><strong>filters</strong> – List of filters sizes in each layer.</p></li>
+<li><p><strong>strides</strong> – List of strides sizes in each layer.</p></li>
+<li><p><strong>max_filter</strong> – Maximum size that filters can have.</p></li>
+<li><p><strong>max_stride</strong> – Maximum size that stride can have.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor.add_layer">
+<span class="sig-name descname"><span class="pre">add_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lay_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.ConvDescriptor.add_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a layer in the given position with all the characteristics indicated by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the layer.</p></li>
+<li><p><strong>lay_type</strong> – Type of operation (0, 1: pooling, 2 convolutional).</p></li>
+<li><p><strong>filter_size</strong> – Filter size.</p></li>
+<li><p><strong>stride_size</strong> – Stride size.</p></li>
+<li><p><strong>act_function</strong> – Activation function.</p></li>
+<li><p><strong>init_function</strong> – Initialization function.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor.change_filters">
+<span class="sig-name descname"><span class="pre">change_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_channel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.ConvDescriptor.change_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the filter of the layer in the position received by parameter for 
+a new filter specified with the size and channels received also by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the filter to be changed.</p></li>
+<li><p><strong>new_kernel_size</strong> – Height and width of the filter (only square filters are allowed).</p></li>
+<li><p><strong>new_channel</strong> – Number of output channels.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor.change_stride">
+<span class="sig-name descname"><span class="pre">change_stride</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_stride</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.ConvDescriptor.change_stride" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the stride of the layer in the position received by parameter 
+for a new stried specified with the data received also by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the filter to be changed.</p></li>
+<li><p><strong>new_stride</strong> – Stride assigned to that layer.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor.codify_components">
+<span class="sig-name descname"><span class="pre">codify_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.ConvDescriptor.codify_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Codifies all the components of the network in a list of tuples, where the 
+first element of the tuple is a description of the value that is in the 
+second element of the tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the components of the network.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor.random_init">
+<span class="sig-name descname"><span class="pre">random_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_stride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_filter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.ConvDescriptor.random_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the input, the output and some limits for the parametes of the 
+network, a random initialization of the object (the network descriptor) is done.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_size</strong> – Dimension of the input.</p></li>
+<li><p><strong>output_size</strong> – Dimension of the output.</p></li>
+<li><p><strong>max_num_layers</strong> – Maximum number of layers.</p></li>
+<li><p><strong>max_stride</strong> – Maximum stride possible (used as 2)</p></li>
+<li><p><strong>max_filter</strong> – Maximum filter size possible (used as 3)</p></li>
+<li><p><strong>dropout</strong> – Whether dropout is a possibility in the network</p></li>
+<li><p><strong>batch_norm</strong> – Whether batch normalization is a possibility in the network</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor.remove_layer">
+<span class="sig-name descname"><span class="pre">remove_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.ConvDescriptor.remove_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the layer in the position received by parameter from the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer_pos</strong> – Position of the layer that is going to be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.ConvDescriptor.remove_random_layer">
+<span class="sig-name descname"><span class="pre">remove_random_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.ConvDescriptor.remove_random_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects and removes a random layer from the network if it is possible.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.MLP">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">MLP</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_descriptor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.MLP" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.network.Network" title="evoflow.network.Network"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.network.Network</span></code></a></p>
+<p>TensorFlow definition of the Multi Layer Perceptron.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>network_descriptor</strong> – Descriptor of the MLP.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.MLP.building">
+<span class="sig-name descname"><span class="pre">building</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.MLP.building" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a TensorFlow layer, this functions continues adding more layers of a MLP.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – A layer from TensorFlow.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The layer received from parameter with the MLP concatenated to it.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.MLPDescriptor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">MLPDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dims</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_probs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.MLPDescriptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.network.NetworkDescriptor" title="evoflow.network.NetworkDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.network.NetworkDescriptor</span></code></a></p>
+<p>Descriptor of a Multi Layer Perceptron, formed by hidden layers and with the possibility of
+selecting the number of neurons in each layer and including dropout and batch normalization.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_hidden_layers</strong> – Number of hidden layers in the network.</p></li>
+<li><p><strong>input_dim</strong> – Dimension of the input data (can have one or more dimensions).</p></li>
+<li><p><strong>output_dim</strong> – Expected output of the network (similarly, can have one or more dimensions).</p></li>
+<li><p><strong>init_functions</strong> – Weight initialization functions. Can have different ranges, depending on the subclass.</p></li>
+<li><p><strong>act_functions</strong> – Activation functions to be applied after each layer.</p></li>
+<li><p><strong>batch_norm</strong> – A boolean that indicates if batch normalization is applied after each layer in the network.</p></li>
+<li><p><strong>dropout</strong> – A boolean that indicates if dropout is applied after each layer in the network.</p></li>
+<li><p><strong>dropout_probs</strong> – The different probabilities of the dropout after each layer.</p></li>
+<li><p><strong>dims</strong> – Number of neurons in each layer.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.MLPDescriptor.add_layer">
+<span class="sig-name descname"><span class="pre">add_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">lay_dims</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">drop_prob</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.MLPDescriptor.add_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a layer in the given position with all the characteristics indicated by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the layer.</p></li>
+<li><p><strong>lay_dims</strong> – Number of neurons in the layer.</p></li>
+<li><p><strong>init_w_function</strong> – Function for initializing the weights of the layer.</p></li>
+<li><p><strong>init_a_function</strong> – Activation function to be applied.</p></li>
+<li><p><strong>dropout</strong> – Whether dropout is applied or not in the layer.</p></li>
+<li><p><strong>drop_prob</strong> – Probability of dropout.</p></li>
+<li><p><strong>batch_norm</strong> – Whether batch normalization is applied after the layer.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.MLPDescriptor.change_layer_dimension">
+<span class="sig-name descname"><span class="pre">change_layer_dimension</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_dim</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.MLPDescriptor.change_layer_dimension" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the dimension of the layer in position given by parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the layer that will be changed.</p></li>
+<li><p><strong>new_dim</strong> – Dimension that will be changed to.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.MLPDescriptor.codify_components">
+<span class="sig-name descname"><span class="pre">codify_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.MLPDescriptor.codify_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Codifies all the components of the network in a list of tuples, where the 
+first element of the tuple is a description of the value that is in the 
+second element of the tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the components of the network.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.MLPDescriptor.random_init">
+<span class="sig-name descname"><span class="pre">random_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_neurons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">__</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.MLPDescriptor.random_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the input, the output and some limits for the parametes of the 
+network, a random initialization of the object (the network descriptor) is done.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_size</strong> – Input size of the network (it will be flattened in order to fit in the MLP).</p></li>
+<li><p><strong>output_size</strong> – Output size of the network (it will be flattened in order to fit in the MLP).</p></li>
+<li><p><strong>max_num_layers</strong> – Maximum number of layers that can be in the network.</p></li>
+<li><p><strong>max_num_neurons</strong> – Maximum number fo neurons that can be in each layer of the network.</p></li>
+<li><p><strong>dropout</strong> – A boolean value that indicates if the networks can have dropout.</p></li>
+<li><p><strong>batch_norm</strong> – A boolean value that indicates if the networks can have batch normalization.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.MLPDescriptor.remove_layer">
+<span class="sig-name descname"><span class="pre">remove_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.MLPDescriptor.remove_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the layer in the position received by parameter from the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer_pos</strong> – Position of the layer that is going to be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.Network">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">Network</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_descriptor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.Network" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class contains the TensorFlow definition of the networks (i.e., the “implementation” of the descriptors).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>network_descriptor</strong> – The descriptor with the information to generate this class (the network).</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">NetworkDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_probs</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">object</span></code></p>
+<p>This class implements the descriptor of a generic network. Subclasses of this are the evolved ones.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_hidden_layers</strong> – Number of hidden layers in the network.</p></li>
+<li><p><strong>input_dim</strong> – Dimension of the input data (can have one or more dimensions).</p></li>
+<li><p><strong>output_dim</strong> – Expected output of the network (similarly, can have one or more dimensions).</p></li>
+<li><p><strong>init_functions</strong> – Weight initialization functions. Can have different ranges, depending on the subclass.</p></li>
+<li><p><strong>act_functions</strong> – Activation functions to be applied after each layer.</p></li>
+<li><p><strong>batch_norm</strong> – A boolean that indicates if batch normalization is applied after each layer in the network.</p></li>
+<li><p><strong>dropout</strong> – A boolean that indicates if dropout is applied after each layer in the network.</p></li>
+<li><p><strong>dropout_probs</strong> – The different probabilities of the dropout after each layer.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor.change_activation">
+<span class="sig-name descname"><span class="pre">change_activation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_act_fn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor.change_activation" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exchanges the activation function in the selected layer for a new one passed by parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the layer whose activation function wants to be changed.</p></li>
+<li><p><strong>new_act_fn</strong> – New activation fucntion that is going to be asigned.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor.change_batch_norm">
+<span class="sig-name descname"><span class="pre">change_batch_norm</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor.change_batch_norm" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the batch normalization conditional. If batch normalization is used, quit it; otherwise, add it.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor.change_dropout">
+<span class="sig-name descname"><span class="pre">change_dropout</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor.change_dropout" title="Permalink to this definition">¶</a></dt>
+<dd><p>Change the dropout conditional. If dropout layers are used, quit them; otherwise, add them.</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor.change_dropout_prob">
+<span class="sig-name descname"><span class="pre">change_dropout_prob</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor.change_dropout_prob" title="Permalink to this definition">¶</a></dt>
+<dd><p>The dropout probability for each layer is changed by a new random one (between 0 and 1).</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor.change_weight_init">
+<span class="sig-name descname"><span class="pre">change_weight_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_weight_fn</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor.change_weight_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Exchanges the weight initialization function in the selected layer for a new one passed by parameter.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the layer whose activation function wants to be changed.</p></li>
+<li><p><strong>new_act_fn</strong> – New activation fucntion that is going to be asigned.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor.print_components">
+<span class="sig-name descname"><span class="pre">print_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor.print_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Codifies all the components of the network in a string.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>A string with all the components of the network.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor.remove_layer">
+<span class="sig-name descname"><span class="pre">remove_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor.remove_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the layer in the position received by parameter from the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer_pos</strong> – Position of the layer that is going to be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.NetworkDescriptor.remove_random_layer">
+<span class="sig-name descname"><span class="pre">remove_random_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.NetworkDescriptor.remove_random_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects and removes a random layer from the network.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.RNN">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">RNN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_descriptor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.network.Network" title="evoflow.network.Network"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.network.Network</span></code></a></p>
+<p>TensorFlow definition of the Recurrent Neural Network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>network_descriptor</strong> – Descriptor of the RNN.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNN.building">
+<span class="sig-name descname"><span class="pre">building</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNN.building" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a TensorFlow layer, this functions continues adding more layers of a RNN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – A layer from TensorFlow.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The layer received from parameter with the RNN concatenated to it.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">RNNDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnn_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_in_layer</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_units</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout_prob</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.network.NetworkDescriptor" title="evoflow.network.NetworkDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.network.NetworkDescriptor</span></code></a></p>
+<p>Descriptor of a Recurrent Neural Network, formed by recurrent layers and with
+the possibility of selecting the type and number of unit in the recurrent
+layer and allowing bidirectional layers.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_hidden_layers</strong> – Number of hidden layers in the network.</p></li>
+<li><p><strong>input_dim</strong> – Dimension of the input data (can have one or more dimensions).</p></li>
+<li><p><strong>output_dim</strong> – Expected output of the network (similarly, can have one or more dimensions).</p></li>
+<li><p><strong>init_functions</strong> – Weight initialization functions. Can have different ranges, depending on the subclass.</p></li>
+<li><p><strong>act_functions</strong> – Activation functions to be applied after each layer.</p></li>
+<li><p><strong>batch_norm</strong> – A boolean that indicates if batch normalization is applied after each layer in the network.</p></li>
+<li><p><strong>dropout</strong> – A boolean that indicates if dropout is applied after each layer in the network.</p></li>
+<li><p><strong>dropout_probs</strong> – The different probabilities of the dropout after each layer.</p></li>
+<li><p><strong>rnn_layers</strong> – List of the types of recurrent layers.</p></li>
+<li><p><strong>units_in_layer</strong> – List of number of units in each layer.</p></li>
+<li><p><strong>max_units</strong> – Maximum numbers of units that layers can have.</p></li>
+<li><p><strong>bidirectional</strong> – A boolean value to indicate if bidirectional layers are allowed.</p></li>
+</ul>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.add_layer">
+<span class="sig-name descname"><span class="pre">add_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">rnn_type</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">units_in_layer</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">bidirectional</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.add_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a layer in the given position with all the characteristics indicated by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the layer.</p></li>
+<li><p><strong>lay_params</strong> – Type of recurrent layer, how many units, etc..</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.change_bidirectional">
+<span class="sig-name descname"><span class="pre">change_bidirectional</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.change_bidirectional" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the layer in the position received by parameter 
+for a bidirectional if is not already; otherwise, for a non
+bidirectional one.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer_pos</strong> – Position of the filter to be changed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.change_layer_type">
+<span class="sig-name descname"><span class="pre">change_layer_type</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.change_layer_type" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the type of the layer in the position received by parameter 
+for a new one selected randomly.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer_pos</strong> – Position of the filter to be changed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.change_max_units">
+<span class="sig-name descname"><span class="pre">change_max_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">max_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.change_max_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the stride of the layer in the position received by parameter 
+for a new stried specified with the data received also by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the filter to be changed.</p></li>
+<li><p><strong>new_stride</strong> – Stride assigned to that layer.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.change_units">
+<span class="sig-name descname"><span class="pre">change_units</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_units</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.change_units" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the number of units of the layer in the position received by parameter 
+for a new number specified with the data received also by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the filter to be changed.</p></li>
+<li><p><strong>new_units</strong> – Number of units assigned to that layer.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.codify_components">
+<span class="sig-name descname"><span class="pre">codify_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.codify_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Codifies all the components of the network in a list of tuples, where the 
+first element of the tuple is a description of the value that is in the 
+second element of the tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the components of the network.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.random_init">
+<span class="sig-name descname"><span class="pre">random_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_layers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_num_neurons</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">__</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.random_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the input, the output and some limits for the parametes of the 
+network, a random initialization of the object (the network descriptor) is done.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_size</strong> – Input size of the network (it will be flattened in order to fit in the MLP).</p></li>
+<li><p><strong>output_size</strong> – Output size of the network (it will be flattened in order to fit in the MLP).</p></li>
+<li><p><strong>max_num_layers</strong> – Maximum number of layers that can be in the network.</p></li>
+<li><p><strong>max_num_neurons</strong> – Maximum number fo units that can be in each recurrent layer of the network.</p></li>
+<li><p><strong>dropout</strong> – A boolean value that indicates if the networks can have dropout.</p></li>
+<li><p><strong>batch_norm</strong> – A boolean value that indicates if the networks can have batch normalization.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.remove_layer">
+<span class="sig-name descname"><span class="pre">remove_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.remove_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the layer in the position received by parameter from the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer_pos</strong> – Position of the layer that is going to be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.RNNDescriptor.remove_random_layer">
+<span class="sig-name descname"><span class="pre">remove_random_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.RNNDescriptor.remove_random_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects and removes a random layer from the network if it is possible.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.TCNN">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">TCNN</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">network_descriptor</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TCNN" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.network.Network" title="evoflow.network.Network"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.network.Network</span></code></a></p>
+<p>TensorFlow definition of the Transposed Convolutional Neural Network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>network_descriptor</strong> – Descriptor of the TCNN.</p>
+</dd>
+</dl>
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.TCNN.building">
+<span class="sig-name descname"><span class="pre">building</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TCNN.building" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given a TensorFlow layer, this functions continues adding more layers of a TCNN.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>x</strong> – A layer from TensorFlow.</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The layer received from parameter with the TCNN concatenated to it.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py class">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor">
+<em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">TConvDescriptor</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">number_hidden_layers</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">input_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_dim</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_filter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_stride</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strides</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_functions</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TConvDescriptor" title="Permalink to this definition">¶</a></dt>
+<dd><p>Bases: <a class="reference internal" href="#evoflow.network.NetworkDescriptor" title="evoflow.network.NetworkDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">evoflow.network.NetworkDescriptor</span></code></a></p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor.MAX_NUM_FILTER">
+<span class="sig-name descname"><span class="pre">MAX_NUM_FILTER</span></span><em class="property"> <span class="pre">=</span> <span class="pre">65</span></em><a class="headerlink" href="#evoflow.network.TConvDescriptor.MAX_NUM_FILTER" title="Permalink to this definition">¶</a></dt>
+<dd><p>Descriptor of a Transposed Convolutional Neural Network, formed by transposed convolutional 
+layers and with the possibility of selecting the filters and strides in each layer and including 
+batch normalization, but not including dropout.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>number_hidden_layers</strong> – Number of hidden layers in the network.</p></li>
+<li><p><strong>input_dim</strong> – Dimension of the input data (can have one or more dimensions).</p></li>
+<li><p><strong>output_dim</strong> – Expected output of the network (similarly, can have one or more dimensions).</p></li>
+<li><p><strong>init_functions</strong> – Weight initialization functions. Can have different ranges, depending on the subclass.</p></li>
+<li><p><strong>act_functions</strong> – Activation functions to be applied after each layer.</p></li>
+<li><p><strong>batch_norm</strong> – A boolean that indicates if batch normalization is applied after each layer in the network.</p></li>
+<li><p><strong>dropout</strong> – A boolean that indicates if dropout is applied after each layer in the network.</p></li>
+<li><p><strong>dropout_probs</strong> – The different probabilities of the dropout after each layer.</p></li>
+<li><p><strong>filters</strong> – List of filters sizes in each layer.</p></li>
+<li><p><strong>strides</strong> – List of strides sizes in each layer.</p></li>
+<li><p><strong>max_filter</strong> – Maximum size that filters can have.</p></li>
+<li><p><strong>max_stride</strong> – Maximum size that stride can have.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor.add_layer">
+<span class="sig-name descname"><span class="pre">add_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filter_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">stride_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">act_function</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">init_function</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TConvDescriptor.add_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Adds a layer in the given position with all the characteristics indicated by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the layer.</p></li>
+<li><p><strong>filter_size</strong> – Filter size.</p></li>
+<li><p><strong>stride_size</strong> – Stride size.</p></li>
+<li><p><strong>act_function</strong> – Activation function.</p></li>
+<li><p><strong>init_function</strong> – Initialization function.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor.change_filters">
+<span class="sig-name descname"><span class="pre">change_filters</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_kernel_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_channel</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TConvDescriptor.change_filters" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the filter of the layer in the position received by parameter for 
+a new filter specified with the size and channels received also by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the filter to be changed.</p></li>
+<li><p><strong>new_kernel_size</strong> – Height and width of the filter (only square filters are allowed).</p></li>
+<li><p><strong>new_channel</strong> – Number of output channels.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor.change_stride">
+<span class="sig-name descname"><span class="pre">change_stride</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">new_stride</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TConvDescriptor.change_stride" title="Permalink to this definition">¶</a></dt>
+<dd><p>Changes the stride of the layer in the position received by parameter 
+for a new stried specified with the data received also by parameters.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>layer_pos</strong> – Position of the stride to be changed.</p></li>
+<li><p><strong>new_stride</strong> – Stride assigned to that layer.</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor.codify_components">
+<span class="sig-name descname"><span class="pre">codify_components</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TConvDescriptor.codify_components" title="Permalink to this definition">¶</a></dt>
+<dd><p>Codifies all the components of the network in a list of tuples, where the 
+first element of the tuple is a description of the value that is in the 
+second element of the tuple.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns</dt>
+<dd class="field-odd"><p>List with all the components of the network.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor.random_init">
+<span class="sig-name descname"><span class="pre">random_init</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">__</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_stride</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_filter</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TConvDescriptor.random_init" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the input, the output and some limits for the parametes of the 
+network, a random initialization of the object (the network descriptor) is done.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_size</strong> – Dimension of the input.</p></li>
+<li><p><strong>output_size</strong> – Dimension of the output.</p></li>
+<li><p><strong>max_stride</strong> – Maximum stride possible (used as 2)</p></li>
+<li><p><strong>max_filter</strong> – Maximum filter size possible (used as 3)</p></li>
+<li><p><strong>dropout</strong> – Whether dropout is a possibility in the network</p></li>
+<li><p><strong>batch_norm</strong> – Whether batch normalization is a possibility in the network</p></li>
+</ul>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor.remove_layer">
+<span class="sig-name descname"><span class="pre">remove_layer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">layer_pos</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TConvDescriptor.remove_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Removes the layer in the position received by parameter from the network.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>layer_pos</strong> – Position of the layer that is going to be removed.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="evoflow.network.TConvDescriptor.remove_random_layer">
+<span class="sig-name descname"><span class="pre">remove_random_layer</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.TConvDescriptor.remove_random_layer" title="Permalink to this definition">¶</a></dt>
+<dd><p>Selects and removes a random layer from the network if it is possible.</p>
+</dd></dl>
+
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.network.calculate_CNN_shape">
+<span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">calculate_CNN_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strides</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_layer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.calculate_CNN_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the input shape and the filters and strides that have been applied to that
+input by using convolutional and pooling layers, it return the output shape 
+in the desired layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_shape</strong> – Shape of the input given to the convolutional layers.</p></li>
+<li><p><strong>filters</strong> – List with the filters that convolutional and pooling layers use.</p></li>
+<li><p><strong>strides</strong> – List with the strides that convolutional and pooling layers use.</p></li>
+<li><p><strong>desired_layer</strong> – Position of the layer where the output shape is wanted (if 
+-1 is passed, it calculates until the last layer).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output shape after applying those operations.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="evoflow.network.calculate_TCNN_shape">
+<span class="sig-prename descclassname"><span class="pre">evoflow.network.</span></span><span class="sig-name descname"><span class="pre">calculate_TCNN_shape</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">input_shape</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">filters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">strides</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">desired_layer</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#evoflow.network.calculate_TCNN_shape" title="Permalink to this definition">¶</a></dt>
+<dd><p>Given the input shape and the filters and strides that have been applied to that
+input by using transposed convolutional layers, it return the output shape 
+in the desired layer.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>input_shape</strong> – Shape of the input given to the transposed convolutional layers.</p></li>
+<li><p><strong>filters</strong> – List with the filters that transposed convolutional layers use.</p></li>
+<li><p><strong>strides</strong> – List with the strides that transposed convolutional layers use.</p></li>
+<li><p><strong>desired_layer</strong> – Position of the layer where the output shape is wanted (if 
+-1 is passed, it calculates until the last layer).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>The output shape after applying those operations.</p>
+</dd>
+</dl>
+</dd></dl>
+
+</div>
+<div class="section" id="module-evoflow">
+<span id="module-contents"></span><h2>Module contents<a class="headerlink" href="#module-evoflow" title="Permalink to this headline">¶</a></h2>
+</div>
+</div>
+
+
+            <div class="clearer"></div>
+          </div>
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="main navigation">
+        <div class="sphinxsidebarwrapper">
+  <h3><a href="index.html">Table of Contents</a></h3>
+  <ul>
+<li><a class="reference internal" href="#">Evoflow</a><ul>
+<li><a class="reference internal" href="#module-evoflow.auxiliary_functions">evoflow.auxiliary_functions module</a></li>
+<li><a class="reference internal" href="#module-evoflow.data">evoflow.data module</a></li>
+<li><a class="reference internal" href="#module-evoflow.evolution">evoflow.evolution module</a></li>
+<li><a class="reference internal" href="#module-evoflow.metrics">evoflow.metrics module</a></li>
+<li><a class="reference internal" href="#module-evoflow.mutation">evoflow.mutation module</a></li>
+<li><a class="reference internal" href="#module-evoflow.network">evoflow.network module</a></li>
+<li><a class="reference internal" href="#module-evoflow">Module contents</a></li>
+</ul>
+</li>
+</ul>
+
+  <h4>Previous topic</h4>
+  <p class="topless"><a href="modules.html"
+                        title="previous chapter">evoflow</a></p>
+  <h4>Next topic</h4>
+  <p class="topless"><a href="examples.html"
+                        title="next chapter">Examples</a></p>
+  <div role="note" aria-label="source link">
+    <h3>This Page</h3>
+    <ul class="this-page-menu">
+      <li><a href="_sources/evoflow.rst.txt"
+            rel="nofollow">Show Source</a></li>
+    </ul>
+   </div>
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="related" role="navigation" aria-label="related navigation">
+      <h3>Navigation</h3>
+      <ul>
+        <li class="right" style="margin-right: 10px">
+          <a href="genindex.html" title="General Index"
+             >index</a></li>
+        <li class="right" >
+          <a href="py-modindex.html" title="Python Module Index"
+             >modules</a> |</li>
+        <li class="right" >
+          <a href="examples.html" title="Examples"
+             >next</a> |</li>
+        <li class="right" >
+          <a href="modules.html" title="evoflow"
+             >previous</a> |</li>
+        <li class="nav-item nav-item-0"><a href="index.html">EvoFlow-2  documentation</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="modules.html" >evoflow</a> &#187;</li>
+        <li class="nav-item nav-item-this"><a href="">Evoflow</a></li> 
+      </ul>
+    </div>
+    <div class="footer" role="contentinfo">
+        &#169; Copyright 2021, Iván Hidalgo.
+      Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 4.0.2.
+    </div>
+  </body>
+</html>

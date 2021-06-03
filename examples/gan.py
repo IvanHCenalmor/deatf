@@ -33,7 +33,18 @@ def discriminator_loss(fake_out, real_out):
     return d_loss
 
 def gan_eval(nets, train_inputs, _, batch_size, iters, __, ___ ,____):
+    """
     
+    :param nets:
+    :param train_inputs:
+    :param train_outputs:
+    :param batch_size:
+    :param iters:
+    :param test_inputs:
+    :param test_outputs:
+    :param hypers:
+    """
+      
     models = {}
         
     noise = np.random.normal(size=(150, 10))

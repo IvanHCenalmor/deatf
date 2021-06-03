@@ -33,15 +33,17 @@ For this, we need to:
 
 def eval_wann(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
-    This function takes care of arranging the model and training it. It is used by the evolutionary internally,
-    and always is provided with the same parameters
-    :param nets: Dictionary with the Networks ("n0", "n1", ..., "nm", in the same order as they have been requested in the *desc_list* parameter)
-    :param train_inputs: Data to be used for training
-    :param train_outputs: Data to be used for training
-    :param batch_size: Batch_size to be used when training. It is not mandatory to use it
-    :param hypers: Optional hyperparameters being evolved in case they were defined for evolution (in this case we also evolve optimizer selection and learning rate)
-    :return: A dictionary with the tf layer which makes the predictions
+    
+    :param nets:
+    :param train_inputs:
+    :param train_outputs:
+    :param batch_size:
+    :param iters:
+    :param test_inputs:
+    :param test_outputs:
+    :param hypers:
     """
+  
 
     models = {}
 
