@@ -1,5 +1,5 @@
-Genetic Adversarial Network
-===========================
+Generative Adversarial Network
+==============================
 
 .. automodule:: gan
    :members:

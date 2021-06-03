@@ -5,8 +5,8 @@ import tensorflow as tf
 import numpy as np
 import time
 
-from evoflow.network import TConvDescriptor
-from evoflow.evolution import Evolving
+from deatf.network import TConvDescriptor
+from deatf.evolution import Evolving
 
 from aux_functions_testing import select_evaluation, load_dataset
 

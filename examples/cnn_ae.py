@@ -11,9 +11,9 @@ import tensorflow as tf
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
-from evoflow.network import ConvDescriptor, TConvDescriptor
-from evoflow.evolution import Evolving
-from evoflow.data import load_fashion
+from deatf.network import ConvDescriptor, TConvDescriptor
+from deatf.evolution import Evolving
+from deatf.data import load_fashion
 
 from sklearn.metrics import mean_squared_error
 from tensorflow.keras.layers import Input, Dense, Flatten

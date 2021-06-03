@@ -5,9 +5,9 @@ import tensorflow as tf
 import numpy as np
 import time
 
-from evoflow.metrics import accuracy_error
-from evoflow.network import RNNDescriptor
-from evoflow.evolution import Evolving
+from deatf.metrics import accuracy_error
+from deatf.network import RNNDescriptor
+from deatf.evolution import Evolving
 
 from aux_functions_testing import load_dataset, select_evaluation
 

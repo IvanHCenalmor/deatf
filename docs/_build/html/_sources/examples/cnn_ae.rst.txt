@@ -1,5 +1,5 @@
-Convolutional Neural Network - Auto Encoder
-===========================================
+Convolution Neural Network - Auto Encoder
+=========================================
 
 .. automodule:: cnn_ae
    :members:

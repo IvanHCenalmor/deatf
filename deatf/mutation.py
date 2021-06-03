@@ -1,5 +1,5 @@
 import numpy as np
-from evoflow.network import initializations, activations
+from deatf.network import initializations, activations
 from tensorflow.keras.layers import SimpleRNN, LSTM, GRU
 
 class Mutation:

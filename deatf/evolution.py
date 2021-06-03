@@ -4,8 +4,8 @@ import random
 
 from deap import algorithms, base, creator, tools
 
-from evoflow.network import MLP, MLPDescriptor, TCNN, CNN, RNN
-from evoflow.mutation import MLP_Mutation, CNN_Mutation, TCNN_Mutation, RNN_Mutation
+from deatf.network import MLP, MLPDescriptor, TCNN, CNN, RNN
+from deatf.mutation import MLP_Mutation, CNN_Mutation, TCNN_Mutation, RNN_Mutation
 import os
 
 from tensorflow.keras.layers import Input, Flatten

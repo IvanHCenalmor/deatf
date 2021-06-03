@@ -4,8 +4,8 @@ sys.path.append('../..')
 import tensorflow as tf
 import time
 
-from evoflow.metrics import accuracy_error
-from evoflow.network import ConvDescriptor
+from deatf.metrics import accuracy_error
+from deatf.network import ConvDescriptor
 
 from aux_functions_testing import test
 

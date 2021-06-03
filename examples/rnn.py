@@ -6,10 +6,10 @@ sys.path.append('..')
 
 import tensorflow as tf
 
-from evoflow.metrics import accuracy_error
-from evoflow.network import RNNDescriptor
-from evoflow.evolution import Evolving
-from evoflow.data import load_fashion
+from deatf.metrics import accuracy_error
+from deatf.network import RNNDescriptor
+from deatf.evolution import Evolving
+from deatf.data import load_fashion
 
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.models import Model

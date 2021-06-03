@@ -3,8 +3,8 @@ sys.path.append('../..')
 
 import tensorflow as tf
 
-from evoflow.evolution import Evolving
-from evoflow.network import MLPDescriptor
+from deatf.evolution import Evolving
+from deatf.network import MLPDescriptor
 
 from tensorflow.keras.layers import Input, Reshape
 from tensorflow.keras.models import Model

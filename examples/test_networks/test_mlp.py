@@ -3,7 +3,7 @@ sys.path.append('../..')
 
 import time
 
-from evoflow.network import MLPDescriptor
+from deatf.network import MLPDescriptor
 
 from aux_functions_testing import test
 

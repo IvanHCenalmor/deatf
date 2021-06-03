@@ -1,0 +1,4 @@
+Metrics
+-------
+
+.. automodule:: deatf.metrics

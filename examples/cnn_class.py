@@ -10,10 +10,10 @@ sys.path.append('..')
 import tensorflow as tf
 import numpy as np
 
-from evoflow.network import MLPDescriptor, ConvDescriptor
-from evoflow.metrics import accuracy_error
-from evoflow.evolution import Evolving
-from evoflow.data import load_fashion
+from deatf.network import MLPDescriptor, ConvDescriptor
+from deatf.metrics import accuracy_error
+from deatf.evolution import Evolving
+from deatf.data import load_fashion
 
 from sklearn.preprocessing import OneHotEncoder
 from tensorflow.keras.layers import Input, Dense, Flatten

@@ -1,4 +1,4 @@
-Multi-network
+Multi-Network
 =============
 
 .. automodule:: multi

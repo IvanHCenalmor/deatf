@@ -1,7 +1,7 @@
 import sys
 sys.path.append('../..')
 
-from evoflow.network import MLPDescriptor, MLP
+from deatf.network import MLPDescriptor, MLP
 
 import tensorflow as tf
 from tensorflow.keras.layers import Input, Reshape

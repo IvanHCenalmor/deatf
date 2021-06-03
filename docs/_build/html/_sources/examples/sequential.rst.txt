@@ -1,5 +1,5 @@
-Sequential
-==========
+Sequential Network
+==================
 
 .. automodule:: sequential
    :members:
