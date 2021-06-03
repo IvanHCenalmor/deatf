@@ -1,4 +1,4 @@
-# EvoFlow-2
+# DEATF
 
 [![Python](https://img.shields.io/pypi/pyversions/tensorflow.svg?style=plastic)](https://badge.fury.io/py/tensorflow)
 [![TensorFlow](https://img.shields.io/badge/TensorFlow-2.5-green)](https://www.tensorflow.org/)
