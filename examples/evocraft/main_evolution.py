@@ -1,6 +1,5 @@
 import sys
 sys.path.append('../..')
-
 import tensorflow as tf
 
 from deatf.evolution import Evolving
@@ -47,6 +46,8 @@ def eval_model(nets, train_inputs, _, __, iters, test_inputs, ___, hypers):
     
     for epoch in range(iters):
         loss = train_step(data)
+        if epoch % 100 == 0:
+            print("Epoch {:03d}: Loss: {}".format(epoch, loss))
         
     #loss = evaluate(probabilities)
     probabilities = model(data)
@@ -57,14 +58,14 @@ def eval_model(nets, train_inputs, _, __, iters, test_inputs, ___, hypers):
 
 if __name__ == "__main__":
     
-    bounds = [5,5,5]
-    wanted_blocks = [23,45,64,22,33]
+    bounds = [9,9,9]
+    wanted_blocks = [-1,164, 169, 173]
 
     data = create_data(bounds)
     
     e = Evolving(desc_list=[MLPDescriptor], x_trains=[data], y_trains=[data], 
                  x_tests=[data], y_tests=[data], evaluation=eval_model, 
-                 batch_size=150, population=5, generations=10, iters=10, 
+                 batch_size=150, population=5, generations=10, iters=500, 
                  n_inputs=[[data.shape[1:]]], n_outputs=[[len(wanted_blocks)]+bounds], 
                  cxp=0., mtp=1., hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
                  batch_norm=True, dropout=True)

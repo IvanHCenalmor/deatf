@@ -148,7 +148,7 @@ class MLPDescriptor(NetworkDescriptor):
                          dropout=dropout, dropout_probs=dropout_probs, batch_norm=batch_norm)
         self.dims = dims  # Number of neurons in each layer
 
-    def random_init(self, input_size, output_size, max_num_layers, max_num_neurons, _, __, dropout, batch_norm):
+    def random_init(self, input_size, output_size, max_num_layers, max_num_neurons, max_stride, max_filter, dropout, batch_norm):
         """
         Given the input, the output and some limits for the parametes of the 
         network, a random initialization of the object (the network descriptor) is done. 
@@ -156,7 +156,9 @@ class MLPDescriptor(NetworkDescriptor):
         :param input_size: Input size of the network (it will be flattened in order to fit in the MLP).
         :param output_size: Output size of the network (it will be flattened in order to fit in the MLP).
         :param max_num_layers: Maximum number of layers that can be in the network.
-        :param max_num_neurons: Maximum number fo neurons that can be in each layer of the network.
+        :param max_num_neurons: Maximum number fo units that can be in each recurrent layer of the network.
+        :param max_stride: Maximum stride possible (used as 2).
+        :param max_filter: Maximum filter size possible (used as 3).
         :param dropout: A boolean value that indicates if the networks can have dropout.
         :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """
@@ -302,18 +304,19 @@ class ConvDescriptor(NetworkDescriptor):
         self.max_filter = max_filter
         self.max_stride = max_stride
 
-    def random_init(self, input_size, output_size, max_num_layers, _, max_stride, max_filter, dropout, batch_norm):
+    def random_init(self, input_size, output_size, max_num_layers, max_num_neurons, max_stride, max_filter, dropout, batch_norm):
         """
         Given the input, the output and some limits for the parametes of the 
         network, a random initialization of the object (the network descriptor) is done. 
         
-        :param input_size: Dimension of the input.
-        :param output_size: Dimension of the output.
-        :param max_num_layers: Maximum number of layers.
-        :param max_stride: Maximum stride possible (used as 2)
-        :param max_filter: Maximum filter size possible (used as 3)
-        :param dropout: Whether dropout is a possibility in the network
-        :param batch_norm: Whether batch normalization is a possibility in the network
+        :param input_size: Input size of the network.
+        :param output_size: Output size of the network.
+        :param max_num_layers: Maximum number of layers that can be in the network.
+        :param max_num_neurons: Maximum number fo units that can be in each recurrent layer of the network.
+        :param max_stride: Maximum stride possible (used as 2).
+        :param max_filter: Maximum filter size possible (used as 3).
+        :param dropout: A boolean value that indicates if the networks can have dropout.
+        :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """
 
         self.input_dim = input_size
@@ -549,17 +552,19 @@ class TConvDescriptor(NetworkDescriptor):
         self.max_filter = max_filter
         self.max_stride = max_stride
 
-    def random_init(self, input_size, output_size, _, __, max_stride, max_filter, dropout, batch_norm):
+    def random_init(self, input_size, output_size, max_num_layers, max_num_neurons, max_stride, max_filter, dropout, batch_norm):
         """
         Given the input, the output and some limits for the parametes of the 
         network, a random initialization of the object (the network descriptor) is done. 
         
-        :param input_size: Dimension of the input.
-        :param output_size: Dimension of the output.
-        :param max_stride: Maximum stride possible (used as 2)
-        :param max_filter: Maximum filter size possible (used as 3)
-        :param dropout: Whether dropout is a possibility in the network
-        :param batch_norm: Whether batch normalization is a possibility in the network
+        :param input_size: Input size of the network.
+        :param output_size: Output size of the network.
+        :param max_num_layers: Maximum number of layers that can be in the network.
+        :param max_num_neurons: Maximum number fo units that can be in each recurrent layer of the network.
+        :param max_stride: Maximum stride possible (used as 2).
+        :param max_filter: Maximum filter size possible (used as 3).
+        :param dropout: A boolean value that indicates if the networks can have dropout.
+        :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """
         self.input_dim = input_size
         self.output_dim = output_size
@@ -770,15 +775,17 @@ class RNNDescriptor(NetworkDescriptor):
         self.max_units = max_units
         self.bidirectional = bidirectional
         
-    def random_init(self, input_size, output_size, max_num_layers, max_num_neurons, _, __, dropout, batch_norm):
+    def random_init(self, input_size, output_size, max_num_layers, max_num_neurons, max_stride, max_filter, dropout, batch_norm):
         """
         Given the input, the output and some limits for the parametes of the 
         network, a random initialization of the object (the network descriptor) is done. 
         
-        :param input_size: Input size of the network (it will be flattened in order to fit in the MLP).
-        :param output_size: Output size of the network (it will be flattened in order to fit in the MLP).
+        :param input_size: Input size of the network.
+        :param output_size: Output size of the network.
         :param max_num_layers: Maximum number of layers that can be in the network.
         :param max_num_neurons: Maximum number fo units that can be in each recurrent layer of the network.
+        :param max_stride: Maximum stride possible (used as 2).
+        :param max_filter: Maximum filter size possible (used as 3).
         :param dropout: A boolean value that indicates if the networks can have dropout.
         :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """

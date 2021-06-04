@@ -25,7 +25,7 @@ def model_eval(network, training_iterations, bounds, wanted_blocks):
     out = network.building(inp)
     out = Reshape([len(wanted_blocks)]+bounds)(out)
     model = Model(inputs=inp, outputs=out)
-    model.summary()
+    # model.summary()
     
     opt = tf.keras.optimizers.Adam(learning_rate=0.01)
 
@@ -41,8 +41,9 @@ def model_eval(network, training_iterations, bounds, wanted_blocks):
         return loss
     
     for epoch in range(training_iterations):
-        loss = train_step(data)           
-        print("Epoch {:03d}: Loss: {}".format(epoch, loss))
+        loss = train_step(data)     
+        if epoch % 100 == 0:
+            print("Epoch {:03d}: Loss: {}".format(epoch, loss))
         
     prediction = model.predict(data)
     ev = interactive_loss(prediction, wanted_blocks, bounds)
@@ -53,13 +54,13 @@ if __name__ == '__main__':
     print('ADVISE: Remember to activate the server in order to see and evaluate the created structure after training.')
     
     bounds = [5,5,5]
-    wanted_blocks = [23,45,64,22,33]
+    wanted_blocks = [-1,164, 169, 173]
     
     desc = MLPDescriptor(10,3,len(wanted_blocks))
     desc.random_init(input_size=3, output_size=[len(wanted_blocks)]+bounds, 
-                     max_num_layers=10, max_num_neurons=200, 
+                     max_num_layers=10, max_num_neurons=200, max_stride=None, max_filter=None,
                      dropout=True, batch_norm=True)
     network = MLP(desc)
     
-    preds = model_eval(network, 1000, bounds, wanted_blocks, verbose=1)
+    preds = model_eval(network, 5000, bounds, wanted_blocks)
     print(preds)
