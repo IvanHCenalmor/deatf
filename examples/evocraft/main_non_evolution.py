@@ -19,7 +19,7 @@ def evaluate(probabilities):
 
 def model_eval(network, training_iterations, bounds, wanted_blocks):    
     
-    data = create_data(bounds)
+    data = create_data(bounds, 1000)
     
     inp = Input(shape=data.shape[1:])
     out = network.building(inp)

@@ -118,7 +118,7 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     
     if len(train_outputs["o0"].shape) == 1:
         res = tf.nn.softmax(preds)
-        ev = accuracy_error(res, test_outputs["o0"])
+        ev = accuracy_error(test_outputs["o0"], res)
     else:
         if np.isnan(preds).any():
             ev = 288

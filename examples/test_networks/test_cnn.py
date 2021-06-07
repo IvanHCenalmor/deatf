@@ -71,7 +71,7 @@ def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     
     res = tf.nn.softmax(preds)
 
-    return accuracy_error(res, test_outputs["o0"]),
+    return accuracy_error(test_outputs["o0"], rnn),
     
 if __name__ == "__main__":
     #evaluated = test_CNN('binary_alpha_digits', eval_func=eval_cnn, batch_size=150, population=20, generations=5, iters=10)

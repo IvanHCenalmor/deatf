@@ -52,7 +52,7 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     
     res = tf.nn.softmax(preds)
 
-    return accuracy_error(res, test_outputs["o0"]),
+    return accuracy_error(test_outputs["o0"], res),
 
 if __name__ == "__main__":
 

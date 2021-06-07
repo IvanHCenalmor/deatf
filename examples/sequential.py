@@ -75,7 +75,7 @@ def eval_sequential(nets, train_inputs, train_outputs, batch_size, iters, test_i
         
     res = tf.nn.softmax(pred)
 
-    return accuracy_error(res, test_outputs["o0"]),
+    return accuracy_error(test_outputs["o0"], res),
 
 
 if __name__ == "__main__":

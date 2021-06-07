@@ -17,11 +17,11 @@ def accuracy_error(true, prediction):
     :return: The accuracy error calculated between the true and predicted data.
     """
     if len(true.shape) > 1:
-        true = np.argmax(true, axis=1)
+        true = np.argmax(true, axis=-1)
     if len(prediction.shape) > 1:
-        prediction = np.argmax(prediction, axis=1)
-
-    return 1-np.sum(true == prediction)/true.shape[0]
+        prediction = np.argmax(prediction, axis=-1)
+    
+    return 1 - np.sum(true == prediction)/np.prod(true.shape)
 
 def balanced_accuracy(true, prediction):
     """

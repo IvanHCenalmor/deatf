@@ -61,7 +61,7 @@ if __name__ == "__main__":
     bounds = [9,9,9]
     wanted_blocks = [-1,164, 169, 173]
 
-    data = create_data(bounds)
+    data = create_data(bounds,1000)
     
     e = Evolving(desc_list=[MLPDescriptor], x_trains=[data], y_trains=[data], 
                  x_tests=[data], y_tests=[data], evaluation=eval_model, 

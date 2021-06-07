@@ -204,7 +204,7 @@ class Evolving:
         Define the evolutionary algorithm for the evolution. It uses predefined algorithms
         from DEAP library.
         
-        :param selection: String that indicates the evolutionary algorithm 
+        :param ev_alg: String that indicates the evolutionary algorithm 
                           ('simple', 'mu_plus_lambda' or 'mu_comm_lambda').
         """
         deap_algs = {'simple':algorithms.eaSimple, 'mu_plus_lambda': algorithms.eaMuPlusLambda, 
@@ -254,12 +254,10 @@ class Evolving:
         :param sel: Selection method.
         :param sel_kwargs: Hyperparameters for the selection methods (e.g., size of the tournament 
                            if that method is selected).
-        :param ev_alg: DEAP evolutionary algorithm.
-        :param ev_kwargs: Hyperparameters for the evolutionary algorithm,(e.g., mutation or 
-                          crossover probability).
         :param batch_norm: Whether the evolutive process includes batch normalization in the 
                            networks or not.
         :param dropout: Whether the evolutive process includes dropout in the networks or not.
+        :param custom_mutations: List with the desired mutations to be applied.
         :param add_obj: Number of additional objectives.
         """
 
