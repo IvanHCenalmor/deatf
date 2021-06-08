@@ -14,6 +14,12 @@ from tensorflow.keras.initializers import RandomNormal, RandomUniform, GlorotNor
 activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.sigmoid, tf.nn.tanh]
 initializations = [RandomNormal, RandomUniform, GlorotNormal, GlorotUniform]
 
+MIN_NUM_NEURONS = 2
+MIN_NUM_FILTERS = 2
+MIN_NUM_STRIDES = 1
+MIN_NUM_CHANNELS = 3
+MAX_NUM_CHANNELS = 65
+
 class NetworkDescriptor:
     """
     This class implements the descriptor of a generic network. Subclasses of this are the evolved ones.
@@ -28,6 +34,7 @@ class NetworkDescriptor:
     :param dropout_probs: The different probabilities of the dropout after each layer.
     """
     def __init__(self, number_hidden_layers=None, input_dim=None, output_dim=None, 
+                 max_num_layers=None, max_num_neurons=None,
                  init_functions=[], act_functions=[], 
                  dropout=False, dropout_probs=[], batch_norm=False):
         self.number_hidden_layers = number_hidden_layers
@@ -38,6 +45,9 @@ class NetworkDescriptor:
         self.batch_norm = batch_norm
         self.dropout = dropout
         self.dropout_probs = dropout_probs
+        
+        self.max_num_layers = max_num_layers
+        self.max_num_neurons = max_num_neurons
 
     def remove_layer(self, layer_pos):  
         """
@@ -53,7 +63,7 @@ class NetworkDescriptor:
         Selects and removes a random layer from the network.
         """
         layer_pos = np.random.randint(self.number_hidden_layers)
-        self.remove_layer(layer_pos)
+        return self.remove_layer(layer_pos)
 
     def change_activation(self, layer_pos, new_act_fn):
         """
@@ -63,9 +73,9 @@ class NetworkDescriptor:
         :param new_act_fn: New activation fucntion that is going to be asigned.
         """
         if layer_pos < 0 or layer_pos > self.number_hidden_layers:
-            # If not within feasible bounds, quit.
-            return
+            return False # It is not within feasible bounds
         self.act_functions[layer_pos] = new_act_fn
+        return True
 
     def change_weight_init(self, layer_pos, new_weight_fn):
         """
@@ -75,27 +85,30 @@ class NetworkDescriptor:
         :param new_act_fn: New activation fucntion that is going to be asigned.
         """
         if layer_pos < 0 or layer_pos > self.number_hidden_layers:
-            # If not within feasible bounds, quit.
-            return
+            return False # It is not within feasible bounds
         self.init_functions[layer_pos] = new_weight_fn
+        return True
 
     def change_dropout(self):
         """
         Change the dropout conditional. If dropout layers are used, quit them; otherwise, add them.
         """
         self.dropout = not self.dropout
+        return True # This mutation is controled, it always will be applied
     
     def change_dropout_prob(self):
         """
         The dropout probability for each layer is changed by a new random one (between 0 and 1).
         """
-        self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+        self.dropout_probs = np.random.rand(self.number_hidden_layers)
+        return True # This mutation is controled, it always will be applied
     
     def change_batch_norm(self):
         """
         Change the batch normalization conditional. If batch normalization is used, quit it; otherwise, add it.
         """
         self.batch_norm = not self.batch_norm
+        return True # This mutation is controled, it always will be applied
         
     def print_components(self):
         """
@@ -162,32 +175,35 @@ class MLPDescriptor(NetworkDescriptor):
         :param dropout: A boolean value that indicates if the networks can have dropout.
         :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """
-
+        
+        self.max_num_layers = max_num_layers
+        self.max_num_neurons = max_num_neurons
+        
         if hasattr(input_size, '__iter__'):
             # If the incoming/outgoing sizes have more than one dimension compute the size of the flattened sizes
             self.input_dim = reduce(lambda x, y: x*y, input_size)
         else:
             self.input_dim = input_size
             
-
         if hasattr(output_size, '__iter__'):
             self.output_dim = reduce(lambda x, y: x*y, output_size)
         else:
             self.output_dim = output_size
 
         self.number_hidden_layers = np.random.randint(max_num_layers)+1
-        self.dims = [np.random.randint(4, max_num_neurons)+1 for _ in range(self.number_hidden_layers)]
-        self.init_functions = np.random.choice(initializations, size=self.number_hidden_layers+1)
-        self.act_functions = np.random.choice(activations, size=self.number_hidden_layers+1)
+        
+        self.dims = [np.random.randint(MIN_NUM_NEURONS, max_num_neurons) for _ in range(self.number_hidden_layers)]
+        self.init_functions = np.random.choice(initializations, size=self.number_hidden_layers)
+        self.act_functions = np.random.choice(activations, size=self.number_hidden_layers)
         
         if batch_norm:
             self.batch_norm = np.random.choice([True, False])
             
         if dropout:
             self.dropout = np.random.choice([True, False])
-            self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+            self.dropout_probs = np.random.rand(self.number_hidden_layers)
         else:
-            self.dropout_probs = np.zeros(self.number_hidden_layers+1)
+            self.dropout_probs = np.zeros(self.number_hidden_layers)
 
     def add_layer(self, layer_pos, lay_dims, init_function, act_function, drop_prob):
         """
@@ -201,10 +217,10 @@ class MLPDescriptor(NetworkDescriptor):
         :param drop_prob: Probability of dropout.
         :param batch_norm: Whether batch normalization is applied after the layer.
         """
-
         if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
-            # If not within feasible bounds, return
-            return
+            return False # It is not within feasible bounds
+        if self.number_hidden_layers >= self.max_num_layers:
+            return False 
 
         # We create the new layer and add it to the network descriptor
         self.dims = np.insert(self.dims, layer_pos, lay_dims)
@@ -212,6 +228,7 @@ class MLPDescriptor(NetworkDescriptor):
         self.act_functions = np.insert(self.act_functions, layer_pos, act_function)
         self.number_hidden_layers = self.number_hidden_layers + 1
         self.dropout_probs = np.insert(self.dropout_probs, layer_pos, drop_prob)
+        return True
 
     def remove_layer(self, layer_pos):
         """
@@ -220,9 +237,8 @@ class MLPDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the layer that is going to be removed.
         """
 
-        # If not within feasible bounds, quit.
         if layer_pos <= 1 or layer_pos > self.number_hidden_layers:
-            return
+            return False # It is not within feasible bounds
         
         self.dims = np.delete(self.dims, layer_pos)
         self.init_functions = np.delete(self.init_functions, layer_pos)
@@ -231,6 +247,7 @@ class MLPDescriptor(NetworkDescriptor):
 
         # Finally the number of hidden layers is updated
         self.number_hidden_layers = self.number_hidden_layers - 1
+        return True
 
     def change_layer_dimension(self, layer_pos, new_dim):
         """
@@ -239,7 +256,12 @@ class MLPDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the layer that will be changed.
         :param new_dim: Dimension that will be changed to.
         """
+        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
+            return False # It is not within feasible bounds
+        if new_dim < MIN_NUM_NEURONS or new_dim > self.max_num_neurons:
+            return False # It is not within feasible bounds
         self.dims[layer_pos] = new_dim
+        return True # This mutation is controled, it always will be applied
 
 
     def codify_components(self):
@@ -267,8 +289,6 @@ class MLPDescriptor(NetworkDescriptor):
 
 
 class ConvDescriptor(NetworkDescriptor):
-    
-    MAX_NUM_FILTER = 65
     
     """
     Descriptor of a Convolutional Neural Network, formed by convolutional and pooling layers and 
@@ -318,7 +338,10 @@ class ConvDescriptor(NetworkDescriptor):
         :param dropout: A boolean value that indicates if the networks can have dropout.
         :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """
-
+        
+        self.max_num_layers = max_num_layers
+        self.max_num_neurons = max_num_neurons
+        
         self.input_dim = input_size
         self.output_dim = output_size
 
@@ -336,8 +359,9 @@ class ConvDescriptor(NetworkDescriptor):
             new_layer = np.random.choice([0, 1, 2])
             
             self.layers += [2]
-            self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, self.MAX_NUM_FILTER)])]
-            self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
+            self.filters += [np.array([np.random.randint(MIN_NUM_FILTERS, max_filter)] * 2 + 
+                                       [np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)])]
+            self.strides += [np.array([np.random.randint(MIN_NUM_STRIDES, max_stride)] * 2 + [1])]
             shape = calculate_CNN_shape(self.input_dim, self.filters, self.strides, -1)
             if shape[0] < 2 or shape[1] < 2 or np.prod(shape)*self.filters[-1][-1] < self.output_dim:  # If the blob size is too small
                 self.layers = self.layers[:-1]
@@ -354,8 +378,9 @@ class ConvDescriptor(NetworkDescriptor):
             
             if new_layer != 2:
                 self.layers += [new_layer]
-                self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, self.MAX_NUM_FILTER)])]
-                self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
+                self.filters += [np.array([np.random.randint(MIN_NUM_FILTERS, max_filter)] * 2 + 
+                                           [np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)])]
+                self.strides += [np.array([np.random.randint(MIN_NUM_STRIDES, max_stride)] * 2 + [1])]
                 shape = calculate_CNN_shape(self.input_dim, self.filters, self.strides, -1)
                 if shape[0] < 2 or shape[1] < 2 or np.prod(shape)*self.filters[-1][-1] < self.output_dim:  # If the blob size is too small
                     self.layers = self.layers[:-2]
@@ -373,12 +398,17 @@ class ConvDescriptor(NetworkDescriptor):
                 self.act_functions += [np.random.choice(activations)]
                 
             i += 1
-            
-        if batch_norm is not None and not batch_norm:
+         
+        self.dropout = False
+        self.dropout_probs = np.zeros(self.number_hidden_layers)
+        
+        if batch_norm is not None and batch_norm:
             self.batch_norm = np.random.choice([True, False])
+        else:
+            self.batch_norm = False
 
     
-    def add_layer(self, layer_pos, lay_type, filter_size, stride_size, act_function, init_function):
+    def add_layer(self, layer_pos, lay_type, filter_size, filter_channel, stride_size, act_function, init_function):
         """
         Adds a layer in the given position with all the characteristics indicated by parameters.
         
@@ -398,15 +428,20 @@ class ConvDescriptor(NetworkDescriptor):
             layer_pos += 1
         
         aux_number_hidden_layers += 1
-        aux_filters.insert(layer_pos, np.array([filter_size, filter_size, np.random.randint(0, self.MAX_NUM_FILTER)]))
+        aux_filters.insert(layer_pos, np.array([filter_size, filter_size, filter_channel]))
         aux_strides.insert(layer_pos, np.array([stride_size, stride_size, 1]))
+        
         if lay_type < 2:
             aux_number_hidden_layers += 1
-            pool_filters = np.random.randint(2, 4)
+            pool_filters = np.random.randint(MIN_NUM_FILTERS, self.max_filter)
+            pool_channels = np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)
             pool_strides = 1
             
-            aux_filters.insert(layer_pos, np.array([pool_filters, pool_filters, np.random.randint(0, self.MAX_NUM_FILTER)]))
-            aux_strides.insert(layer_pos, np.array([pool_strides, pool_strides, 1]))
+            aux_filters.insert(layer_pos+1, np.array([pool_filters, pool_filters, pool_channels]))
+            aux_strides.insert(layer_pos+1, np.array([pool_strides, pool_strides, 1]))
+            
+        if aux_number_hidden_layers >= self.max_num_layers:
+            return False
             
         if calculate_CNN_shape(self.input_dim, aux_filters, aux_strides, aux_number_hidden_layers)[0] > 0:
         
@@ -425,6 +460,10 @@ class ConvDescriptor(NetworkDescriptor):
             self.filters = aux_filters
             self.strides = aux_strides
             self.number_hidden_layers = aux_number_hidden_layers           
+            
+            return True
+        else:
+            return False
 
     def remove_layer(self, layer_pos):
         """
@@ -432,7 +471,20 @@ class ConvDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the layer that is going to be removed.
         """
- 
+        
+        # np.sum(self.layers) > 3 means that are least are two convolutional layers
+        # if np.sum(self.layers) > 3: 
+        
+        if self.number_hidden_layers <= 1:
+            return False # If there is only one layer it can  not be removed
+        if self.number_hidden_layers == 2 and self.layers[-1] != 2 and layer_pos == 0:
+            # If there are only two layers (an the last one is a pooling layers)
+            # If the layer to be removed is the first one, it can not be removed
+            # because it can not only remain a pooling layer
+            return False
+        if layer_pos < 0  or layer_pos > (self.number_hidden_layers - 1):
+            return False # It is not within feasible bounds
+
         self.layers.pop(layer_pos)
         self.act_functions.pop(layer_pos)
         self.init_functions.pop(layer_pos)
@@ -440,23 +492,18 @@ class ConvDescriptor(NetworkDescriptor):
         self.strides.pop(layer_pos)
         self.number_hidden_layers -= 1
         
-        if layer_pos < self.number_hidden_layers:
+        if layer_pos < self.number_hidden_layers: 
             if self.layers[layer_pos] != 2:
+                # If next layers is a pooling one, it has to be removed
+                # with its convolutional layer, that has been removed
                 self.layers.pop(layer_pos)
                 self.act_functions.pop(layer_pos)
                 self.init_functions.pop(layer_pos)
                 self.filters.pop(layer_pos)
                 self.strides.pop(layer_pos)
                 self.number_hidden_layers -= 1
-
-    def remove_random_layer(self):
-        """
-        Selects and removes a random layer from the network if it is possible.
-        """
-        # np.sum(self.layers) > 3 means that are least are two convolutional layers
-        if np.sum(self.layers) > 3: 
-            layer_pos = np.random.randint(self.number_hidden_layers)
-            self.remove_layer(layer_pos)
+        
+        return True
 
     def change_filters(self, layer_pos, new_kernel_size, new_channel):
         """
@@ -474,6 +521,9 @@ class ConvDescriptor(NetworkDescriptor):
         
         if calculate_CNN_shape(self.input_dim, aux_filters, self.strides, self.number_hidden_layers)[0] > 0:
             self.filters = aux_filters
+            return True
+        else:
+            return False
 
     def change_stride(self, layer_pos, new_stride):
         """
@@ -489,7 +539,11 @@ class ConvDescriptor(NetworkDescriptor):
         
         if calculate_CNN_shape(self.input_dim, self.filters, aux_strides, self.number_hidden_layers)[0] > 0:
             self.strides = aux_strides
+            return True
+        else:
+            return False
             
+        
     def codify_components(self):
         """
         Codifies all the components of the network in a list of tuples, where the 
@@ -500,8 +554,8 @@ class ConvDescriptor(NetworkDescriptor):
         """
         
         return [('Number of layers', self.number_hidden_layers),
-                ('Input dimension', self.input_dim),
-                ('Output dimension', self.output_dim),
+                ('Input dimension', self.input_dim[0]),
+                ('Output dimension', self.output_dim[0]),
                 ('Layer types', self.layers),
                 ('Filters in each layer', self.filters),
                 ('Strides in each layer', self.strides),
@@ -518,8 +572,6 @@ class ConvDescriptor(NetworkDescriptor):
         return 'Convolutional Neural Network descriptor'
 
 class TConvDescriptor(NetworkDescriptor):
-    
-    MAX_NUM_FILTER = 65
 
     """
     Descriptor of a Transposed Convolutional Neural Network, formed by transposed convolutional 
@@ -566,6 +618,10 @@ class TConvDescriptor(NetworkDescriptor):
         :param dropout: A boolean value that indicates if the networks can have dropout.
         :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """
+        
+        self.max_num_layers = max_num_layers
+        self.max_num_neurons = max_num_neurons
+        
         self.input_dim = input_size
         self.output_dim = output_size
         
@@ -576,8 +632,9 @@ class TConvDescriptor(NetworkDescriptor):
         self.init_functions = []
         self.act_functions = []
         for i in range(300):
-            self.strides += [np.array([np.random.randint(1, max_stride)] * 2 + [1])]
-            self.filters += [np.array([np.random.randint(2, max_filter)] * 2 + [np.random.randint(3, self.MAX_NUM_FILTER)])]
+            self.filters += [np.array([np.random.randint(MIN_NUM_FILTERS, max_filter)] * 2 + 
+                                       [np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)])]
+            self.strides += [np.array([np.random.randint(MIN_NUM_STRIDES, max_stride)] * 2 + [1])]
             self.init_functions += [np.random.choice(initializations[1:])]
             self.act_functions += [np.random.choice(activations)]
 
@@ -596,7 +653,7 @@ class TConvDescriptor(NetworkDescriptor):
         if batch_norm is not None and not batch_norm:
             self.batch_norm = np.random.choice([True, False])
                 
-    def add_layer(self, layer_pos, filter_size, stride_size, act_function, init_function):
+    def add_layer(self, layer_pos, filter_size, filter_channel, stride_size, act_function, init_function):
         """
         Adds a layer in the given position with all the characteristics indicated by parameters.
         
@@ -607,15 +664,20 @@ class TConvDescriptor(NetworkDescriptor):
         :param init_function: Initialization function.
         """
         
+        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
+            return False # It is not within feasible bounds
+        if self.number_hidden_layers >= self.max_num_layers:
+            return False 
+        
         self.number_hidden_layers += 1
-        self.filters.insert(layer_pos, np.array([filter_size, filter_size, np.random.randint(0, self.MAX_NUM_FILTER)]))
+        self.filters.insert(layer_pos, np.array([filter_size, filter_size, filter_channel]))
         self.strides.insert(layer_pos, np.array([stride_size, stride_size, 1]))
         self.act_functions.insert(layer_pos, act_function)
         self.init_functions.insert(layer_pos, init_function)
             
         for i in range(layer_pos, self.number_hidden_layers):
             
-            if i > self.number_hidden_layers - 1: #I the layers haev been removed
+            if i > self.number_hidden_layers - 1: #I the layers have been removed
                 break
             
             output = calculate_TCNN_shape(self.input_dim, self.filters[:i], self.strides[:i], -1)
@@ -629,7 +691,7 @@ class TConvDescriptor(NetworkDescriptor):
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
         
-        return 0
+        return True
 
     def remove_layer(self, layer_pos):
         """
@@ -637,7 +699,13 @@ class TConvDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the layer that is going to be removed.
         """
-
+        # No control about lower bound is done because this function can be called 
+        # with negative position indexes (-1 is refering to last layer).
+        if layer_pos > self.number_hidden_layers:
+            return False # It is not within feasible bounds
+        if self.number_hidden_layers <= 1:
+            return False 
+        
         self.filters.pop(layer_pos)
         self.act_functions.pop(layer_pos)
         self.init_functions.pop(layer_pos)
@@ -648,19 +716,15 @@ class TConvDescriptor(NetworkDescriptor):
         
         while output[0] * self.strides[-1][0] > self.output_dim[0]:
             self.strides[-1] = np.array([self.strides[-1][0] - 1, self.strides[-1][1] - 1, self.strides[-1][2]])
+        
         if self.strides[-1][0] == 0:
-                self.remove_layer(-1)
+            if not self.remove_layer(-1):
+                return False
+        
         output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
-
-    def remove_random_layer(self):
-        """
-        Selects and removes a random layer from the network if it is possible.
-        """
-        if self.number_hidden_layers > 1:
-            layer_pos = np.random.randint(self.number_hidden_layers)
-            self.remove_layer(layer_pos)
+        return True
 
     def change_filters(self, layer_pos, new_kernel_size, new_channel):
         """
@@ -675,20 +739,23 @@ class TConvDescriptor(NetworkDescriptor):
         self.filters[layer_pos][1] = new_kernel_size
         self.filters[layer_pos][2] = new_channel
         
-        for i in range(layer_pos, self.number_hidden_layers):
-            if i > self.number_hidden_layers - 1: #I the layers haev been removed
-                break
-            
+        i = layer_pos
+        while i < self.number_hidden_layers:
             output = calculate_TCNN_shape(self.input_dim, self.filters[:i], self.strides[:i], -1)
             
             while output[0] * self.strides[i][0] > self.output_dim[0]:
                 self.strides[i] = np.array([self.strides[i][0] - 1, self.strides[i][1] - 1, self.strides[i][2]])
+ 
             if self.strides[i][0] == 0:
-                self.remove_layer(i)
+                if not self.remove_layer(i):
+                    return False
+            i += 1
 
         output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
+        
+        return True
 
     def change_stride(self, layer_pos, new_stride):
         """
@@ -702,19 +769,23 @@ class TConvDescriptor(NetworkDescriptor):
         self.strides[layer_pos][0] = new_stride
         self.strides[layer_pos][1] = new_stride
 
-        for i in range(layer_pos, self.number_hidden_layers):
-            if i > self.number_hidden_layers - 1: #I the layers haev been removed
-                break           
+        i = layer_pos
+        while i < self.number_hidden_layers:
             output = calculate_TCNN_shape(self.input_dim, self.filters[:i], self.strides[:i], -1)
-            
+
             while output[0] * self.strides[i][0] > self.output_dim[0]:
                 self.strides[i] = np.array([self.strides[i][0] - 1, self.strides[i][1] - 1, self.strides[i][2]])
+
             if self.strides[i][0] == 0:
-                self.remove_layer(i)
+                if not self.remove_layer(i):
+                    return False
+            i += 1
 
         output = calculate_TCNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
         desired_filter_size = self.output_dim[0] - (output[0] - 1) * self.strides[-1][0]
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
+
+        return True
         
     def codify_components(self):
         """
@@ -726,8 +797,8 @@ class TConvDescriptor(NetworkDescriptor):
         """
         
         return [('Number of layers', self.number_hidden_layers),
-                ('Input dimension', self.input_dim),
-                ('Output dimension', self.output_dim),
+                ('Input dimension', self.input_dim[0]),
+                ('Output dimension', self.output_dim[0]),
                 ('Filters in each layer', self.filters),
                 ('Strides in each layer', self.strides),
                 ('Maximum filter size', self.max_filter),
@@ -789,6 +860,10 @@ class RNNDescriptor(NetworkDescriptor):
         :param dropout: A boolean value that indicates if the networks can have dropout.
         :param batch_norm: A boolean value that indicates if the networks can have batch normalization.
         """
+        
+        self.max_num_layers = max_num_layers
+        self.max_num_neurons = max_num_neurons
+        
         self.input_dim = input_size
         self.output_dim = output_size
         
@@ -796,18 +871,18 @@ class RNNDescriptor(NetworkDescriptor):
         
         # Random initialization
         self.number_hidden_layers = np.random.randint(max_num_layers)+1
-        self.units_in_layer = [np.random.randint(1, self.max_units)+1 for _ in range(self.number_hidden_layers)]
-        self.init_functions = list(np.random.choice(initializations, size=self.number_hidden_layers+1))
-        self.act_functions = list(np.random.choice(activations, size=self.number_hidden_layers+1))
+        self.units_in_layer = [np.random.randint(MIN_NUM_NEURONS, self.max_units) for _ in range(self.number_hidden_layers)]
+        self.init_functions = list(np.random.choice(initializations, size=self.number_hidden_layers))
+        self.act_functions = list(np.random.choice(activations, size=self.number_hidden_layers))
         
-        self.rnn_layers = list(np.random.choice([SimpleRNN, LSTM, GRU], size=self.number_hidden_layers+1))
-        self.bidirectional = list(np.random.choice([True, False], size=self.number_hidden_layers+1))
+        self.rnn_layers = list(np.random.choice([SimpleRNN, LSTM, GRU], size=self.number_hidden_layers))
+        self.bidirectional = list(np.random.choice([True, False], size=self.number_hidden_layers))
         
         if dropout is not None and dropout:
             self.dropout = np.random.choice([True, False])
-            self.dropout_probs = np.random.rand(self.number_hidden_layers+1)
+            self.dropout_probs = np.random.rand(self.number_hidden_layers)
         else:
-            self.dropout_probs = np.zeros(self.number_hidden_layers+1)
+            self.dropout_probs = np.zeros(self.number_hidden_layers)
     
     def add_layer(self, layer_pos, rnn_type, units_in_layer, bidirectional, act_function, init_function):
         """
@@ -817,12 +892,19 @@ class RNNDescriptor(NetworkDescriptor):
         :param lay_params: Type of recurrent layer, how many units, etc..
         """
         
+        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
+            return False # It is not within feasible bounds
+        if self.number_hidden_layers >= self.max_num_layers:
+            return False 
+        
         self.number_hidden_layers += 1
         self.rnn_layers.insert(layer_pos, rnn_type)
         self.units_in_layer.insert(layer_pos, min(units_in_layer, self.max_units))
         self.bidirectional.insert(layer_pos, bidirectional)
         self.act_functions.insert(layer_pos, act_function)
         self.init_functions.insert(layer_pos, init_function)
+        
+        return True
     
     def remove_layer(self, layer_pos):
         """
@@ -831,32 +913,29 @@ class RNNDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the layer that is going to be removed.
         """
         
+        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
+            return False # It is not within feasible bounds
+        if self.number_hidden_layers <= 1:
+            return False 
+        
         self.number_hidden_layers -= 1
         self.rnn_layers.pop(layer_pos)
         self.units_in_layer.pop(layer_pos)
         self.bidirectional.pop(layer_pos)
         self.act_functions.pop(layer_pos)
         self.init_functions.pop(layer_pos)
-    
-    def remove_random_layer(self):
-        """
-        Selects and removes a random layer from the network if it is possible.
-        """
-        if self.number_hidden_layers > 1:
-            layer_pos = np.random.randint(self.number_hidden_layers)
-            self.remove_layer(layer_pos)
         
-    def change_layer_type(self, layer_pos): 
+        return True
+    
+    def change_layer_type(self, layer_pos, layer_type): 
         """
         Changes the type of the layer in the position received by parameter 
         for a new one selected randomly.
         
         :param layer_pos: Position of the filter to be changed.
         """
-        layer_type = self.rnn_layers[layer_pos]
-        possible_types = [SimpleRNN, LSTM, GRU]
-        possible_types.remove(layer_type)
-        self.rnn_layers[layer_pos] = np.random.choice(possible_types)
+        self.rnn_layers[layer_pos] = layer_type
+        return True
         
     def change_units(self, layer_pos, new_units):
         """
@@ -867,6 +946,7 @@ class RNNDescriptor(NetworkDescriptor):
         :param new_units: Number of units assigned to that layer. 
         """
         self.units_in_layer[layer_pos] = new_units
+        return True
         
     def change_bidirectional(self, layer_pos):
         """
@@ -877,17 +957,7 @@ class RNNDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the filter to be changed.
         """
         self.bidirectional[layer_pos] = not self.bidirectional[layer_pos]
-        
-    def change_max_units(self, max_units):
-        """
-        Changes the stride of the layer in the position received by parameter 
-        for a new stried specified with the data received also by parameters.
-        
-        :param layer_pos: Position of the filter to be changed.
-        :param new_stride: Stride assigned to that layer. 
-        """
-        self.max_units = max_units
-        self.units_in_layer = [min(unit, self.max_units) for unit in self.units_in_layer]        
+        return True
     
     def codify_components(self):
         """
@@ -899,8 +969,8 @@ class RNNDescriptor(NetworkDescriptor):
         """
         
         return [('Number of layers', self.number_hidden_layers),
-                ('Input dimension', self.input_dim),
-                ('Output dimension', self.output_dim),
+                ('Input dimension', self.input_dim[0]),
+                ('Output dimension', self.output_dim[0]),
                 ('Layer types', self.rnn_layers),
                 ('Maximum number of units', self.max_units),
                 ('Units in each layer', self.units_in_layer),
@@ -941,7 +1011,7 @@ class MLP(Network):
         :return: The layer received from parameter with the MLP concatenated to it.
         """
         
-        for lay_indx in range(self.descriptor.number_hidden_layers):
+        for lay_indx in range(self.descriptor.number_hidden_layers-1):
             
             x = Dense(self.descriptor.dims[lay_indx], 
                       activation=self.descriptor.act_functions[lay_indx], 
@@ -952,10 +1022,10 @@ class MLP(Network):
                 x = BatchNormalization()(x)
         
         x = Dense(self.descriptor.output_dim, 
-                  activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers],
-                  kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers])(x)
+                  activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers-1],
+                  kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers-1])(x)
         if self.descriptor.dropout:
-            x = Dropout(self.descriptor.dropout_probs[lay_indx])(x)
+            x = Dropout(self.descriptor.dropout_probs[self.descriptor.number_hidden_layers-1])(x)
         if self.descriptor.batch_norm:
             x = BatchNormalization()(x)
         
@@ -1074,7 +1144,7 @@ class RNN(Network):
                         activation=self.descriptor.act_functions[self.descriptor.number_hidden_layers - 1],
                         kernel_initializer=self.descriptor.init_functions[self.descriptor.number_hidden_layers - 1]())
         
-        if self.descriptor.bidirectional[self.descriptor.number_hidden_layers]:
+        if self.descriptor.bidirectional[self.descriptor.number_hidden_layers - 1]:
             x = Bidirectional(rnn_layer)(x)
         else:
             x = rnn_layer(x)

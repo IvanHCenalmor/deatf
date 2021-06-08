@@ -270,7 +270,7 @@ class Evolving:
 
         self.toolbox.register("evaluate", self.eval_individual)
         self.toolbox.register("mate", cross, creator.Individual)
-        self.toolbox.register("mutate", mutations, self.ev_hypers, self.max_num_neurons, custom_mutations)
+        self.toolbox.register("mutate", mutations, self.ev_hypers, batch_norm, dropout, custom_mutations)
 
         self.toolbox.register("select", self.selection, **sel_kwargs)
 
@@ -396,7 +396,7 @@ class Evolving:
         return ev
 
 
-def mutations(ev_hypers, max_num_layers, custom_mutations, individual):
+def mutations(ev_hypers, batch_norm, dropout, custom_mutations, individual):
     """
     Mutation operators for individuals. They can affect any network or the hyperparameters.
     
@@ -421,7 +421,7 @@ def mutations(ev_hypers, max_num_layers, custom_mutations, individual):
     else:
         network_custom_mutations = custom_mutations[network.__class__.__name__]
     
-    network_mutation = mutation_types[network.__class__.__name__](ev_hypers, max_num_layers, network, 
+    network_mutation = mutation_types[network.__class__.__name__](ev_hypers, batch_norm, dropout, network, 
                                                                   hyperparameters, network_custom_mutations)
     network_mutation.apply_random_mutation()
     

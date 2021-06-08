@@ -51,7 +51,7 @@ def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
     
     models["n0"] = model
-    
+    model.summary()
     preds = models["n0"].predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)

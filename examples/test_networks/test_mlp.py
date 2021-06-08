@@ -42,5 +42,5 @@ def test_MLP(dataset_name, eval_func=None, batch_size=150, population=5,
                 iters=iters, max_num_layers=max_num_layers, max_num_neurons=max_num_neurons)
 
 if __name__ == "__main__":
-    evaluated = test_MLP('parkinsons', batch_size=50, population=10, generations=5, iters=10)
-    #test_MLP_all_datasets(batch_size=200, population=2, generations = 2, iters=10)
+    #evaluated = test_MLP('forest_types', batch_size=50, population=10, generations=5, iters=10)
+    test_MLP_all_datasets(batch_size=200, population=2, generations = 2, iters=10)

@@ -179,7 +179,8 @@ def load_csv(data_directory, data_sep, decimal, label_column, removed_columns):
 
     scaler = MinMaxScaler(feature_range=(0, 1))
     features = scaler.fit_transform(features)
-    labels = scaler.fit_transform(labels.reshape(-1, 1)).flatten()
+    if isinstance(labels[0], float) or isinstance(labels[0], int):
+        labels = scaler.fit_transform(labels.reshape(-1, 1)).flatten()
     
     return features, labels
 

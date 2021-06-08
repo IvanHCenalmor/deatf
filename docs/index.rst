@@ -5,10 +5,13 @@
 
 DEATF documentation
 =========================
+Distributed Evolutionary Algorithms in TensorFlow (DEATF).
+
+.. image:: _images/DEAFT_without_border.png
+   :width: 600
 
 .. toctree::
    :maxdepth: 2
-   :caption: Distributed Evolutionary Algorithms in TensorFlow (DEATF).
 
    api/index
    examples/index
