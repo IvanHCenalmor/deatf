@@ -5,7 +5,7 @@ import tensorflow as tf
 import time
 
 from deatf.metrics import accuracy_error
-from deatf.network import ConvDescriptor
+from deatf.network import CNNDescriptor
 
 from aux_functions_testing import test
 
@@ -45,7 +45,7 @@ def test_CNN_all_datasets(eval_func=None, batch_size=150, population=5,
 def test_CNN(dataset_name, eval_func=None, batch_size=150, population=5, 
              generations=10, iters=100, max_num_layers=10, max_num_neurons=20):
     
-    return test(dataset_name, descriptors=[ConvDescriptor], eval_func=eval_func, 
+    return test(dataset_name, descriptors=[CNNDescriptor], eval_func=eval_func, 
                 batch_size=batch_size, population=population, generations=generations, 
                 iters=iters, max_num_layers=max_num_layers, max_num_neurons=max_num_neurons,  
                 hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]})    

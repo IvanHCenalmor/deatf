@@ -10,7 +10,7 @@ sys.path.append('..')
 import tensorflow as tf
 import numpy as np
 
-from deatf.network import MLPDescriptor, ConvDescriptor
+from deatf.network import MLPDescriptor, CNNDescriptor
 from deatf.metrics import accuracy_error
 from deatf.evolution import Evolving
 from deatf.data import load_fashion
@@ -51,13 +51,13 @@ def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
     
     models["n0"] = model
-    model.summary()
+    #model.summary()
+    
     preds = models["n0"].predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
 
     return accuracy_error(test_outputs["o0"], res),
-
 
 if __name__ == "__main__":
 
@@ -89,11 +89,13 @@ if __name__ == "__main__":
     y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()  
     
     # Here we indicate that we want a CNN as the first network of the model
-    e = Evolving(desc_list=[ConvDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[y_train], 
+    e = Evolving(desc_list=[CNNDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[y_train], 
                  x_tests=[x_val], y_tests=[y_val], evaluation=eval_cnn, 
                  batch_size=150, population=5, generations=10, iters=10, 
-                 n_inputs=[[28, 28, 3], [20]], n_outputs=[[20], [10]], cxp=0.5,
-                 mtp=0.5, hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, batch_norm=True, dropout=True)
+                 n_inputs=[[28, 28, 3], [20]], n_outputs=[[7, 7, 1], [10]], cxp=0.5,
+                 mtp=0.5, hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
+    batch_norm=True, dropout=True)
+
     a = e.evolve()
 
     print(a[-1])

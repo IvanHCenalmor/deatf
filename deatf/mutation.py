@@ -191,7 +191,7 @@ class MLP_Mutation(Mutation):
         number of neurons from 1 to maximum number of neurons described 
         in the initialization.
         """
-        layer_pos = np.random.randint(0, self.network.number_hidden_layers)
+        layer_pos = np.random.randint(self.network.number_hidden_layers)
         
         possible_dimensions = list(range(MIN_NUM_NEURONS, self.network.max_num_neurons))
         possible_dimensions.remove(self.network.dims[layer_pos])
@@ -229,8 +229,13 @@ class CNN_Mutation(Mutation):
         """
         A new convolutional or pooling layer is added to the CNN descriptor.
         """
-        new_layer_pos = np.random.randint(0, self.network.number_hidden_layers)
-        new_lay_type = np.random.randint(0, 3)
+        if self.network.number_hidden_layers <= 1:
+            new_layer_pos = 0
+        else:
+            # Is self.network.number_hidden_layers - 1 because last layer should
+            # not be changed in order to have the desired output.
+            new_layer_pos = np.random.randint(self.network.number_hidden_layers-1)
+        new_lay_type = np.random.randint(3)
         
         new_filter_size = np.random.randint(MIN_NUM_FILTERS, self.network.max_filter)
         new_filter_channel = np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)
@@ -254,7 +259,11 @@ class CNN_Mutation(Mutation):
         stride from 1 to maximum stride size described 
         in the network descriptor.
         """
-        layer_pos = np.random.randint(0, self.network.number_hidden_layers)
+        if self.network.number_hidden_layers <= 1:
+            return False
+        # Is self.network.number_hidden_layers - 1 because last layer should
+        # not be changed in order to have the desired output.
+        layer_pos = np.random.randint(self.network.number_hidden_layers-1)
         
         possible_strides = list(range(MIN_NUM_STRIDES, self.network.max_stride))
         possible_strides.remove(self.network.strides[layer_pos][0])
@@ -271,7 +280,11 @@ class CNN_Mutation(Mutation):
         filter with size from 2 to maximum filter size described 
         in the network descriptor and with channels from 1 to 65.
         """
-        layer_pos = np.random.randint(0, self.network.number_hidden_layers)
+        if self.network.number_hidden_layers <= 1:
+            return False
+        # Is self.network.number_hidden_layers - 1 because last layer should
+        # not be changed in order to have the desired output.
+        layer_pos = np.random.randint(self.network.number_hidden_layers-1)
         
         possible_filter_sizes = list(range(MIN_NUM_FILTERS, self.network.max_filter))
         possible_filter_channels = list(range(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS))
@@ -351,7 +364,7 @@ class TCNN_Mutation(Mutation):
         """
         A new transposed convolutional layer is added to the TCNN descriptor.
         """
-        new_layer_pos = np.random.randint(0, self.network.number_hidden_layers)
+        new_layer_pos = np.random.randint(self.network.number_hidden_layers)
         
         new_filter_size = np.random.randint(MIN_NUM_FILTERS, self.network.max_filter)
         new_filter_channel = np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)

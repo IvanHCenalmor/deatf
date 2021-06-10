@@ -15,7 +15,7 @@ activations = [None, tf.nn.relu, tf.nn.elu, tf.nn.softplus, tf.nn.softsign, tf.s
 initializations = [RandomNormal, RandomUniform, GlorotNormal, GlorotUniform]
 
 MIN_NUM_NEURONS = 2
-MIN_NUM_FILTERS = 2
+MIN_NUM_FILTERS = 1
 MIN_NUM_STRIDES = 1
 MIN_NUM_CHANNELS = 3
 MAX_NUM_CHANNELS = 65
@@ -72,8 +72,6 @@ class NetworkDescriptor:
         :param layer_pos: Position of the layer whose activation function wants to be changed.
         :param new_act_fn: New activation fucntion that is going to be asigned.
         """
-        if layer_pos < 0 or layer_pos > self.number_hidden_layers:
-            return False # It is not within feasible bounds
         self.act_functions[layer_pos] = new_act_fn
         return True
 
@@ -84,8 +82,6 @@ class NetworkDescriptor:
         :param layer_pos: Position of the layer whose activation function wants to be changed.
         :param new_act_fn: New activation fucntion that is going to be asigned.
         """
-        if layer_pos < 0 or layer_pos > self.number_hidden_layers:
-            return False # It is not within feasible bounds
         self.init_functions[layer_pos] = new_weight_fn
         return True
 
@@ -217,11 +213,11 @@ class MLPDescriptor(NetworkDescriptor):
         :param drop_prob: Probability of dropout.
         :param batch_norm: Whether batch normalization is applied after the layer.
         """
-        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
-            return False # It is not within feasible bounds
         if self.number_hidden_layers >= self.max_num_layers:
             return False 
-
+        if lay_dims < MIN_NUM_NEURONS or lay_dims > self.max_num_neurons:
+            return False # It is not within feasible bounds
+        
         # We create the new layer and add it to the network descriptor
         self.dims = np.insert(self.dims, layer_pos, lay_dims)
         self.init_functions = np.insert(self.init_functions, layer_pos, init_function)
@@ -236,9 +232,8 @@ class MLPDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the layer that is going to be removed.
         """
-
-        if layer_pos <= 1 or layer_pos > self.number_hidden_layers:
-            return False # It is not within feasible bounds
+        if self.number_hidden_layers <= 1:
+            return False 
         
         self.dims = np.delete(self.dims, layer_pos)
         self.init_functions = np.delete(self.init_functions, layer_pos)
@@ -256,8 +251,6 @@ class MLPDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the layer that will be changed.
         :param new_dim: Dimension that will be changed to.
         """
-        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
-            return False # It is not within feasible bounds
         if new_dim < MIN_NUM_NEURONS or new_dim > self.max_num_neurons:
             return False # It is not within feasible bounds
         self.dims[layer_pos] = new_dim
@@ -288,7 +281,7 @@ class MLPDescriptor(NetworkDescriptor):
         return 'Multi Layer Perceptron descriptor'
 
 
-class ConvDescriptor(NetworkDescriptor):
+class CNNDescriptor(NetworkDescriptor):
     
     """
     Descriptor of a Convolutional Neural Network, formed by convolutional and pooling layers and 
@@ -355,7 +348,7 @@ class ConvDescriptor(NetworkDescriptor):
         self.act_functions = []
         
         i = 0
-        while i < self.number_hidden_layers:
+        while i < (self.number_hidden_layers - 1):
             new_layer = np.random.choice([0, 1, 2])
             
             self.layers += [2]
@@ -363,14 +356,15 @@ class ConvDescriptor(NetworkDescriptor):
                                        [np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)])]
             self.strides += [np.array([np.random.randint(MIN_NUM_STRIDES, max_stride)] * 2 + [1])]
             shape = calculate_CNN_shape(self.input_dim, self.filters, self.strides, -1)
-            if shape[0] < 2 or shape[1] < 2 or np.prod(shape)*self.filters[-1][-1] < self.output_dim:  # If the blob size is too small
+            if shape[0] < 2 or shape[1] < 2 or (shape[0] < self.output_dim[0] and shape[1] < self.output_dim[1]):  
+                # If the blob size is too small
                 self.layers = self.layers[:-1]
                 self.filters = self.filters[:-1]
                 self.strides = self.strides[:-1]
                 if i == 0:
-                    continue # If enters here is because it has not added nothing, it tries again with other random
+                    continue # If enters here is because it has not added anything, 
+                             # it tries again with other random
                 else:
-                    self.number_hidden_layers = i
                     break
             
             self.init_functions += [np.random.choice(initializations[1:])]
@@ -382,23 +376,46 @@ class ConvDescriptor(NetworkDescriptor):
                                            [np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)])]
                 self.strides += [np.array([np.random.randint(MIN_NUM_STRIDES, max_stride)] * 2 + [1])]
                 shape = calculate_CNN_shape(self.input_dim, self.filters, self.strides, -1)
-                if shape[0] < 2 or shape[1] < 2 or np.prod(shape)*self.filters[-1][-1] < self.output_dim:  # If the blob size is too small
+                if shape[0] < 2 or shape[1] < 2 or (shape[0] < self.output_dim[0] and shape[1] < self.output_dim[1]):  
+                    # If the blob size is too small
                     self.layers = self.layers[:-2]
                     self.filters = self.filters[:-2]
                     self.strides = self.strides[:-2]
                     self.init_functions = self.init_functions[:-1]
                     self.act_functions = self.act_functions[:-1]
                     if i == 0:
-                        continue # If enters here is because it has not added nothing, it tries again with other random
+                        continue # If enters here is because it has not added anything, 
+                                 # it tries again with other random
                     else:
-                        self.number_hidden_layers = i
                         break
                 i += 1
                 self.init_functions += [np.random.choice(initializations[1:])]
                 self.act_functions += [np.random.choice(activations)]
                 
             i += 1
-         
+        
+        self.number_hidden_layers = i
+        
+        # For the final layer, in order to achieve the desired output, calculations
+        # have to been made.
+        last_lay_inp = calculate_CNN_shape(self.input_dim, self.filters, self.strides, -1)
+        maximum_stride = last_lay_inp[0]//self.output_dim[0]
+        if maximum_stride > 1:
+            last_lay_stride = np.random.randint(1, maximum_stride)
+        else:
+            last_lay_stride  = 1
+        last_lay_filter = (last_lay_inp[0] + 1) - (self.output_dim[0] * last_lay_stride)
+           
+        if last_lay_filter < 1:
+            return False
+        
+        self.layers += [2]
+        self.filters += [np.array([last_lay_filter, last_lay_filter, self.output_dim[2]])]
+        self.strides += [np.array([last_lay_stride, last_lay_stride, 1])]
+        self.init_functions += [np.random.choice(initializations[1:])]
+        self.act_functions += [np.random.choice(activations)]
+        self.number_hidden_layers += 1
+        
         self.dropout = False
         self.dropout_probs = np.zeros(self.number_hidden_layers)
         
@@ -419,6 +436,14 @@ class ConvDescriptor(NetworkDescriptor):
         :param act_function: Activation function.
         :param init_function: Initialization function.
         """
+        if self.number_hidden_layers >= self.max_num_layers:
+            return False  
+        if filter_size < MIN_NUM_FILTERS or filter_size > self.max_filter:
+            return False # It is not within feasible bounds
+        if filter_channel < MIN_NUM_CHANNELS or filter_channel > MAX_NUM_CHANNELS:
+            return False # It is not within feasible bounds
+        if stride_size < MIN_NUM_STRIDES or stride_size > self.max_stride:
+            return False # It is not within feasible bounds
         
         aux_filters = copy.deepcopy(self.filters)
         aux_strides = copy.deepcopy(self.strides)
@@ -440,10 +465,27 @@ class ConvDescriptor(NetworkDescriptor):
             aux_filters.insert(layer_pos+1, np.array([pool_filters, pool_filters, pool_channels]))
             aux_strides.insert(layer_pos+1, np.array([pool_strides, pool_strides, 1]))
             
+        
+        # The final layer, in order to achieve the desired output, calculations
+        # have to been made.
+        last_lay_inp = calculate_CNN_shape(self.input_dim, aux_filters[:-1], aux_strides[:-1], -1)
+        maximum_stride = last_lay_inp[0]//self.output_dim[0]
+        if maximum_stride > 1:
+            last_lay_stride = np.random.randint(1, maximum_stride)
+        else:
+            last_lay_stride  = 1
+        last_lay_filter = (last_lay_inp[0] + 1) - (self.output_dim[0] * last_lay_stride)
+           
+        if last_lay_filter < 1:
+            return False
+        
+        aux_filters[-1] = np.array([last_lay_filter, last_lay_filter, self.output_dim[2]])
+        aux_strides[-1] = np.array([last_lay_stride, last_lay_stride, 1])
+            
         if aux_number_hidden_layers >= self.max_num_layers:
             return False
             
-        if calculate_CNN_shape(self.input_dim, aux_filters, aux_strides, aux_number_hidden_layers)[0] > 0:
+        if calculate_CNN_shape(self.input_dim, aux_filters, aux_strides, -1)[0] >= self.output_dim[0]:
         
             self.layers.insert(layer_pos, 2)
             # A convolutional layer is added always
@@ -471,10 +513,6 @@ class ConvDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the layer that is going to be removed.
         """
-        
-        # np.sum(self.layers) > 3 means that are least are two convolutional layers
-        # if np.sum(self.layers) > 3: 
-        
         if self.number_hidden_layers <= 1:
             return False # If there is only one layer it can  not be removed
         if self.number_hidden_layers == 2 and self.layers[-1] != 2 and layer_pos == 0:
@@ -482,8 +520,6 @@ class ConvDescriptor(NetworkDescriptor):
             # If the layer to be removed is the first one, it can not be removed
             # because it can not only remain a pooling layer
             return False
-        if layer_pos < 0  or layer_pos > (self.number_hidden_layers - 1):
-            return False # It is not within feasible bounds
 
         self.layers.pop(layer_pos)
         self.act_functions.pop(layer_pos)
@@ -503,41 +539,102 @@ class ConvDescriptor(NetworkDescriptor):
                 self.strides.pop(layer_pos)
                 self.number_hidden_layers -= 1
         
+        # The final layer, in order to achieve the desired output, calculations
+        # have to been made.
+        last_lay_inp = calculate_CNN_shape(self.input_dim, self.filters[:-1], self.strides[:-1], -1)
+        maximum_stride = last_lay_inp[0]//self.output_dim[0]
+        if maximum_stride > 1:
+            last_lay_stride = np.random.randint(1, maximum_stride)
+        else:
+            last_lay_stride  = 1
+        last_lay_filter = (last_lay_inp[0] + 1) - (self.output_dim[0] * last_lay_stride)
+           
+        if last_lay_filter < 1:
+            return False
+        
+        self.filters[-1] = np.array([last_lay_filter, last_lay_filter, self.output_dim[2]])
+        self.strides[-1] = np.array([last_lay_stride, last_lay_stride, 1])
+        
         return True
 
-    def change_filters(self, layer_pos, new_kernel_size, new_channel):
+    def change_filters(self, layer_pos, new_filter_size, new_channel):
         """
         Changes the filter of the layer in the position received by parameter for 
         a new filter specified with the size and channels received also by parameters.
         
         :param layer_pos: Position of the filter to be changed.
-        :param new_kernel_size: Height and width of the filter (only square filters are allowed).
+        :param new_filter_size: Height and width of the filter (only square filters are allowed).
         :param new_channel: Number of output channels.
         """
+        if new_filter_size < MIN_NUM_FILTERS or new_filter_size > self.max_filter:
+            return False # It is not within feasible bounds
+        if new_channel < MIN_NUM_CHANNELS or new_channel > MAX_NUM_CHANNELS:
+            return False # It is not within feasible bounds
+        
         aux_filters = copy.deepcopy(self.filters)
-        aux_filters[layer_pos][0] = new_kernel_size
-        aux_filters[layer_pos][1] = new_kernel_size
+        aux_strides = copy.deepcopy(self.strides)
+        aux_filters[layer_pos][0] = new_filter_size
+        aux_filters[layer_pos][1] = new_filter_size
         aux_filters[layer_pos][2] = new_channel
         
-        if calculate_CNN_shape(self.input_dim, aux_filters, self.strides, self.number_hidden_layers)[0] > 0:
+        
+        # The final layer, in order to achieve the desired output, calculations
+        # have to been made.
+        last_lay_inp = calculate_CNN_shape(self.input_dim, aux_filters[:-1], aux_strides[:-1], -1)
+        maximum_stride = last_lay_inp[0]//self.output_dim[0]
+        if maximum_stride > 1:
+            last_lay_stride = np.random.randint(1, maximum_stride)
+        else:
+            last_lay_stride  = 1
+        last_lay_filter = (last_lay_inp[0] + 1) - (self.output_dim[0] * last_lay_stride)
+           
+        if last_lay_filter < 1:
+            return False
+        
+        aux_filters[-1] = np.array([last_lay_filter, last_lay_filter, self.output_dim[2]])
+        aux_strides[-1] = np.array([last_lay_stride, last_lay_stride, 1])
+        
+        if calculate_CNN_shape(self.input_dim, aux_filters, aux_strides, -1)[0] >= self.output_dim[0]:
             self.filters = aux_filters
+            self.strides = aux_strides
             return True
         else:
             return False
 
-    def change_stride(self, layer_pos, new_stride):
+    def change_stride(self, layer_pos, new_stride_size):
         """
         Changes the stride of the layer in the position received by parameter 
         for a new stried specified with the data received also by parameters.
         
         :param layer_pos: Position of the filter to be changed.
-        :param new_stride: Stride assigned to that layer. 
+        :param new_stride_size: Stride assigned to that layer. 
         """
-        aux_strides = copy.deepcopy(self.strides)
-        aux_strides[layer_pos][0] = new_stride
-        aux_strides[layer_pos][1] = new_stride
+        if new_stride_size < MIN_NUM_STRIDES or new_stride_size > self.max_stride:
+            return False # It is not within feasible bounds
         
-        if calculate_CNN_shape(self.input_dim, self.filters, aux_strides, self.number_hidden_layers)[0] > 0:
+        aux_filters = copy.deepcopy(self.filters)
+        aux_strides = copy.deepcopy(self.strides)
+        aux_strides[layer_pos][0] = new_stride_size
+        aux_strides[layer_pos][1] = new_stride_size
+        
+        # The final layer, in order to achieve the desired output, calculations
+        # have to been made.
+        last_lay_inp = calculate_CNN_shape(self.input_dim, aux_filters[:-1], aux_strides[:-1], -1)
+        maximum_stride = last_lay_inp[0]//self.output_dim[0]
+        if maximum_stride > 1:
+            last_lay_stride = np.random.randint(1, maximum_stride)
+        else:
+            last_lay_stride  = 1
+        last_lay_filter = (last_lay_inp[0] + 1) - (self.output_dim[0] * last_lay_stride)
+           
+        if last_lay_filter < 1:
+            return False
+        
+        aux_filters[-1] = np.array([last_lay_filter, last_lay_filter, self.output_dim[2]])
+        aux_strides[-1] = np.array([last_lay_stride, last_lay_stride, 1])
+        
+        if calculate_CNN_shape(self.input_dim, self.filters, self.strides, -1)[0] >= self.output_dim[0]:
+            self.filters = aux_filters
             self.strides = aux_strides
             return True
         else:
@@ -571,7 +668,7 @@ class ConvDescriptor(NetworkDescriptor):
     def __name__(self):
         return 'Convolutional Neural Network descriptor'
 
-class TConvDescriptor(NetworkDescriptor):
+class TCNNDescriptor(NetworkDescriptor):
 
     """
     Descriptor of a Transposed Convolutional Neural Network, formed by transposed convolutional 
@@ -663,11 +760,14 @@ class TConvDescriptor(NetworkDescriptor):
         :param act_function: Activation function.
         :param init_function: Initialization function.
         """
-        
-        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
-            return False # It is not within feasible bounds
         if self.number_hidden_layers >= self.max_num_layers:
             return False 
+        if filter_size < MIN_NUM_FILTERS or filter_size > self.max_filter:
+            return False # It is not within feasible bounds
+        if filter_channel < MIN_NUM_CHANNELS or filter_channel > MAX_NUM_CHANNELS:
+            return False # It is not within feasible bounds
+        if stride_size < MIN_NUM_STRIDES or stride_size > self.max_stride:
+            return False # It is not within feasible bounds
         
         self.number_hidden_layers += 1
         self.filters.insert(layer_pos, np.array([filter_size, filter_size, filter_channel]))
@@ -699,10 +799,6 @@ class TConvDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the layer that is going to be removed.
         """
-        # No control about lower bound is done because this function can be called 
-        # with negative position indexes (-1 is refering to last layer).
-        if layer_pos > self.number_hidden_layers:
-            return False # It is not within feasible bounds
         if self.number_hidden_layers <= 1:
             return False 
         
@@ -726,17 +822,22 @@ class TConvDescriptor(NetworkDescriptor):
         self.filters[-1] = np.array([desired_filter_size, desired_filter_size, self.output_dim[2]])
         return True
 
-    def change_filters(self, layer_pos, new_kernel_size, new_channel):
+    def change_filters(self, layer_pos, new_filter_size, new_channel):
         """
         Changes the filter of the layer in the position received by parameter for 
         a new filter specified with the size and channels received also by parameters.
         
         :param layer_pos: Position of the filter to be changed.
-        :param new_kernel_size: Height and width of the filter (only square filters are allowed).
+        :param new_filter_size: Height and width of the filter (only square filters are allowed).
         :param new_channel: Number of output channels.
         """
-        self.filters[layer_pos][0] = new_kernel_size
-        self.filters[layer_pos][1] = new_kernel_size
+        if new_filter_size < MIN_NUM_FILTERS or new_filter_size > self.max_filter:
+            return False # It is not within feasible bounds
+        if new_channel < MIN_NUM_CHANNELS or new_channel > MAX_NUM_CHANNELS:
+            return False # It is not within feasible bounds
+        
+        self.filters[layer_pos][0] = new_filter_size
+        self.filters[layer_pos][1] = new_filter_size
         self.filters[layer_pos][2] = new_channel
         
         i = layer_pos
@@ -757,17 +858,19 @@ class TConvDescriptor(NetworkDescriptor):
         
         return True
 
-    def change_stride(self, layer_pos, new_stride):
+    def change_stride(self, layer_pos, new_stride_size):
         """
         Changes the stride of the layer in the position received by parameter 
         for a new stried specified with the data received also by parameters.
         
         :param layer_pos: Position of the stride to be changed.
-        :param new_stride: Stride assigned to that layer.
+        :param new_stride_size: Stride assigned to that layer.
         """
+        if new_stride_size < MIN_NUM_STRIDES or new_stride_size > self.max_stride:
+            return False # It is not within feasible bounds
         
-        self.strides[layer_pos][0] = new_stride
-        self.strides[layer_pos][1] = new_stride
+        self.strides[layer_pos][0] = new_stride_size
+        self.strides[layer_pos][1] = new_stride_size
 
         i = layer_pos
         while i < self.number_hidden_layers:
@@ -892,10 +995,10 @@ class RNNDescriptor(NetworkDescriptor):
         :param lay_params: Type of recurrent layer, how many units, etc..
         """
         
-        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
-            return False # It is not within feasible bounds
         if self.number_hidden_layers >= self.max_num_layers:
             return False 
+        if units_in_layer < MIN_NUM_NEURONS or units_in_layer > self.max_num_neurons:
+            return False # It is not within feasible bounds
         
         self.number_hidden_layers += 1
         self.rnn_layers.insert(layer_pos, rnn_type)
@@ -912,9 +1015,7 @@ class RNNDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the layer that is going to be removed.
         """
-        
-        if layer_pos < 0 or layer_pos >= self.number_hidden_layers:
-            return False # It is not within feasible bounds
+
         if self.number_hidden_layers <= 1:
             return False 
         
@@ -945,6 +1046,9 @@ class RNNDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the filter to be changed.
         :param new_units: Number of units assigned to that layer. 
         """
+        if new_units < MIN_NUM_NEURONS or new_units > self.max_num_neurons:
+            return False # It is not within feasible bounds
+        
         self.units_in_layer[layer_pos] = new_units
         return True
         
@@ -1172,7 +1276,7 @@ def calculate_CNN_shape(input_shape, filters, strides, desired_layer):
     
     filter_size = filters[0]
     stride_size = strides[0]
-    output_shape = (np.array(input_shape[:2]) - np.array(filter_size[:2]) + 1) // np.array(stride_size[:2])
+    output_shape = (np.array(input_shape[:2]) - np.array(filter_size[:2])) // np.array(stride_size[:2]) + 1
     return calculate_CNN_shape(output_shape, filters[1:], strides[1:], desired_layer-1)
 
 

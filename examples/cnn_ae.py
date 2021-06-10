@@ -11,7 +11,7 @@ import tensorflow as tf
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
-from deatf.network import ConvDescriptor, TConvDescriptor
+from deatf.network import CNNDescriptor, TCNNDescriptor
 from deatf.evolution import Evolving
 from deatf.data import load_fashion
 
@@ -39,9 +39,9 @@ def eval_cnn_ae(nets, train_inputs, _, batch_size, iters, test_inputs, __, hyper
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
-    out = Flatten()(out)
-    out = Dense(49)(out)
-    out = tf.reshape(out, (-1, 7, 7, 1))
+    #out = Flatten()(out)
+    #out = Dense(49)(out)
+    #out = tf.reshape(out, (-1, 7, 7, 1))
     out = nets["n1"].building(out)
     
     model = Model(inputs=inp, outputs=out)
@@ -94,7 +94,7 @@ if __name__ == "__main__":
     y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()   
     # Here we define a convolutional-transposed convolutional network combination
     
-    e = Evolving(desc_list=[ConvDescriptor, TConvDescriptor], 
+    e = Evolving(desc_list=[CNNDescriptor, TCNNDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], 
                  x_tests=[x_val], y_tests=[y_val], 
                  evaluation=eval_cnn_ae, 
@@ -102,7 +102,7 @@ if __name__ == "__main__":
                  population=6, 
                  generations=10, iters=10, 
                  n_inputs=[[28, 28, 3], [7, 7, 1]], 
-                 n_outputs=[[49], [28, 28, 3]], 
+                 n_outputs=[[7,7,1], [28, 28, 3]], 
                  cxp=0.5, 
                  mtp=0.5, 
                  hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 

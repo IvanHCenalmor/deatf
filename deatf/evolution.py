@@ -13,7 +13,7 @@ from tensorflow.keras.models import Model
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 
-descs = {"ConvDescriptor": CNN, "MLPDescriptor": MLP, "TConvDescriptor": TCNN, "RNNDescriptor": RNN}
+descs = {"CNNDescriptor": CNN, "MLPDescriptor": MLP, "TCNNDescriptor": TCNN, "RNNDescriptor": RNN}
 
 
 class DescriptorContainer(object):
@@ -407,8 +407,8 @@ def mutations(ev_hypers, batch_norm, dropout, custom_mutations, individual):
     :param individual: DEAP individual. Contains a dict where the keys are the components of the model.
     :return: Mutated version of the DEAP individual.
     """
-    mutation_types = {'MLPDescriptor': MLP_Mutation, 'ConvDescriptor': CNN_Mutation, 
-                      'TConvDescriptor': TCNN_Mutation, 'RNNDescriptor': RNN_Mutation}
+    mutation_types = {'MLPDescriptor': MLP_Mutation, 'CNNDescriptor': CNN_Mutation, 
+                      'TCNNDescriptor': TCNN_Mutation, 'RNNDescriptor': RNN_Mutation}
 
     nets = list(individual.descriptor_list.keys())
     hyperparameters = individual.descriptor_list["hypers"]

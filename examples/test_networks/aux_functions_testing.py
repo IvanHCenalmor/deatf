@@ -1,3 +1,4 @@
+import math
 import sys
 sys.path.append('../..')
 
@@ -33,6 +34,8 @@ def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, populatio
 
     input_shape = x_train.shape[1:]
     output_shape = y_val.shape[1:]
+    if len(output_shape) == 1:
+        output_shape =  [int(math.sqrt(output_shape[0])) + 1, int(math.sqrt(output_shape[0])) + 1, 1]
     
     if eval_func == None:
         eval_func = select_evaluation(mode)

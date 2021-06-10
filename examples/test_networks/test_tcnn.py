@@ -5,7 +5,7 @@ import tensorflow as tf
 import numpy as np
 import time
 
-from deatf.network import TConvDescriptor
+from deatf.network import TCNNDescriptor
 from deatf.evolution import Evolving
 
 from aux_functions_testing import select_evaluation, load_dataset
@@ -65,7 +65,7 @@ def test_TCNN(dataset_name, eval_func=None, batch_size=150, population=5,
         eval_func = select_evaluation(mode)
     
     e = Evolving(evaluation=eval_func, 
-			 desc_list=[TConvDescriptor], 
+			 desc_list=[TCNNDescriptor], 
 			 x_trains=[train_noise], y_trains=[x_train], 
 			 x_tests=[val_noise], y_tests=[x_val],
 			 n_inputs=[input_shape],

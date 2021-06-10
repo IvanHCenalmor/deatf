@@ -10,7 +10,7 @@ sys.path.append('..')
 import tensorflow as tf
 import numpy as np
 
-from deatf.network import MLPDescriptor, ConvDescriptor, CNN
+from deatf.network import MLPDescriptor, CNNDescriptor, CNN
 from deatf.metrics import accuracy_error
 from deatf.data import load_fashion
 from deatf import evolution
@@ -62,7 +62,7 @@ class SkipCNN(CNN):
                 
         return x
 
-evolution.descs["ConvDescriptor"] = SkipCNN
+evolution.descs["CNNDescriptor"] = SkipCNN
 
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
@@ -132,10 +132,10 @@ if __name__ == "__main__":
     y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()    
 
     # Here we indicate that we want a CNN as the first network of the model
-    e = evolution.Evolving(evaluation=eval_cnn, desc_list=[ConvDescriptor, MLPDescriptor], 
+    e = evolution.Evolving(evaluation=eval_cnn, desc_list=[CNNDescriptor, MLPDescriptor], 
                            x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val],
-                           batch_size=150, population=2, generations=3, iters=10, 
-                           n_inputs=[[28, 28, 3], [20]], n_outputs=[[20], [10]], cxp=0.5, mtp=0.5, 
+                           batch_size=150, population=5, generations=3, iters=10, 
+                           n_inputs=[[28, 28, 3], [20]], n_outputs=[[7, 7, 1], [10]], cxp=0.5, mtp=0.5, 
                            hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2], "skip": range(3, 10)}, 
                            batch_norm=True, dropout=True)
     a = e.evolve()
