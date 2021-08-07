@@ -1,3 +1,22 @@
+"""
+Here there can be found the classes responsible of the evolution of the netwroks.
+This is a key part of the library, in charge of initializing and evolving the 
+desired networks, using other class to achieve it. Is also important because is 
+the one that the user will make use of.
+
+:class:`~Evolving` class is the main class and the one in charge of evolving model descriptors.
+Those descriptors and the atributes specified in the initialization will generate
+network to evolve; so the stepts to follow are:
+        
+    1. Initialize this class with all the desired qualities.
+    2. Call :func:`evolve` function.
+    
+:class:`~DescriptorContainer` is just an auxiliar class to help Evolving. It is 
+used with the DEAP library and it represent the individul to be evolved. 
+
+================================================================================================
+"""
+
 import tensorflow as tf
 import numpy as np
 import random
@@ -19,27 +38,69 @@ descs = {"CNNDescriptor": CNN, "MLPDescriptor": MLP, "TCNNDescriptor": TCNN, "RN
 class DescriptorContainer(object):
     """
     Auxiliar class for DEAP algorithm. This object will represent the individual
-    that will be evolved in the Genetic Algorithm. It contains a dictionary
+    that will be evolved in the Genetic Algorithm with DEAP. It contains a dictionary
     with the networks descriptors and the hyperparameters that will be evolved.
+    In this dictionary 'nX' will be the key for each network descriptor (where X is the
+    number of the descripor, starting from 0) and 'hypers' will be the key for the 
+    hyperparameters.
     This class does not require a fitness attribute because it will be added 
-    later by the DEAP's creator.
+    later by the DEAP's creator. 
     
-    :param descriptor_list: A dictionary containing the descriptors of the 
+    :param desc_list: A dictionary containing the descriptors of the 
                             networks and hyperparameters that will be evolved 
                             with DEAP algorithm.
     """
-    def __init__(self, descriptor_list):
-        self.descriptor_list = descriptor_list
+    def __init__(self, desc_list):
+        self.desc_list = desc_list
 
 
 class Evolving:
     """
-    This is the main class in charge of evolving model descriptors. It contains 
-    all the needed functions and atributes in order to realize the evolution.
-    For evolving the desired network, these are the two stepts to follow:
-    1.- Initialize this class with all the desired qualities.
-    2.- Call evolve() function.
+    This is the main class and contains all the needed functions and atributes
+    in order to realize the evolution. As is can be seen this class has many 
+    atributes to initialice, this is due to its high cutomization. Many of 
+    the parameters (like evol_kwargs or sel_kwargs) are not neccesary unless 
+    custom evoluationary or selection functions are used. 
+    
+    In order to facilitate the use of this class, here is a table with the atributes
+    used in the initialization of it. Is divided in three columns:
         
+    * Required atributes: atributes that always have to be declared, because
+      otherwise the initialization will be inclompleted and it will give an error.
+    * Predefined atributes: atributes that are necesary and have to be declared but
+      they already predefined with a value and there is no need to define them 
+      (it will run, but with the predefined values), but they can be defined by the 
+      user and custom the execution. 
+      For example, evol_alg is intialize with 'mu_plus_lambda' algorithm and if Evolving 
+      class is created without asigning a value to 'evol_alg it will run with it; but it
+      can be declared and defined with 'mu_comm_lambda' or 'simple' algorithms.
+    * Optional atributes: atributes that are not needed, it can be initialiced without
+      defining these atributes. Even so, they can be defined and the initialization will
+      be more custom and with more options.
+    
+    =======================  =========================  ============================
+    Required attributes      Predefined attributes      Optional attributes
+    =======================  =========================  ============================
+    n_inputs                 evol_alg                   evol_kwargs
+    n_outputs                sel                        sel_kwargs
+    desc_list                max_num_neurons            seed
+    x_trains                 max_num_layers             hyperpatameters 
+    y_trains                 max_filter                 custom_mutations
+    x_tests                  max_stride
+    y_tests                  dropout
+    population               batch_norm
+    generations              lrate
+    iters                    cxp 
+    batch_size               mtp
+    compl                    add_obj
+    evaluation              
+    =======================  =========================  ============================
+    
+    By using the described atributes in the initialization and some functions defined
+    in this class, an Evolving object is created. This is the first step in the evolving
+    process and the most relevant one, because here is where decisions are taken. Then 
+    by calling :func:`evolve` function everything is done automaticaly.
+    
     :param n_inputs: List of lists with the dimensions of the input sizes of each network.
     :param n_outputs: List of lists with the dimensions of the output sizes of each network.
     :param max_num_layers: Maximum number of layers.
@@ -66,10 +127,10 @@ class Evolving:
                     evolved or if the network descriptor to be evolved is different from a MLP. It is complex
                     if occurs any of these conditions; otherwise, if none of the condition are true,
                     is is considered simple (not complex).
-    :param toolbox: Obect Toolbox() from deap.base in the DEAP algorithm.
+    :param toolbox: Object Toolbox() from deap.base in the DEAP algorithm.
     :param selection: String that indicates the selection method used in the evolution. 
                       Possibilities are: 'best', 'tournament', 'roulette', 'random' or 'nsga2'.
-    :param ev_alg: String that indicates the evolution algorithm that will be used.
+    :param evol_alg: String that indicates the evolution algorithm that will be used.
                    Possibilities are: 'simple', 'mu_plus_lambda' or 'mu_comm_lambda'.
     :param evol_kwargs: Dictionary with parameters for the main DEAP function. The keys 
                         for that parameters are:' mu', 'lambda', 'cxpb' or 'mutpb'. Being
@@ -82,16 +143,15 @@ class Evolving:
                 one descriptor to be evolved.
     :param generations: Number of generations that the evolution algorithm will be running.
     :param population_size: Population of individuals that will be evaluated in the evolution algorithm.
-    :param ev_hypers: Hyperparameters to be evolved in the algorithm (e.g., optimizer, batch size).
+    :param hypers: Hyperparameters to be evolved in the algorithm (e.g., optimizer, batch size).
     """
 
-    def __init__(self, desc_list=[MLPDescriptor, ], compl=False, 
-                 x_trains=None, y_trains=None, x_tests=None, y_tests=None, 
-                 evaluation="XEntropy", n_inputs=((28, 28),), n_outputs=((10,),), 
-                 batch_size=100, population=20, generations=20, iters=10, lrate=0.01, sel='best',
-                 max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3, seed=None , cxp=0, 
-                 mtp=1, dropout=False, batch_norm=False, evol_kwargs={}, sel_kwargs={}, 
-                 ev_alg='mu_plus_lambda', hyperparameters={}, custom_mutations={}, add_obj=0):
+    def __init__(self, desc_list, compl, x_trains, y_trains, x_tests, y_tests, 
+                 evaluation, n_inputs, n_outputs, batch_size, population, generations, iters, 
+                 lrate=0.01, sel='best', max_num_layers=10, max_num_neurons=100, 
+                 max_filter=4, max_stride=3, seed=None , cxp=0, mtp=1, 
+                 dropout=False, batch_norm=False, evol_kwargs={}, sel_kwargs={}, 
+                 evol_alg='mu_plus_lambda', hyperparameters={}, custom_mutations={}, add_obj=0):
 
         np.random.seed(seed)
         tf.random.set_seed(seed)
@@ -104,8 +164,9 @@ class Evolving:
         self.max_num_neurons = max_num_neurons
         self.max_filter = max_filter
         self.max_stride = max_stride
-        self.descriptors = desc_list
-        self.evaluation = None                                          
+        self.desc_list = desc_list
+        self.evaluation = None   
+                                       
         # Define and assign evalutaion function (both if is simple or complex case).
         self.define_evaluation(evaluation)
 
@@ -116,6 +177,7 @@ class Evolving:
         self.train_outputs = {}
         self.test_inputs = {}
         self.test_outputs = {}
+        
         # Load data in the previous dicts.
         self.data_save(x_trains, y_trains, x_tests, y_tests)            
         
@@ -126,16 +188,16 @@ class Evolving:
         self.selection = None
         self.define_selection(sel)
 
-        self.ev_alg = None
+        self.evol_alg = None
         self.evol_kwargs = evol_kwargs                                  
         self.cXp = cxp if len(desc_list) > 1 else 0
         self.mtp = mtp if len(desc_list) > 1 else 1
 
         self.generations = generations
         self.population_size = population
-        self.ev_hypers = hyperparameters
+        self.hypers = hyperparameters
 
-        self.define_evolving(ev_alg)
+        self.define_evolving(evol_alg)
         
         # Initialize DEAP-related matters.
         self.initialize_deap(sel, sel_kwargs, batch_norm, 
@@ -143,9 +205,11 @@ class Evolving:
         
     def data_save(self, x_trains, y_trains, x_tests, y_tests):
         """
-        Load data given by parameters in the atributes of data from
-        the class Evolving, it initialices those atributes (train_inputs, 
-        train_outputs, test_inputs and test_outputs).
+        Load data given by parameters in the atributes of data from the class Evolving, 
+        it initialices those atributes (train_inputs, train_outputs, test_inputs and 
+        test_outputs). That data can be given in dictionary or list format, if is 
+        given as dictionary inputs' key must be 'iX' and outputs' 'oX' (being X the 
+        number of data it is, first data will hava 'i0' and 'o0').
         
         :param x_trains: Features data for training.
         :param y_trains: Labels data for training.
@@ -172,7 +236,22 @@ class Evolving:
         Define the evaluation function. It accepts an string ('MSE' or 'XEntropy)
         and it will use the predifined functions from TensorFlow; this will be done
         in simple cases. Otherwise, the evaluation function will be defined and passed
-        by parameter by the user.
+        by parameter by the user. If is defined by the user it has to folloe the next
+        structure:
+            
+        * It must have the next parameters in the following order:
+            * nets (dictionary with the networks descriptors, where key 'n0' has the first 
+              network descriptor).
+            * train_inputs (data for the training).
+            * train_outputs (expected outputs for the training).
+            * batch_size (size of the batch that is going to be taken from the train data).
+            * iters (number of iterations that each network will be trained).
+            * test_inputs (data for testing).
+            * test_outputs (expected outputs for the testing).
+            * hyperparameters (dictionary with the hyperparameters like 'optimizer' or 'lrate'
+              that also being evolved).
+        * The output must be: value, . It must be like that because it has to receive more than
+          one output. The value is the fitness or evaluation value calculated in the function.
         
         :param evaluation: Evaluation function. Either string (predefined) or customized by the user.
         """
@@ -185,11 +264,17 @@ class Evolving:
     
     def define_selection(self, selection):
         """
-        Define the selection method for the evolution algorithm. It uses predefined methods
-        from DEAP library.
+        Define the selection method for the evolution algorithm. It can be used a predefined method
+        from DEAP library ('best', 'tournament', 'roulette', 'random' and 'nsga2') or a selection method 
+        defined by the user. If is defined by the user it has to follow the next structure:
+        as parameters recieve at least individuals (list with all the individuals) and k (the number
+        of individuals that will be selected) and as output it will return the list with the 
+        selected individuals. Apart from the individuals and the number of selected ones, more 
+        parameters can be used, thses should be defined in 'sel_kwargs' in the initialization.
         
-        :param selection: String that indicates the selection method ('best', 'tournament', 'roulette',
-                          'random' or 'nsga2').
+        :param selection: Selection function, Either string that indicates the selection method 
+                          ('best', 'tournament', 'roulette', 'random' or 'nsga2') or customized 
+                          by the user.
         """
         sel_methods = {'best':tools.selBest, 'tournament':tools.selTournament, 'roulette':tools.selRoulette, 
                        'random':tools.selRandom, 'nsga2':tools.selNSGA2}
@@ -199,33 +284,47 @@ class Evolving:
         else:
             self.selection = selection
             
-    def define_evolving(self, ev_alg):
+    def define_evolving(self, evol_alg):
         """
         Define the evolutionary algorithm for the evolution. It uses predefined algorithms
-        from DEAP library.
+        from DEAP library ('simple', 'mu_plus_lambda' or 'mu_comm_lambda') or a custom
+        function defined by the user. This custom evolutionary algorithm function must follow
+        the next structure:
+            
+        * At least it has to receive the following parameters: population, toolbox, cxpb, 
+          mutpb, ngen, stats=None, halloffame=None.
+        * More parameters can be used, they will have to be defined in evol_kwargs parameter
+          in the initialization.
+        * It has to return population (the final population) and logbook (object from deap.tools.Logbook 
+          with the statistics of the evolution).
+        * During the procces of the defined function, other functions defined in the
+          toolbox can be used (selection, muatation or evalutaion).
         
-        :param ev_alg: String that indicates the evolutionary algorithm 
-                          ('simple', 'mu_plus_lambda' or 'mu_comm_lambda').
+        :param evol_alg: Evolutionary algorithm. It can be either a string that indicates the 
+                       evolutionary algorithm ('simple', 'mu_plus_lambda' or 'mu_comm_lambda')
+                       or a defined evolutionary function by the user.
         """
         deap_algs = {'simple':algorithms.eaSimple, 'mu_plus_lambda': algorithms.eaMuPlusLambda, 
                      'mu_comm_lambda':algorithms.eaMuCommaLambda}
         
-        if type(ev_alg) is str:
+        if type(evol_alg) is str:
             
-            self.ev_alg = deap_algs[ev_alg]
+            self.evol_alg = deap_algs[evol_alg]
         
             if not self.evol_kwargs:
-                if ev_alg == 'simple':
+                if evol_alg == 'simple':
                     self.evol_kwargs = {"cxpb": self.cXp, "mutpb": self.mtp}
                 else:
                     self.evol_kwargs = {"mu": self.population_size, "lambda_": self.population_size, 
                                         "cxpb": self.cXp, "mutpb": self.mtp}
         else:
-            self.ev_alg = ev_alg
+            self.evol_alg = evol_alg
     
     def is_complex(self, compl, evaluation, hyperparameters):
         """
         Determines if the case that will be evolved is a simple or a complex case.
+        This will affect in the evaluation method used :func:`simple_eval` or 
+        :func:`complex_eval`.
         
         :param compl: A boolean value that directly indicates if is a simple or 
                       complex case.
@@ -239,9 +338,9 @@ class Evolving:
             return True
         elif type(evaluation) is not str:
             return True
-        elif self.descriptors[0] is not MLPDescriptor:
+        elif self.desc_list[0] is not MLPDescriptor:
             return True
-        elif len(self.descriptors) > 1 or len(hyperparameters) > 0:
+        elif len(self.desc_list) > 1 or len(hyperparameters) > 0:
             return True
         
         return False
@@ -250,6 +349,10 @@ class Evolving:
     def initialize_deap(self, sel, sel_kwargs, batch_norm, dropout, custom_mutations, add_obj):
         """
         Initialize DEAP function and atributes in order to be ready for evolutionary algorithm.
+        In this function all the other functions that have been defined in :func:`define_evaluation`,
+        :func:`define_evolving` and :func:`define_selection` will be added to the toolbox of DEAP.
+        Also here the individuals :class:`~DescriptorContainer` will be assigned as individuals 
+        to be evolved.
         
         :param sel: Selection method.
         :param sel_kwargs: Hyperparameters for the selection methods (e.g., size of the tournament 
@@ -270,7 +373,7 @@ class Evolving:
 
         self.toolbox.register("evaluate", self.eval_individual)
         self.toolbox.register("mate", cross, creator.Individual)
-        self.toolbox.register("mutate", mutations, self.ev_hypers, batch_norm, dropout, custom_mutations)
+        self.toolbox.register("mutate", mutations, self.hypers, batch_norm, dropout, custom_mutations)
 
         self.toolbox.register("select", self.selection, **sel_kwargs)
 
@@ -295,7 +398,7 @@ class Evolving:
         stats.register("std", np.std, axis=0)
         stats.register("min", np.min, axis=0)
         stats.register("max", np.max, axis=0)
-        result, log_book = self.ev_alg(pop, self.toolbox, ngen=self.generations, 
+        result, log_book = self.evol_alg(pop, self.toolbox, ngen=self.generations, 
                                        **self.evol_kwargs, verbose=1, 
                                        stats=stats, halloffame=hall_of)
 
@@ -304,8 +407,10 @@ class Evolving:
     def init_individual(self, init_ind, batch_norm, dropout):
         """
         Initializes the individual that is going to be used and evolved during the evolutionary
-        algorithm. It will be used s dictionary with the string network id as key and the network 
-        descriptor as a value, i.e., {"net_id": net_desc}.
+        algorithm. That individual will be used as dictionary with the string network id as key 
+        and the network descriptor as a value, i.e., {"net_id": net_desc}. In simple case there
+        will only be one network that is a MLP, in complex cases more than one network can be 
+        evaluated.
         
         :param init_ind: DEAP function for transforming a network descriptor, or a list of 
                          descriptors + evolvable hyperparameters into a DEAP individual.
@@ -323,33 +428,36 @@ class Evolving:
             network_descriptor["n0"].random_init(self.train_inputs["i0"].shape[1:], self.train_outputs["o0"].shape[1], 
                                                  self.max_num_layers, self.max_num_neurons, None, None, dropout, batch_norm)
         else:  # Complex case
-            for i, descriptor in enumerate(self.descriptors):
+            for i, descriptor in enumerate(self.desc_list):
                 network_descriptor["n" + str(i)] = descriptor()
                 network_descriptor["n" + str(i)].random_init(self.n_inputs[i], self.n_outputs[i], self.max_num_layers, 
                                                              self.max_num_neurons, self.max_stride, self.max_filter, 
                                                              dropout, batch_norm)
         network_descriptor["hypers"] = {}
-        if len(self.ev_hypers) > 0:
+        if len(self.hypers) > 0:
 
-            for hyper in self.ev_hypers:
-                network_descriptor["hypers"][hyper] = np.random.choice(self.ev_hypers[hyper])
+            for hyper in self.hypers:
+                network_descriptor["hypers"][hyper] = np.random.choice(self.hypers[hyper])
 
         return init_ind(network_descriptor)
 
     def eval_individual(self, individual):
         """
         Function used for evaluating a DEAP individual during the evolutionary algorithm.
+        This is the registered function for evalution and is an auxiliar function because
+        it only does another calling depending on the type of evaluation (:func:`simple_eval` or 
+        :func:`complex_eval`). 
         
         :param individual: DEAP individual.
         :return: Value obtained from the evaluation.
         """
         if not self.complex:
-            ev = self.single_net_eval(individual)
+            ev = self.simple_eval(individual)
         else:
-            ev = self.eval_multinetwork(individual)
+            ev = self.complex_eval(individual)
         return ev
 
-    def single_net_eval(self, individual):
+    def simple_eval(self, individual):
         """
         Evaluation in the simple case. Function for evolving a single individual. 
         No need of the user providing a evaluation function.
@@ -357,7 +465,7 @@ class Evolving:
         :param individual: DEAP individual
         :return: Value obtained from the evaluation.
         """
-        net = MLP(individual.descriptor_list["n0"])
+        net = MLP(individual.desc_list["n0"])
         
         inp = Input(shape=self.n_inputs[0])
         out = Flatten()(inp)
@@ -376,52 +484,53 @@ class Evolving:
             
         return ev
 
-    def eval_multinetwork(self, individual):
+    def complex_eval(self, individual):
         """
         Evaluation in the complex case. Function for evolving individuals in a 
-        complex case.  The user must have implemented the training and evaluation functions.
+        complex case. The user must have implemented the training and evaluation functions.
         
         :param individual: DEAP individual
         :return: Value obtained from the evaluation.
         """
         nets = {}
     
-        for index, net in enumerate(individual.descriptor_list.keys()):
+        for index, net in enumerate(individual.desc_list.keys()):
             if "hypers" not in net:
-                nets[net] = descs[self.descriptors[index].__name__](individual.descriptor_list[net])
+                nets[net] = descs[self.desc_list[index].__name__](individual.desc_list[net])
 
         ev = self.evaluation(nets, self.train_inputs, self.train_outputs, self.batch_size, self.iters,
-                             self.test_inputs, self.test_outputs, individual.descriptor_list["hypers"])
+                             self.test_inputs, self.test_outputs, individual.desc_list["hypers"])
 
         return ev
 
 
-def mutations(ev_hypers, batch_norm, dropout, custom_mutations, individual):
+def mutations(hypers, batch_norm, dropout, custom_mutations, individual):
     """
-    Mutation operators for individuals. They can affect any network or the hyperparameters.
+    Mutation operators for individuals. It can be affected any network or hyperparameter.
+    Depending on the type of network that will suffer the mutation, this function
+    will create a different object from :class:`deatf.mutation.Mutation`.
     
-    :param ev_hypers: Hyperparameters not included in the networks to be evolved.
-    :param max_num_layers: Maximum number of layers in networks.
+    :param hypers: Hyperparameters not included in the networks to be evolved.
     :param batch_normalization: Whether batch normalization is part of the evolution or not.
-    :param drop: Whether dropout is part of the evolution or not.
+    :param dropout: Whether dropout is part of the evolution or not.
     :param individual: DEAP individual. Contains a dict where the keys are the components of the model.
     :return: Mutated version of the DEAP individual.
     """
     mutation_types = {'MLPDescriptor': MLP_Mutation, 'CNNDescriptor': CNN_Mutation, 
                       'TCNNDescriptor': TCNN_Mutation, 'RNNDescriptor': RNN_Mutation}
 
-    nets = list(individual.descriptor_list.keys())
-    hyperparameters = individual.descriptor_list["hypers"]
+    nets = list(individual.desc_list.keys())
+    hyperparameters = individual.desc_list["hypers"]
     nets.remove("hypers")
 
-    network = individual.descriptor_list[np.random.choice(nets)]
+    network = individual.desc_list[np.random.choice(nets)]
 
     if not custom_mutations:
         network_custom_mutations = [] # If no custom mutations are passed, each network's mutations will be applied
     else:
         network_custom_mutations = custom_mutations[network.__class__.__name__]
     
-    network_mutation = mutation_types[network.__class__.__name__](ev_hypers, batch_norm, dropout, network, 
+    network_mutation = mutation_types[network.__class__.__name__](hypers, batch_norm, dropout, network, 
                                                                   hyperparameters, network_custom_mutations)
     network_mutation.apply_random_mutation()
     
@@ -439,7 +548,7 @@ def cross(init_ind, ind1, ind2):
              parameters (the offspring).
     """
 
-    keys = list(ind1.descriptor_list.keys())
+    keys = list(ind1.desc_list.keys())
     # Randomly select the keys of the components that will be interchanged.
     cx_point = np.random.choice(keys, size=np.random.randint(1, len(keys)) if len(keys) > 2 else 1, replace=False)
     new1 = {}
@@ -447,11 +556,11 @@ def cross(init_ind, ind1, ind2):
 
     for key in keys:
         if key in cx_point:
-            new1[key] = ind1.descriptor_list[key]
-            new2[key] = ind2.descriptor_list[key]
+            new1[key] = ind1.desc_list[key]
+            new2[key] = ind2.desc_list[key]
         else:
-            new1[key] = ind2.descriptor_list[key]
-            new2[key] = ind1.descriptor_list[key]
+            new1[key] = ind2.desc_list[key]
+            new2[key] = ind1.desc_list[key]
 
 
     return init_ind(new1), init_ind(new2)

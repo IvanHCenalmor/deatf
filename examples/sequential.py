@@ -9,10 +9,9 @@ sys.path.append('..')
 import tensorflow as tf
 import numpy as np
 
-from deatf.metrics import accuracy_error
+from deatf.auxiliary_functions import accuracy_error, load_fashion
 from deatf.network import MLPDescriptor
 from deatf.evolution import Evolving
-from deatf.data import load_fashion
 
 from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model

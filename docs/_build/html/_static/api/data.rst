@@ -1,4 +1,4 @@
-DATA
+Data
 ----
 
 .. automodule:: deatf.data

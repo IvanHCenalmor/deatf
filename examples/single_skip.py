@@ -10,9 +10,8 @@ sys.path.append('..')
 import tensorflow as tf
 import numpy as np
 
+from deatf.auxiliary_functions import accuracy_error, load_fashion
 from deatf.network import MLPDescriptor, CNNDescriptor, CNN
-from deatf.metrics import accuracy_error
-from deatf.data import load_fashion
 from deatf import evolution
 
 from tensorflow.keras.layers import Input, Dense, Flatten, Conv2D, AveragePooling2D, MaxPooling2D, Concatenate, UpSampling2D

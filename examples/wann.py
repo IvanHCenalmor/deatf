@@ -11,7 +11,7 @@ import numpy as np
 
 from deatf.network import MLPDescriptor
 from deatf.evolution import Evolving
-from deatf.data import load_fashion
+from deatf.auxiliary_functions import load_fashion
 
 from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model

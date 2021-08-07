@@ -4,7 +4,7 @@ sys.path.append('../..')
 import tensorflow as tf
 import time
 
-from deatf.metrics import accuracy_error
+from deatf.auxiliary_functions import accuracy_error
 from deatf.network import CNNDescriptor
 
 from aux_functions_testing import test

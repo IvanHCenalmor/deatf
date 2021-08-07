@@ -1,3 +1,22 @@
+"""
+Mutation is a key step in the genetic algorithm. Here are defined and explained all
+the classes used to make those mutations possible. :class:`~Mutation` is the main and
+generic class; then there are specific classes, one for each :class:`deatf.network.NetworkDescriptor`.
+These classes contains all the possible mutations that can be made in their defined functions.
+But the two steps to follow are:
+    
+1. Initialize appropiate class for the Network to evolve.
+2. Call :func:`Mutation.apply_random_mutation` in order to apply a random possible mutation
+   or :func:`Mutation.apply_mutation` to apply an specific mutation (these functions 
+   are inherited from Mutation so they can be used in other mutation classes).
+
+The mutation will be applied to the :class:`deatf.network.NetworkDescriptor` object passed
+i nthe parameter network in the initialization. The change will be made in the object, that
+is why mutation function do not return anything.
+
+========================================================================================================
+"""
+
 import numpy as np
 from deatf.network import initializations, activations
 from deatf.network import MIN_NUM_NEURONS, MIN_NUM_FILTERS, MIN_NUM_STRIDES, MIN_NUM_CHANNELS, MAX_NUM_CHANNELS
@@ -10,7 +29,7 @@ class Mutation:
     applied to any descriptor, subclases will have specific mutations for their own
     network.
     
-    :param ev_hypers: List with the hyperparameters to be evolved.
+    :param hypers: List with the hyperparameters to be evolved.
     :param batch_norm: A boolean value that indicates if batch normalization can appear
                        during evolution. Is different from the network's one because this
                        remains during all the process and the network's one can be changed 
@@ -23,8 +42,8 @@ class Mutation:
                                  to the network. Is defined by the user with the mutations
                                  wanted, if is not defined, all possible mutations could be applied.
     """
-    def __init__(self, ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
-        self.ev_hypers = ev_hypers
+    def __init__(self, hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
+        self.hypers = hypers
         self.batch_norm = batch_norm
         self.dropout = dropout
         self.network = network
@@ -71,7 +90,7 @@ class Mutation:
         method_list.remove('apply_random_mutation')
         
         
-        if len(self.ev_hypers) == 0:
+        if len(self.hypers) == 0:
             method_list.remove('mut_hyper')
         if not self.batch_norm: # Batch normalization declared in evolution is used
             method_list.remove('mut_batch_norm')
@@ -134,9 +153,9 @@ class Mutation:
         randomly from the list of evolvable hyperparameters described in the initialization.
         """
         # We change the value of a hyperparameter for another value
-        h = np.random.choice(list(self.ev_hypers.keys()))  # We select the hyperparameter to be mutated
+        h = np.random.choice(list(self.hypers.keys()))  # We select the hyperparameter to be mutated
         # We choose two values, just in case the first one is the one already selected
-        new_value = np.random.choice(self.ev_hypers[h], size=2, replace=False)
+        new_value = np.random.choice(self.hypers[h], size=2, replace=False)
         if self.hyperparameters[h] == new_value[0]:
             self.hyperparameters[h] = new_value[1]
         else:
@@ -150,7 +169,7 @@ class MLP_Mutation(Mutation):
     This class implements the possible mutations that can be applied 
     specialy to the MLP descriptors. 
     
-    :param ev_hypers: List with the hyperparameters to be evolved.
+    :param hypers: List with the hyperparameters to be evolved.
     :param batch_norm: A boolean value that indicates if batch normalization can appear
                        during evolution. Is different from the network's one because this
                        remains during all the process and the network's one can be changed 
@@ -163,8 +182,8 @@ class MLP_Mutation(Mutation):
                                  to the network. Is defined by the user with the mutations
                                  wanted, if is not defined, all possible mutations could be applied.
     """
-    def __init__(self, ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
-        super().__init__(ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list)
+    def __init__(self, hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
+        super().__init__(hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list)
         
     def mut_add_layer(self):
         """
@@ -209,7 +228,7 @@ class CNN_Mutation(Mutation):
     This class implements the possible mutations that can be applied 
     specialy to the CNN descriptors. 
     
-    :param ev_hypers: List with the hyperparameters to be evolved.
+    :param hypers: List with the hyperparameters to be evolved.
     :param batch_norm: A boolean value that indicates if batch normalization can appear
                        during evolution. Is different from the network's one because this
                        remains during all the process and the network's one can be changed 
@@ -222,8 +241,8 @@ class CNN_Mutation(Mutation):
                                  to the network. Is defined by the user with the mutations
                                  wanted, if is not defined, all possible mutations could be applied.
     """
-    def __init__(self, ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
-        super().__init__(ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list)
+    def __init__(self, hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
+        super().__init__(hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list)
 
     def mut_add_conv_layer(self):
         """
@@ -344,7 +363,7 @@ class TCNN_Mutation(Mutation):
     This class implements the possible mutations that can be applied 
     specialy to the TCNN descriptors. 
     
-    :param ev_hypers: List with the hyperparameters to be evolved.
+    :param hypers: List with the hyperparameters to be evolved.
     :param batch_norm: A boolean value that indicates if batch normalization can appear
                        during evolution. Is different from the network's one because this
                        remains during all the process and the network's one can be changed 
@@ -357,8 +376,8 @@ class TCNN_Mutation(Mutation):
                                  to the network. Is defined by the user with the mutations
                                  wanted, if is not defined, all possible mutations could be applied.
     """
-    def __init__(self, ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
-        super().__init__(ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list)
+    def __init__(self, hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
+        super().__init__(hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list)
          
     def mut_add_deconv_layer(self):
         """
@@ -434,7 +453,7 @@ class RNN_Mutation(Mutation):
     This class implements the possible mutations that can be applied 
     specialy to the RNN descriptors. 
     
-    :param ev_hypers: List with the hyperparameters to be evolved.
+    :param hypers: List with the hyperparameters to be evolved.
     :param batch_norm: A boolean value that indicates if batch normalization can appear
                        during evolution. Is different from the network's one because this
                        remains during all the process and the network's one can be changed 
@@ -447,8 +466,8 @@ class RNN_Mutation(Mutation):
                                  to the network. Is defined by the user with the mutations
                                  wanted, if is not defined, all possible mutations could be applied.
     """
-    def __init__(self, ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
-        super().__init__(ev_hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list)
+    def __init__(self, hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list=[]):
+        super().__init__(hypers, batch_norm, dropout, network, hyperparameters, custom_mutation_list)
         
     def mut_add_rnn_layer(self):
         """

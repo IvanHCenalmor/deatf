@@ -1,5 +1,8 @@
-DEATF
+deatf package
 =============
+
+Submodules
+----------
 
 deatf.auxiliary\_functions module
 ---------------------------------
@@ -9,26 +12,10 @@ deatf.auxiliary\_functions module
    :undoc-members:
    :show-inheritance:
 
-deatf.data module
------------------
-
-.. automodule:: deatf.data
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 deatf.evolution module
 ----------------------
 
 .. automodule:: deatf.evolution
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
-deatf.metrics module
---------------------
-
-.. automodule:: deatf.metrics
    :members:
    :undoc-members:
    :show-inheritance:
@@ -45,6 +32,14 @@ deatf.network module
 --------------------
 
 .. automodule:: deatf.network
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Module contents
+---------------
+
+.. automodule:: deatf
    :members:
    :undoc-members:
    :show-inheritance:

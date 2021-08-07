@@ -1,3 +1,22 @@
+"""
+Here there can be found two relevant classes in the library: :class:`~NetworkDescriptor` and 
+:class:`~Network`. These classes are directly linked between them and both have a principal
+and more abstract class and then one class for each network type that inherit from them.
+
+:class:`~NetworkDescriptor` and its subclasses are the ones responsible of establishing
+the structure and atributes that the network will have. All these classes have functions
+for a random initialization (to initialize individuals in the genetic algorithm) and
+functions to make changes and make easier the mutations. This would be the genotype in the 
+evolutionary algorithm.
+
+:class:`~NetworkDescriptor` and its subclasses are otherwise the phenotype, they are 
+the network itself constructed by using the TensorFlow library. That is why they only
+have one function, to turn the received descriptor into a network that contains all 
+that information.
+
+========================================================================================================
+"""
+
 import tensorflow as tf
 import numpy as np
 import os
@@ -23,6 +42,7 @@ MAX_NUM_CHANNELS = 65
 class NetworkDescriptor:
     """
     This class implements the descriptor of a generic network. Subclasses of this are the evolved ones.
+    Parameters described in this class are the ones that are in all the types of networks
     
     :param number_hidden_layers: Number of hidden layers in the network.
     :param input_dim: Dimension of the input data (can have one or more dimensions).
@@ -207,9 +227,8 @@ class MLPDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the layer.
         :param lay_dims: Number of neurons in the layer.
-        :param init_w_function: Function for initializing the weights of the layer.
-        :param init_a_function: Activation function to be applied.
-        :param dropout: Whether dropout is applied or not in the layer.
+        :param init_function: Function for initializing the weights of the layer.
+        :param act_function: Activation function to be applied.
         :param drop_prob: Probability of dropout.
         :param batch_norm: Whether batch normalization is applied after the layer.
         """
@@ -367,7 +386,7 @@ class CNNDescriptor(NetworkDescriptor):
                 else:
                     break
             
-            self.init_functions += [np.random.choice(initializations[1:])]
+            self.init_functions += [np.random.choice(initializations)]
             self.act_functions += [np.random.choice(activations)]
             
             if new_layer != 2:
@@ -389,7 +408,7 @@ class CNNDescriptor(NetworkDescriptor):
                     else:
                         break
                 i += 1
-                self.init_functions += [np.random.choice(initializations[1:])]
+                self.init_functions += [np.random.choice(initializations)]
                 self.act_functions += [np.random.choice(activations)]
                 
             i += 1
@@ -412,7 +431,7 @@ class CNNDescriptor(NetworkDescriptor):
         self.layers += [2]
         self.filters += [np.array([last_lay_filter, last_lay_filter, self.output_dim[2]])]
         self.strides += [np.array([last_lay_stride, last_lay_stride, 1])]
-        self.init_functions += [np.random.choice(initializations[1:])]
+        self.init_functions += [np.random.choice(initializations)]
         self.act_functions += [np.random.choice(activations)]
         self.number_hidden_layers += 1
         
@@ -732,7 +751,7 @@ class TCNNDescriptor(NetworkDescriptor):
             self.filters += [np.array([np.random.randint(MIN_NUM_FILTERS, max_filter)] * 2 + 
                                        [np.random.randint(MIN_NUM_CHANNELS, MAX_NUM_CHANNELS)])]
             self.strides += [np.array([np.random.randint(MIN_NUM_STRIDES, max_stride)] * 2 + [1])]
-            self.init_functions += [np.random.choice(initializations[1:])]
+            self.init_functions += [np.random.choice(initializations)]
             self.act_functions += [np.random.choice(activations)]
 
             shape = calculate_TCNN_shape(self.input_dim, self.filters, self.strides, -1)

@@ -4,9 +4,9 @@ sys.path.append('../..')
 import numpy as np
 import tensorflow as tf
 
+from deatf.auxiliary_functions import accuracy_error
 from deatf.evolution import Evolving
 from deatf.network import MLP, MLPDescriptor
-from deatf.metrics import accuracy_error
 
 from tensorflow.keras.layers import Input, Reshape, Softmax
 from tensorflow.keras.models import Model
@@ -52,7 +52,7 @@ def evolve_with_population(evolving_alg, population):
     stats.register("std", np.std, axis=0)
     stats.register("min", np.min, axis=0)
     stats.register("max", np.max, axis=0)
-    result, log_book = evolving_alg.ev_alg(population, evolving_alg.toolbox, 
+    result, log_book = evolving_alg.evol_alg(population, evolving_alg.toolbox, 
                                            ngen=evolving_alg.generations, 
                                            **evolving_alg.evol_kwargs, verbose=1, 
                                            stats=stats, halloffame=hall_of)
@@ -110,11 +110,11 @@ if __name__ == "__main__":
     a = evolve_with_population(e, net_population)
     print(a[-1])
 
-    mlp_descriptor = a[2].items[-1].descriptor_list['n0']
+    mlp_descriptor = a[2].items[-1].desc_list['n0']
     network = MLP(mlp_descriptor)
         
-    learning_rate = a[2].items[-1].descriptor_list['hypers']['lrate']
-    optimizer = optimizers[a[2].items[-1].descriptor_list['hypers']['optimizer']]
+    learning_rate = a[2].items[-1].desc_list['hypers']['lrate']
+    optimizer = optimizers[a[2].items[-1].desc_list['hypers']['optimizer']]
     
     inp = Input(shape=x_train.shape[1:])
     out = network.building(inp)

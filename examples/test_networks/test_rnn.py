@@ -5,7 +5,7 @@ import tensorflow as tf
 import numpy as np
 import time
 
-from deatf.metrics import accuracy_error
+from deatf.auxiliary_functions import accuracy_error
 from deatf.network import RNNDescriptor
 from deatf.evolution import Evolving
 

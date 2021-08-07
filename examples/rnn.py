@@ -6,10 +6,9 @@ sys.path.append('..')
 
 import tensorflow as tf
 
-from deatf.metrics import accuracy_error
+from deatf.auxiliary_functions import accuracy_error, load_fashion
 from deatf.network import RNNDescriptor
 from deatf.evolution import Evolving
-from deatf.data import load_fashion
 
 from tensorflow.keras.layers import Input, Dense
 from tensorflow.keras.models import Model
@@ -73,7 +72,7 @@ if __name__ == "__main__":
                  cxp=0, mtp=1, 
                  hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
                  batch_norm=True, dropout=True,
-                 ev_alg='mu_plus_lambda')
+                 evol_alg='mu_plus_lambda')
 
     a = e.evolve()
 

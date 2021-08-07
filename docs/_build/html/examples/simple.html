@@ -35,7 +35,7 @@
           <a href="sequential.html" title="Sequential Network"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">DEATF  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../examples.html" accesskey="U">Examples</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Multi Layer Perceptron</a></li> 
       </ul>
     </div>  
@@ -47,8 +47,36 @@
             
   <div class="section" id="module-simple">
 <span id="multi-layer-perceptron"></span><h1>Multi Layer Perceptron<a class="headerlink" href="#module-simple" title="Permalink to this headline">¶</a></h1>
-<p>This is a use case of EvoFlow</p>
-<p>In this instance, we require a simple, single-DNN layer classifier for which we specify the predefined loss and fitness function.</p>
+<p>This is the simplest use case of DEATF.</p>
+<p>In this instance, we require a simple DNN, a Multi Layer Perceptron (MLP). Only restrictions
+for the evolution have to be established, like maximum number of layers or neurons in the MLP.
+As is it the simple case, no evalution function has to be used, a predifined one is used (XEntropy).
+Fashion mnist dataset is used, that is why 28x28 is the input size and 10 the output size.</p>
+<p>First of all fashion mnist dataset has to be loaded and preprocessed in order to
+pass it to the network. In that preprocessing, labels that are integers from 0 to
+9, are one hot encoded. That is, 3 turns into a vector [0,0,0,1,0,0,0,0,0,0] with
+a one in the index 3 (starting to count from 0) and the rest are zeros.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">x_train</span><span class="p">,</span> <span class="n">y_train</span><span class="p">,</span> <span class="n">x_test</span><span class="p">,</span> <span class="n">y_test</span><span class="p">,</span> <span class="n">x_val</span><span class="p">,</span> <span class="n">y_val</span> <span class="o">=</span> <span class="n">load_fashion</span><span class="p">()</span>
+
+    <span class="n">OHEnc</span> <span class="o">=</span> <span class="n">OneHotEncoder</span><span class="p">()</span>
+
+    <span class="n">y_train</span> <span class="o">=</span> <span class="n">OHEnc</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y_train</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    <span class="n">y_test</span> <span class="o">=</span> <span class="n">OHEnc</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y_test</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+    <span class="n">y_val</span> <span class="o">=</span> <span class="n">OHEnc</span><span class="o">.</span><span class="n">fit_transform</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">reshape</span><span class="p">(</span><span class="n">y_val</span><span class="p">,</span> <span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="p">)))</span><span class="o">.</span><span class="n">toarray</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Then is time to star the evolution. First specifying the desired parameters for evolution and then calling evolve function, evolution will be carried out.</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span>    <span class="n">e</span> <span class="o">=</span> <span class="n">Evolving</span><span class="p">(</span><span class="n">evaluation</span><span class="o">=</span><span class="s2">&quot;XEntropy&quot;</span><span class="p">,</span> <span class="n">desc_list</span><span class="o">=</span><span class="p">[</span><span class="n">MLPDescriptor</span><span class="p">],</span> <span class="n">compl</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+                 <span class="n">x_trains</span><span class="o">=</span><span class="p">[</span><span class="n">x_train</span><span class="p">],</span> <span class="n">y_trains</span><span class="o">=</span><span class="p">[</span><span class="n">y_train</span><span class="p">],</span> <span class="n">x_tests</span><span class="o">=</span><span class="p">[</span><span class="n">x_val</span><span class="p">],</span> <span class="n">y_tests</span><span class="o">=</span><span class="p">[</span><span class="n">y_val</span><span class="p">],</span> 
+                 <span class="n">n_inputs</span><span class="o">=</span><span class="p">[[</span><span class="mi">28</span><span class="p">,</span> <span class="mi">28</span><span class="p">]],</span> <span class="n">n_outputs</span><span class="o">=</span><span class="p">[[</span><span class="mi">10</span><span class="p">]],</span> <span class="n">batch_size</span><span class="o">=</span><span class="mi">150</span><span class="p">,</span> <span class="n">iters</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> 
+                 <span class="n">population</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">generations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_num_layers</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_num_neurons</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
+                 <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">evol_alg</span><span class="o">=</span><span class="s1">&#39;mu_plus_lambda&#39;</span><span class="p">,</span>
+                 <span class="n">evol_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;mu&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;lambda_&#39;</span><span class="p">:</span><span class="mi">15</span><span class="p">,</span> <span class="s1">&#39;cxpb&#39;</span><span class="p">:</span><span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;mutpb&quot;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">},</span>
+                 <span class="n">sel</span> <span class="o">=</span> <span class="s1">&#39;best&#39;</span><span class="p">)</span>
+    
+    <span class="n">a</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">evolve</span><span class="p">()</span>
+</pre></div>
+</div>
 </div>
 
 
@@ -101,7 +129,7 @@
           <a href="sequential.html" title="Sequential Network"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">DEATF  documentation</a> &#187;</li>
-          <li class="nav-item nav-item-1"><a href="../examples.html" >Examples</a> &#187;</li>
+          <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li>
         <li class="nav-item nav-item-this"><a href="">Multi Layer Perceptron</a></li> 
       </ul>
     </div>

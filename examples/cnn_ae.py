@@ -11,9 +11,10 @@ import tensorflow as tf
 import numpy as np
 from sklearn.preprocessing import OneHotEncoder
 
+
 from deatf.network import CNNDescriptor, TCNNDescriptor
+from deatf.auxiliary_functions import load_fashion
 from deatf.evolution import Evolving
-from deatf.data import load_fashion
 
 from sklearn.metrics import mean_squared_error
 from tensorflow.keras.layers import Input, Dense, Flatten

@@ -3,15 +3,17 @@ This is a use case of EvoFlow
 
 In this instance, we require a simple, single-DNN layer classifier for which we specify the predefined loss and fitness function.
 """
+
 import sys
 sys.path.append('..')
 
 import tensorflow as tf
 import numpy as np
 
+
+from deatf.auxiliary_functions import load_fashion
 from deatf.network import MLPDescriptor
 from deatf.evolution import Evolving
-from deatf.data import load_fashion
 
 from tensorflow.keras.layers import Input, Flatten
 from tensorflow.keras.models import Model
