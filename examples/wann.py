@@ -1,7 +1,11 @@
 """
-This is a use case of EvoFlow
+This is a use case of DEATF where a weighted artificial neural network (WANN) is used.
 
-In this instance, we handle a classification problem, which is to be solved by two DNNs combined in a sequential layout.
+This is a case like the simple.py example because only one MLP is used to solve the 
+problem. The difference is that here the weights are not randomly initialized, they
+are loaded to the model like hyperparameters and as hyperparameters they are evolved.
+So is an aproach of weight evolving. This is a classification problem, but in order
+to simplify it it has be turned into a binary classification problem.
 """
 import sys
 sys.path.append('..')
@@ -20,30 +24,34 @@ from sklearn.preprocessing import OneHotEncoder
 
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
-"""
-This is not a straightforward task as we need to "place" the models in the sequential order.
-For this, we need to:
-1- Tell the model the designed arrangement.
-2- Define the training process.
-3- Implement a fitness function to test the models.
-"""
-
 
 def eval_wann(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
+    This evaluation case is different to the ones in the other examples and 
+    not because of the model's building. The difference is that the weigths 
+    are loaded into the model and this implies that it do not need to train,
+    once the weights are loaded the model can predict. In orddr to evaluate 
+    the performance it is used the mean of the cases that have been well 
+    predicted.
     
-    :param nets:
-    :param train_inputs:
-    :param train_outputs:
-    :param batch_size:
-    :param iters:
-    :param test_inputs:
-    :param test_outputs:
-    :param hypers:
+    :param nets: Dictionary with the networks that will be used to build the 
+                 final network and that represent the individuals to be 
+                 evaluated in the genetic algorithm.
+    :param train_inputs: Input data for training, this data will only be used to 
+                         give it to the created networks and train them.
+    :param train_outputs: Output data for training, it will be used to compare 
+                          the returned values by the networks and see their performance.
+    :param batch_size: Number of samples per batch are used during training process.
+    :param iters: Number of iterations that each network will be trained.
+    :param test_inputs: Input data for testing, this data will only be used to 
+                        give it to the created networks and test them. It can not be used during
+                        training in order to get a real feedback.
+    :param test_outputs: Output data for testing, it will be used to compare 
+                         the returned values by the networks and see their real performance.
+    :param hypers: Hyperparameters that are being evolved and used in the process.
+    :return: Mean of the cases that have been well predicted that evaluates the true
+             performance of the network.
     """
-  
-
-    models = {}
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = Flatten()(inp)
@@ -75,13 +83,11 @@ def eval_wann(nets, train_inputs, train_outputs, batch_size, iters, test_inputs,
                 lay = [lay, layer.get_weights()[1]]
         ls += [lay]
     
-    for i, layer in enumerate(model.layers):  # Este for asigna el valor a todos los pesos
+    for i, layer in enumerate(model.layers):  # Here, the weights are assigned
         if ls[i]:
             layer.set_weights(ls[i])
-
-    models["n0"] = model
     
-    preds = models["n0"].predict(test_inputs["i0"])
+    preds = model.predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
     
@@ -116,6 +122,6 @@ if __name__ == "__main__":
                  batch_norm=False, dropout=False, 
                  hyperparameters={"weight1": np.arange(-2, 2, 0.5), "weight2": np.arange(-2, 2, 0.5), 
                                   "start": ["0", "1"], "p1": ["01", "10"],
-                                  "p2": ["001", "010", "011", "101", "110", "100"]})  # Los pesos, que también evolucionan
+                                  "p2": ["001", "010", "011", "101", "110", "100"]})  # The weights, that are also evolved
     a = e.evolve()
     print(a[-1])

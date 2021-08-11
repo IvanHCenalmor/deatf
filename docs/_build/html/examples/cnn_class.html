@@ -47,24 +47,41 @@
             
   <div class="section" id="module-cnn_class">
 <span id="convolutional-neural-network"></span><h1>Convolutional Neural Network<a class="headerlink" href="#module-cnn_class" title="Permalink to this headline">¶</a></h1>
-<p>This is a use case of EvoFlow</p>
-<p>In this instance, we handle a classification problem, which is to be solved by two DNNs combined in a sequential layout.
-The problem is the same as the one solved in Sequential.py, only that here a CNN is evolved as the first component of the model.</p>
+<p>This is a use case of DEATF where a CNN and a MLP are combined with 
+that order in a sequential way.</p>
+<p>This is a classification problem with fashion MNIST dataset. As the first
+component of the network is a CNN, the input data (clothes’ images) can be 
+directly passed and the output of the MLP is the result of the classification.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="cnn_class.eval_cnn">
 <span class="sig-prename descclassname"><span class="pre">cnn_class.</span></span><span class="sig-name descname"><span class="pre">eval_cnn</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#cnn_class.eval_cnn" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>The model that will evaluate the data is formed by a CNN and then the MLP.
+Between those subnetwork, a flatten layer and a dense layer are added in order
+to enable the union. Softmax cross entropy is used for the training and accuracy error for 
+evaluating the network.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nets</strong> – </p></li>
-<li><p><strong>train_inputs</strong> – </p></li>
-<li><p><strong>train_outputs</strong> – </p></li>
-<li><p><strong>batch_size</strong> – </p></li>
-<li><p><strong>iters</strong> – </p></li>
-<li><p><strong>test_inputs</strong> – </p></li>
-<li><p><strong>test_outputs</strong> – </p></li>
-<li><p><strong>hypers</strong> – </p></li>
+<li><p><strong>nets</strong> – Dictionary with the networks that will be used to build the 
+final network and that represent the individuals to be 
+evaluated in the genetic algorithm.</p></li>
+<li><p><strong>train_inputs</strong> – Input data for training, this data will only be used to 
+give it to the created networks and train them.</p></li>
+<li><p><strong>train_outputs</strong> – Output data for training, it will be used to compare 
+the returned values by the networks and see their performance.</p></li>
+<li><p><strong>batch_size</strong> – Number of samples per batch are used during training process.</p></li>
+<li><p><strong>iters</strong> – Number of iterations that each network will be trained.</p></li>
+<li><p><strong>test_inputs</strong> – Input data for testing, this data will only be used to 
+give it to the created networks and test them. It can not be used during
+training in order to get a real feedback.</p></li>
+<li><p><strong>test_outputs</strong> – Output data for testing, it will be used to compare 
+the returned values by the networks and see their real performance.</p></li>
+<li><p><strong>hypers</strong> – Hyperparameters that are being evolved and used in the process.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Accuracy error obtained with the test data that evaluates the true
+performance of the network.</p>
 </dd>
 </dl>
 </dd></dl>

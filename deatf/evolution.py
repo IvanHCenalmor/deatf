@@ -92,8 +92,8 @@ class Evolving:
     generations              lrate
     iters                    cxp 
     batch_size               mtp
-    compl                    add_obj
-    evaluation              
+    evaluation               add_obj
+                             compl
     =======================  =========================  ============================
     
     By using the described atributes in the initialization and some functions defined
@@ -142,14 +142,15 @@ class Evolving:
     :param mtp: Float value indicating the crossover probability. It will be 1 if there is only
                 one descriptor to be evolved.
     :param generations: Number of generations that the evolution algorithm will be running.
-    :param population_size: Population of individuals that will be evaluated in the evolution algorithm.
+    :param population_size: Number of individuals that will be evaluated in each generation 
+                            of the evolution algorithm.
     :param hypers: Hyperparameters to be evolved in the algorithm (e.g., optimizer, batch size).
     """
 
-    def __init__(self, desc_list, compl, x_trains, y_trains, x_tests, y_tests, 
+    def __init__(self, desc_list, x_trains, y_trains, x_tests, y_tests, 
                  evaluation, n_inputs, n_outputs, batch_size, population, generations, iters, 
                  lrate=0.01, sel='best', max_num_layers=10, max_num_neurons=100, 
-                 max_filter=4, max_stride=3, seed=None , cxp=0, mtp=1, 
+                 max_filter=4, max_stride=3, seed=None , cxp=0, mtp=1, compl=False, 
                  dropout=False, batch_norm=False, evol_kwargs={}, sel_kwargs={}, 
                  evol_alg='mu_plus_lambda', hyperparameters={}, custom_mutations={}, add_obj=0):
 

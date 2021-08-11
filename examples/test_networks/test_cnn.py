@@ -51,7 +51,6 @@ def test_CNN(dataset_name, eval_func=None, batch_size=150, population=5,
                 hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]})    
         
 def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
-    models = {}
     
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
@@ -64,10 +63,8 @@ def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     model.compile(loss=tf.nn.softmax_cross_entropy_with_logits, optimizer=opt, metrics=[])
     
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
-    
-    models["n0"] = model
 
-    preds = models["n0"].predict(test_inputs["i0"])
+    preds = model.predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
 

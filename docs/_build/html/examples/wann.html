@@ -47,35 +47,46 @@
             
   <div class="section" id="module-wann">
 <span id="weighted-neural-network"></span><h1>Weighted Neural Network<a class="headerlink" href="#module-wann" title="Permalink to this headline">¶</a></h1>
-<p>This is a use case of EvoFlow</p>
-<p>In this instance, we handle a classification problem, which is to be solved by two DNNs combined in a sequential layout.</p>
+<p>This is a use case of DEATF where a weighted artificial neural network (WANN) is used.</p>
+<p>This is a case like the simple.py example because only one MLP is used to solve the 
+problem. The difference is that here the weights are not randomly initialized, they
+are loaded to the model like hyperparameters and as hyperparameters they are evolved.
+So is an aproach of weight evolving. This is a classification problem, but in order
+to simplify it it has be turned into a binary classification problem.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="wann.eval_wann">
 <span class="sig-prename descclassname"><span class="pre">wann.</span></span><span class="sig-name descname"><span class="pre">eval_wann</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#wann.eval_wann" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>This evaluation case is different to the ones in the other examples and 
+not because of the model’s building. The difference is that the weigths 
+are loaded into the model and this implies that it do not need to train,
+once the weights are loaded the model can predict. In orddr to evaluate 
+the performance it is used the mean of the cases that have been well 
+predicted.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nets</strong> – </p></li>
-<li><p><strong>train_inputs</strong> – </p></li>
-<li><p><strong>train_outputs</strong> – </p></li>
-<li><p><strong>batch_size</strong> – </p></li>
-<li><p><strong>iters</strong> – </p></li>
-<li><p><strong>test_inputs</strong> – </p></li>
-<li><p><strong>test_outputs</strong> – </p></li>
-<li><p><strong>hypers</strong> – </p></li>
+<li><p><strong>nets</strong> – Dictionary with the networks that will be used to build the 
+final network and that represent the individuals to be 
+evaluated in the genetic algorithm.</p></li>
+<li><p><strong>train_inputs</strong> – Input data for training, this data will only be used to 
+give it to the created networks and train them.</p></li>
+<li><p><strong>train_outputs</strong> – Output data for training, it will be used to compare 
+the returned values by the networks and see their performance.</p></li>
+<li><p><strong>batch_size</strong> – Number of samples per batch are used during training process.</p></li>
+<li><p><strong>iters</strong> – Number of iterations that each network will be trained.</p></li>
+<li><p><strong>test_inputs</strong> – Input data for testing, this data will only be used to 
+give it to the created networks and test them. It can not be used during
+training in order to get a real feedback.</p></li>
+<li><p><strong>test_outputs</strong> – Output data for testing, it will be used to compare 
+the returned values by the networks and see their real performance.</p></li>
+<li><p><strong>hypers</strong> – Hyperparameters that are being evolved and used in the process.</p></li>
 </ul>
 </dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Mean of the cases that have been well predicted that evaluates the true
+performance of the network.</p>
+</dd>
 </dl>
-</dd></dl>
-
-<dl class="py data">
-<dt class="sig sig-object py" id="wann.optimizers">
-<span class="sig-prename descclassname"><span class="pre">wann.</span></span><span class="sig-name descname"><span class="pre">optimizers</span></span><em class="property"> <span class="pre">=</span> <span class="pre">[&lt;class</span> <span class="pre">'tensorflow.python.keras.optimizer_v2.adadelta.Adadelta'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tensorflow.python.keras.optimizer_v2.adagrad.Adagrad'&gt;,</span> <span class="pre">&lt;class</span> <span class="pre">'tensorflow.python.keras.optimizer_v2.adam.Adam'&gt;]</span></em><a class="headerlink" href="#wann.optimizers" title="Permalink to this definition">¶</a></dt>
-<dd><p>This is not a straightforward task as we need to “place” the models in the sequential order.
-For this, we need to:
-1- Tell the model the designed arrangement.
-2- Define the training process.
-3- Implement a fitness function to test the models.</p>
 </dd></dl>
 
 </div>

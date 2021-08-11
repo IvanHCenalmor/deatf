@@ -1,8 +1,10 @@
 """
-This is a use case of EvoFlow
+This is a use case of DEATF where a mutiobjective problem is treated.
 
-We face here a multiobjective problem. We create two MLP, one of which is intended for classifyin MNIST and the other one for
-Fashion-MNIST. They don't interact in any moment in the model.
+In order to face that problem, two MLPs are used. One will be responsible of
+classifying the MNIST dataset and the other one of doing it with the fashion MNIST
+dataset. Both are in the same model, but they work separately and do not interact
+between them in any moment.
 """
 import sys
 sys.path.append('..')
@@ -20,18 +22,28 @@ from tensorflow.keras.models import Model
 
 def evaluation(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, _):
     """
+    In this caxe two simple MLPs are declarated and added to the model but 
+    with different inputs and outputs, so they are separated. Both training and
+    testing will be done with different data and two final results will be 
+    obtained from the evaluation of the model.
     
-    :param nets:
-    :param train_inputs:
-    :param train_outputs:
-    :param batch_size:
-    :param iters:
-    :param test_inputs:
-    :param test_outputs:
-    :param hypers:
+    :param nets: Dictionary with the networks that will be used to build the 
+                 final network and that represent the individuals to be 
+                 evaluated in the genetic algorithm.
+    :param train_inputs: Input data for training, this data will only be used to 
+                         give it to the created networks and train them.
+    :param train_outputs: Output data for training, it will be used to compare 
+                          the returned values by the networks and see their performance.
+    :param batch_size: Number of samples per batch are used during training process.
+    :param iters: Number of iterations that each network will be trained.
+    :param test_inputs: Input data for testing, this data will only be used to 
+                        give it to the created networks and test them. It can not be used during
+                        training in order to get a real feedback.
+    :param test_outputs: Output data for testing, it will be used to compare 
+                         the returned values by the networks and see their real performance.
+    :param hypers: Hyperparameters that are being evolved and used in the process.
+    :return: Two accuracy errors, one from each MLP in the model.
     """
-  
-    models = {}
     
     inp_0 = Input(shape=train_inputs["i0"].shape[1:])
     out_0 = Flatten()(inp_0)
@@ -44,7 +56,9 @@ def evaluation(nets, train_inputs, train_outputs, batch_size, iters, test_inputs
     model = Model(inputs=[inp_0, inp_1], outputs=[out_0, out_1])
     
     opt = tf.keras.optimizers.Adam(learning_rate=0.01)
-    model.compile(loss=[tf.nn.softmax_cross_entropy_with_logits, tf.nn.softmax_cross_entropy_with_logits], optimizer=opt, metrics=[])
+    model.compile(loss=[tf.nn.softmax_cross_entropy_with_logits, 
+                        tf.nn.softmax_cross_entropy_with_logits], 
+                        optimizer=opt, metrics=[])
     
     # As the output has to be the same as the input, the input is passed twice
     model.fit([train_inputs['i0'], train_inputs['i1']],
@@ -52,10 +66,8 @@ def evaluation(nets, train_inputs, train_outputs, batch_size, iters, test_inputs
                epochs=iters, batch_size=batch_size, verbose=0)
     
     #tf.keras.utils.plot_model(model, "multi_input_and_output_model.png", show_shapes=True)
-    
-    models["n0"] = model
-    
-    pred_0, pred_1 = models['n0'].predict([test_inputs['i0'], test_inputs['i1']])
+        
+    pred_0, pred_1 = model.predict([test_inputs['i0'], test_inputs['i1']])
         
     res_0 = tf.nn.softmax(pred_0)
     res_1 = tf.nn.softmax(pred_1)

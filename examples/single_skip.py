@@ -1,8 +1,9 @@
 """
-This is a use case of EvoFlow
+This is a use case of DEATF where a skip CNN is used.
 
-In this instance, we handle a classification problem, which is to be solved by two DNNs combined in a sequential layout.
-The problem is the same as the one solved in Sequential.py, only that here a CNN is evolved as the first component of the model.
+This is a classification problem with fashion MNIST dataset. This example is similar
+to the cnn_class.py file; but, in this case the CNN used has skips in its structure.
+Those skips are conections that are made from a layer with layers that are after it.
 """
 import sys
 sys.path.append('..')
@@ -21,13 +22,25 @@ from sklearn.preprocessing import OneHotEncoder
 
 
 class SkipCNN(CNN):
+    """
+    This network inherits from CNN that in turn inherits from Network (what 
+    SkipCNN also does). The parameters are the same as the CNN, it only 
+    rewrites the building function. In it a new parameter is added,
+    that is the skip added to the network from the beginig to the selected
+    layer, that is the difference.
+    
+    :param network_descriptor: Descriptor of the CNN.
+    """
     def building(self, x, skip):
         """
-        Using the filters defined in the initialization function, create the CNN
-        :param layer: Input of the network
-        :param skip: Example of how to implement a skip connection
-        :return: Output of the network
-        """
+        Given a TensorFlow layer, this functions continues adding more layers of a SkipCNN.
+        
+        :param x: A layer from TensorFlow.
+        :param skip: Number of the layer it has to do the skip into. If the number is
+                     greater than the number of layers, it will be calculated and reasigned a new value.
+        :return: The layer received from parameter with the SkipCNN concatenated to it.
+        """       
+        
         skip = (self.descriptor.number_hidden_layers % (skip-2)) + 2
         for lay_indx in range(self.descriptor.number_hidden_layers):
             
@@ -67,18 +80,29 @@ optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
+    Creates the model formed by the SkipCNN that has been created and then
+    a MLP is sequenetialy added with a flatten and a dense layer in between.
+    That model is trained by using cross entropy function and the final 
+    evaluation is done with the accuracy error.
     
-    :param nets:
-    :param train_inputs:
-    :param train_outputs:
-    :param batch_size:
-    :param iters:
-    :param test_inputs:
-    :param test_outputs:
-    :param hypers:
+    :param nets: Dictionary with the networks that will be used to build the 
+                 final network and that represent the individuals to be 
+                 evaluated in the genetic algorithm.
+    :param train_inputs: Input data for training, this data will only be used to 
+                         give it to the created networks and train them.
+    :param train_outputs: Output data for training, it will be used to compare 
+                          the returned values by the networks and see their performance.
+    :param batch_size: Number of samples per batch are used during training process.
+    :param iters: Number of iterations that each network will be trained.
+    :param test_inputs: Input data for testing, this data will only be used to 
+                        give it to the created networks and test them. It can not be used during
+                        training in order to get a real feedback.
+    :param test_outputs: Output data for testing, it will be used to compare 
+                         the returned values by the networks and see their real performance.
+    :param hypers: Hyperparameters that are being evolved and used in the process.
+    :return: Accuracy error obtained with the test data that evaluates the true
+             performance of the network.
     """
-  
-    models = {}
     
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp, hypers["skip"])
@@ -87,15 +111,13 @@ def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     out = nets["n1"].building(out)
     
     model = Model(inputs=inp, outputs=out)
-    #model.summary()
+    
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
     model.compile(loss=tf.nn.softmax_cross_entropy_with_logits, optimizer=opt, metrics=[])
     
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
-            
-    models["n0"] = model
     
-    preds = models["n0"].predict(test_inputs["i0"])
+    preds = model.predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
 

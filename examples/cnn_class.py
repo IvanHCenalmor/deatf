@@ -1,8 +1,10 @@
 """
-This is a use case of EvoFlow
+This is a use case of DEATF where a CNN and a MLP are combined with 
+that order in a sequential way.
 
-In this instance, we handle a classification problem, which is to be solved by two DNNs combined in a sequential layout.
-The problem is the same as the one solved in Sequential.py, only that here a CNN is evolved as the first component of the model.
+This is a classification problem with fashion MNIST dataset. As the first
+component of the network is a CNN, the input data (clothes' images) can be 
+directly passed and the output of the MLP is the result of the classification.
 """
 import sys
 sys.path.append('..')
@@ -23,18 +25,29 @@ optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
+    The model that will evaluate the data is formed by a CNN and then the MLP.
+    Between those subnetwork, a flatten layer and a dense layer are added in order
+    to enable the union. Softmax cross entropy is used for the training and accuracy error for 
+    evaluating the network.
     
-    :param nets:
-    :param train_inputs:
-    :param train_outputs:
-    :param batch_size:
-    :param iters:
-    :param test_inputs:
-    :param test_outputs:
-    :param hypers:
+    :param nets: Dictionary with the networks that will be used to build the 
+                 final network and that represent the individuals to be 
+                 evaluated in the genetic algorithm.
+    :param train_inputs: Input data for training, this data will only be used to 
+                         give it to the created networks and train them.
+    :param train_outputs: Output data for training, it will be used to compare 
+                          the returned values by the networks and see their performance.
+    :param batch_size: Number of samples per batch are used during training process.
+    :param iters: Number of iterations that each network will be trained.
+    :param test_inputs: Input data for testing, this data will only be used to 
+                        give it to the created networks and test them. It can not be used during
+                        training in order to get a real feedback.
+    :param test_outputs: Output data for testing, it will be used to compare 
+                         the returned values by the networks and see their real performance.
+    :param hypers: Hyperparameters that are being evolved and used in the process.
+    :return: Accuracy error obtained with the test data that evaluates the true
+             performance of the network.
     """
-  
-    models = {}
     
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
@@ -49,10 +62,7 @@ def eval_cnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
     
-    models["n0"] = model
-    #model.summary()
-    
-    preds = models["n0"].predict(test_inputs["i0"])
+    preds = model.predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
 
@@ -69,7 +79,7 @@ if __name__ == "__main__":
     x_val = x_val[:5000]
     y_val = y_val[:5000]
     
-    # We fake a 3 channel dataset by copying the grayscale channel three times.
+    # 3 channel dataset is faked by copying the grayscale channel three times.
     x_train = np.expand_dims(x_train, axis=3)/255
     x_train = np.concatenate((x_train, x_train, x_train), axis=3)
 
@@ -87,7 +97,7 @@ if __name__ == "__main__":
     
     y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()  
     
-    # Here we indicate that we want a CNN as the first network of the model
+    # The order in the descriptor list is important in order to have the CNN first
     e = Evolving(desc_list=[CNNDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[y_train], 
                  x_tests=[x_val], y_tests=[y_val], evaluation=eval_cnn, 
                  batch_size=150, population=5, generations=10, iters=10, 

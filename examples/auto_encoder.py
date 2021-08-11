@@ -1,7 +1,9 @@
 """
-This is a use case of EvoFlow
+This is a use case of DEATF where an Autoencoder is used. 
 
-In this instance, we require a simple, single-DNN layer classifier for which we specify the predefined loss and fitness function.
+In order to create the Autoencoder model, two MLP networks are used. This is an unsupervised
+problem, where the objective is reducing the dimensionaly of the data. One MLP wil be 
+responisble of reducing the dimension and the other MLP of returning it into its original form.
 """
 
 import sys
@@ -40,15 +42,28 @@ def hand_made_np_mse(target, prediction):
 
 def ae_eval(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
+    In order to evaluate the Autoencoder, as an MLP descriptor is used,
+    a Flatten layer is added before the network that is created.
+    Then is trained using the defined mean square error and its 
+    final performance metric is also the mean squared error.
     
-    :param nets:
-    :param train_inputs:
-    :param train_outputs:
-    :param batch_size:
-    :param iters:
-    :param test_inputs:
-    :param test_outputs:
-    :param hypers:
+    :param nets: Dictionary with the networks that will be used to build the 
+                 final network and that represent the individuals to be 
+                 evaluated in the genetic algorithm.
+    :param train_inputs: Input data for training, this data will only be used to 
+                         give it to the created networks and train them.
+    :param train_outputs: Output data for training, it will be used to compare 
+                          the returned values by the networks and see their performance.
+    :param batch_size: Number of samples per batch are used during training process.
+    :param iters: Number of iterations that each network will be trained.
+    :param test_inputs: Input data for testing, this data will only be used to 
+                        give it to the created networks and test them. It can not be used during
+                        training in order to get a real feedback.
+    :param test_outputs: Output data for testing, it will be used to compare 
+                         the returned values by the networks and see their real performance.
+    :param hypers: Hyperparameters that are being evolved and used in the process.
+    :return: Mean squared error obtained with the test data that evaluates the true
+             performance of the network.
     """
     
     inp = Input(shape=train_inputs["i0"].shape[1:])

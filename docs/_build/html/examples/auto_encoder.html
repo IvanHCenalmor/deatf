@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Auto Encoder &#8212; DEATF  documentation</title>
+    <title>Autoencoder &#8212; DEATF  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
     
@@ -16,7 +16,7 @@
     
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Convolution Neural Network - Auto Encoder" href="cnn_ae.html" />
+    <link rel="next" title="Convolution Neural Network - Autoencoder" href="cnn_ae.html" />
     <link rel="prev" title="Examples" href="index.html" /> 
   </head><body>
     <div class="related" role="navigation" aria-label="related navigation">
@@ -29,14 +29,14 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="cnn_ae.html" title="Convolution Neural Network - Auto Encoder"
+          <a href="cnn_ae.html" title="Convolution Neural Network - Autoencoder"
              accesskey="N">next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Examples"
              accesskey="P">previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">DEATF  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" accesskey="U">Examples</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Auto Encoder</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Autoencoder</a></li> 
       </ul>
     </div>  
 
@@ -46,24 +46,41 @@
           <div class="body" role="main">
             
   <div class="section" id="module-auto_encoder">
-<span id="auto-encoder"></span><h1>Auto Encoder<a class="headerlink" href="#module-auto_encoder" title="Permalink to this headline">¶</a></h1>
-<p>This is a use case of EvoFlow</p>
-<p>In this instance, we require a simple, single-DNN layer classifier for which we specify the predefined loss and fitness function.</p>
+<span id="autoencoder"></span><h1>Autoencoder<a class="headerlink" href="#module-auto_encoder" title="Permalink to this headline">¶</a></h1>
+<p>This is a use case of DEATF where an Autoencoder is used.</p>
+<p>In order to create the Autoencoder model, two MLP networks are used. This is an unsupervised
+problem, where the objective is reducing the dimensionaly of the data. One MLP wil be 
+responisble of reducing the dimension and the other MLP of returning it into its original form.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="auto_encoder.ae_eval">
 <span class="sig-prename descclassname"><span class="pre">auto_encoder.</span></span><span class="sig-name descname"><span class="pre">ae_eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auto_encoder.ae_eval" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>In order to evaluate the Autoencoder, as an MLP descriptor is used,
+a Flatten layer is added before the network that is created.
+Then is trained using the defined mean square error and its 
+final performance metric is also the mean squared error.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nets</strong> – </p></li>
-<li><p><strong>train_inputs</strong> – </p></li>
-<li><p><strong>train_outputs</strong> – </p></li>
-<li><p><strong>batch_size</strong> – </p></li>
-<li><p><strong>iters</strong> – </p></li>
-<li><p><strong>test_inputs</strong> – </p></li>
-<li><p><strong>test_outputs</strong> – </p></li>
-<li><p><strong>hypers</strong> – </p></li>
+<li><p><strong>nets</strong> – Dictionary with the networks that will be used to build the 
+final network and that represent the individuals to be 
+evaluated in the genetic algorithm.</p></li>
+<li><p><strong>train_inputs</strong> – Input data for training, this data will only be used to 
+give it to the created networks and train them.</p></li>
+<li><p><strong>train_outputs</strong> – Output data for training, it will be used to compare 
+the returned values by the networks and see their performance.</p></li>
+<li><p><strong>batch_size</strong> – Number of samples per batch are used during training process.</p></li>
+<li><p><strong>iters</strong> – Number of iterations that each network will be trained.</p></li>
+<li><p><strong>test_inputs</strong> – Input data for testing, this data will only be used to 
+give it to the created networks and test them. It can not be used during
+training in order to get a real feedback.</p></li>
+<li><p><strong>test_outputs</strong> – Output data for testing, it will be used to compare 
+the returned values by the networks and see their real performance.</p></li>
+<li><p><strong>hypers</strong> – Hyperparameters that are being evolved and used in the process.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Mean squared error obtained with the test data that evaluates the true
+performance of the network.</p>
 </dd>
 </dl>
 </dd></dl>
@@ -116,7 +133,7 @@
                         title="previous chapter">Examples</a></p>
   <h4>Next topic</h4>
   <p class="topless"><a href="cnn_ae.html"
-                        title="next chapter">Convolution Neural Network - Auto Encoder</a></p>
+                        title="next chapter">Convolution Neural Network - Autoencoder</a></p>
   <div role="note" aria-label="source link">
     <h3>This Page</h3>
     <ul class="this-page-menu">
@@ -148,14 +165,14 @@
           <a href="../py-modindex.html" title="Python Module Index"
              >modules</a> |</li>
         <li class="right" >
-          <a href="cnn_ae.html" title="Convolution Neural Network - Auto Encoder"
+          <a href="cnn_ae.html" title="Convolution Neural Network - Autoencoder"
              >next</a> |</li>
         <li class="right" >
           <a href="index.html" title="Examples"
              >previous</a> |</li>
         <li class="nav-item nav-item-0"><a href="../index.html">DEATF  documentation</a> &#187;</li>
           <li class="nav-item nav-item-1"><a href="index.html" >Examples</a> &#187;</li>
-        <li class="nav-item nav-item-this"><a href="">Auto Encoder</a></li> 
+        <li class="nav-item nav-item-this"><a href="">Autoencoder</a></li> 
       </ul>
     </div>
     <div class="footer" role="contentinfo">

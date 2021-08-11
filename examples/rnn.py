@@ -1,5 +1,9 @@
 """
-This is a use case of EvoFlow
+This is a use case of DEATF where a RNN is used.
+
+This is a classification problem with the fasion MNIST dataset. In this case 
+a RNN is used to procces that data and those images are passed as sequences
+and with those the RNN has to return and predict the class of each image.
 """
 import sys
 sys.path.append('..')
@@ -20,22 +24,32 @@ optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 def eval_rnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
+    The model is created with one RNN, but it needs a dense layer with a softmax activation function.
+    That is needed because they are probability distributions and they have to be between 0 and 1.
+    Finally accuracy error is used to measuare the performance of the model.
     
-    :param nets:
-    :param train_inputs:
-    :param train_outputs:
-    :param batch_size:
-    :param iters:
-    :param test_inputs:
-    :param test_outputs:
-    :param hypers:
+    :param nets: Dictionary with the networks that will be used to build the 
+                 final network and that represent the individuals to be 
+                 evaluated in the genetic algorithm.
+    :param train_inputs: Input data for training, this data will only be used to 
+                         give it to the created networks and train them.
+    :param train_outputs: Output data for training, it will be used to compare 
+                          the returned values by the networks and see their performance.
+    :param batch_size: Number of samples per batch are used during training process.
+    :param iters: Number of iterations that each network will be trained.
+    :param test_inputs: Input data for testing, this data will only be used to 
+                        give it to the created networks and test them. It can not be used during
+                        training in order to get a real feedback.
+    :param test_outputs: Output data for testing, it will be used to compare 
+                         the returned values by the networks and see their real performance.
+    :param hypers: Hyperparameters that are being evolved and used in the process.
+    :return: Accuracy error obtained with the test data that evaluates the true
+             performance of the network.
     """
-  
-    models = {}
 
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
-    out = Dense(10, activation='softmax')(out) # Aa they are probability distributions, they have to be bewteen 0 an 1
+    out = Dense(10, activation='softmax')(out) # As they are probability distributions, they have to be bewteen 0 an 1
     model = Model(inputs=inp, outputs=out)
     
     model.summary()
@@ -44,10 +58,8 @@ def eval_rnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, 
     model.compile(loss=tf.keras.losses.SparseCategoricalCrossentropy(from_logits=True), optimizer=opt, metrics=[])
     
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
-            
-    models["n0"] = model
                      
-    preds = models["n0"].predict(test_inputs["i0"])
+    preds = model.predict(test_inputs["i0"])
     
     res = tf.nn.softmax(preds)
 

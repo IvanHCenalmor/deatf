@@ -1,4 +1,4 @@
-Convolution Neural Network - Auto Encoder
+Convolution Neural Network - Autoencoder
 =========================================
 
 .. automodule:: cnn_ae

@@ -47,24 +47,40 @@
             
   <div class="section" id="module-multi">
 <span id="multi-network"></span><h1>Multi-Network<a class="headerlink" href="#module-multi" title="Permalink to this headline">¶</a></h1>
-<p>This is a use case of EvoFlow</p>
-<p>We face here a multiobjective problem. We create two MLP, one of which is intended for classifyin MNIST and the other one for
-Fashion-MNIST. They don’t interact in any moment in the model.</p>
+<p>This is a use case of DEATF where a mutiobjective problem is treated.</p>
+<p>In order to face that problem, two MLPs are used. One will be responsible of
+classifying the MNIST dataset and the other one of doing it with the fashion MNIST
+dataset. Both are in the same model, but they work separately and do not interact
+between them in any moment.</p>
 <dl class="py function">
 <dt class="sig sig-object py" id="multi.evaluation">
 <span class="sig-prename descclassname"><span class="pre">multi.</span></span><span class="sig-name descname"><span class="pre">evaluation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">_</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#multi.evaluation" title="Permalink to this definition">¶</a></dt>
-<dd><dl class="field-list simple">
+<dd><p>In this caxe two simple MLPs are declarated and added to the model but 
+with different inputs and outputs, so they are separated. Both training and
+testing will be done with different data and two final results will be 
+obtained from the evaluation of the model.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>nets</strong> – </p></li>
-<li><p><strong>train_inputs</strong> – </p></li>
-<li><p><strong>train_outputs</strong> – </p></li>
-<li><p><strong>batch_size</strong> – </p></li>
-<li><p><strong>iters</strong> – </p></li>
-<li><p><strong>test_inputs</strong> – </p></li>
-<li><p><strong>test_outputs</strong> – </p></li>
-<li><p><strong>hypers</strong> – </p></li>
+<li><p><strong>nets</strong> – Dictionary with the networks that will be used to build the 
+final network and that represent the individuals to be 
+evaluated in the genetic algorithm.</p></li>
+<li><p><strong>train_inputs</strong> – Input data for training, this data will only be used to 
+give it to the created networks and train them.</p></li>
+<li><p><strong>train_outputs</strong> – Output data for training, it will be used to compare 
+the returned values by the networks and see their performance.</p></li>
+<li><p><strong>batch_size</strong> – Number of samples per batch are used during training process.</p></li>
+<li><p><strong>iters</strong> – Number of iterations that each network will be trained.</p></li>
+<li><p><strong>test_inputs</strong> – Input data for testing, this data will only be used to 
+give it to the created networks and test them. It can not be used during
+training in order to get a real feedback.</p></li>
+<li><p><strong>test_outputs</strong> – Output data for testing, it will be used to compare 
+the returned values by the networks and see their real performance.</p></li>
+<li><p><strong>hypers</strong> – Hyperparameters that are being evolved and used in the process.</p></li>
 </ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Two accuracy errors, one from each MLP in the model.</p>
 </dd>
 </dl>
 </dd></dl>

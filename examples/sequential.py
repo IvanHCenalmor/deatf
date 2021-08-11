@@ -1,7 +1,11 @@
 """
-This is a use case of EvoFlow
+This is a use case of DEATF where a sequential combination of two networks is used.
 
-In this instance, we handle a classification problem, which is to be solved by two DNNs combined in a sequential layout.
+The two networks that are combined in a sequential way are two MLPs.
+This is a classification problem with fashion MNIST dataset. Due to
+the two dimensions of the input data, it has to be flattened in order
+to pass it to the MLPs; but the rest is similar to other classification 
+examples in this library.
 """
 import sys
 sys.path.append('..')
@@ -20,40 +24,32 @@ from sklearn.preprocessing import OneHotEncoder
 
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
-"""
-This is not a straightforward task as we need to "place" the models in the sequential order.
-For this, we need to:
-1- Tell the model the designed arrangement.
-2- Define the training process.
-3- Implement a fitness function to test the models.
-"""
-
 
 def eval_sequential(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
     """
-    This function takes care of arranging the model and training it. It is used by the evolutionary internally,
-    and always is provided with the same parameters
-    :param nets: Dictionary with the Networks ("n0", "n1", ..., "nm", in the same order as they have been requested in the *desc_list* parameter)
-    :param train_inputs: Data to be used for training
-    :param train_outputs: Data to be used for training
-    :param batch_size: Batch_size to be used when training. It is not mandatory to use it
-    :param hypers: Optional hyperparameters being evolved in case they were defined for evolution (in this case we also evolve optimizer selection and learning rate)
-    :return: A dictionary with the tf layer which makes the predictions
-    """
-    """
+    The model that will evaluate the data is formed by a MLP and then other MLP.
+    As they are compatible between them, there is no need of extra layers between 
+    them. Softmax cross entropy is used for the training and accuracy error for 
+    evaluating the network.    
     
-    :param nets:
-    :param train_inputs:
-    :param train_outputs:
-    :param batch_size:
-    :param iters:
-    :param test_inputs:
-    :param test_outputs:
-    :param hypers:
+    :param nets: Dictionary with the networks that will be used to build the 
+                 final network and that represent the individuals to be 
+                 evaluated in the genetic algorithm.
+    :param train_inputs: Input data for training, this data will only be used to 
+                         give it to the created networks and train them.
+    :param train_outputs: Output data for training, it will be used to compare 
+                          the returned values by the networks and see their performance.
+    :param batch_size: Number of samples per batch are used during training process.
+    :param iters: Number of iterations that each network will be trained.
+    :param test_inputs: Input data for testing, this data will only be used to 
+                        give it to the created networks and test them. It can not be used during
+                        training in order to get a real feedback.
+    :param test_outputs: Output data for testing, it will be used to compare 
+                         the returned values by the networks and see their real performance.
+    :param hypers: Hyperparameters that are being evolved and used in the process.
+    :return: Accuracy error obtained with the test data that evaluates the true
+             performance of the network.
     """
-  
-
-    models = {}
     
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = Flatten()(inp)
@@ -68,9 +64,7 @@ def eval_sequential(nets, train_inputs, train_outputs, batch_size, iters, test_i
     
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
 
-    models["n0"] = model
-
-    pred = models['n0'].predict(test_inputs['i0'])
+    pred = model.predict(test_inputs['i0'])
         
     res = tf.nn.softmax(pred)
 
