@@ -18,7 +18,6 @@ Distributed Evolutionary Algorithms in TensorFlow (DEATF).
 
 .. toctree::
    :maxdepth: 2
-   :hidden:
 
    install
    support

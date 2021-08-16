@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Autoencoder &#8212; DEATF  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
@@ -45,12 +46,46 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-auto_encoder">
+  <section id="module-auto_encoder">
 <span id="autoencoder"></span><h1>Autoencoder<a class="headerlink" href="#module-auto_encoder" title="Permalink to this headline">¶</a></h1>
 <p>This is a use case of DEATF where an Autoencoder is used.</p>
 <p>In order to create the Autoencoder model, two MLP networks are used. This is an unsupervised
 problem, where the objective is reducing the dimensionaly of the data. One MLP wil be 
 responisble of reducing the dimension and the other MLP of returning it into its original form.</p>
+<dl class="py function">
+<dt class="sig sig-object py" id="auto_encoder.hand_made_tf_mse">
+<span class="sig-prename descclassname"><span class="pre">auto_encoder.</span></span><span class="sig-name descname"><span class="pre">hand_made_tf_mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auto_encoder.hand_made_tf_mse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the mean squared error by using TensorFlow operators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – Ground of truth data.</p></li>
+<li><p><strong>prediction</strong> – Predicted data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Mean squared error in a Tensor form.</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt class="sig sig-object py" id="auto_encoder.hand_made_np_mse">
+<span class="sig-prename descclassname"><span class="pre">auto_encoder.</span></span><span class="sig-name descname"><span class="pre">hand_made_np_mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auto_encoder.hand_made_np_mse" title="Permalink to this definition">¶</a></dt>
+<dd><p>Calculates the mean squared error by using NumPy operators.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>target</strong> – Ground of truth data.</p></li>
+<li><p><strong>prediction</strong> – Predicted data.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p>Mean squared error in a NumPy form.</p>
+</dd>
+</dl>
+</dd></dl>
+
 <dl class="py function">
 <dt class="sig sig-object py" id="auto_encoder.ae_eval">
 <span class="sig-prename descclassname"><span class="pre">auto_encoder.</span></span><span class="sig-name descname"><span class="pre">ae_eval</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">nets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">train_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_size</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">iters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_inputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">test_outputs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auto_encoder.ae_eval" title="Permalink to this definition">¶</a></dt>
@@ -85,41 +120,7 @@ performance of the network.</p>
 </dl>
 </dd></dl>
 
-<dl class="py function">
-<dt class="sig sig-object py" id="auto_encoder.hand_made_np_mse">
-<span class="sig-prename descclassname"><span class="pre">auto_encoder.</span></span><span class="sig-name descname"><span class="pre">hand_made_np_mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auto_encoder.hand_made_np_mse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the mean squared error by using NumPy operators.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>target</strong> – Ground of truth data.</p></li>
-<li><p><strong>prediction</strong> – Predicted data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Mean squared error in a NumPy form.</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py function">
-<dt class="sig sig-object py" id="auto_encoder.hand_made_tf_mse">
-<span class="sig-prename descclassname"><span class="pre">auto_encoder.</span></span><span class="sig-name descname"><span class="pre">hand_made_tf_mse</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">target</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">prediction</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#auto_encoder.hand_made_tf_mse" title="Permalink to this definition">¶</a></dt>
-<dd><p>Calculates the mean squared error by using TensorFlow operators.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters</dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>target</strong> – Ground of truth data.</p></li>
-<li><p><strong>prediction</strong> – Predicted data.</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns</dt>
-<dd class="field-even"><p>Mean squared error in a Tensor form.</p>
-</dd>
-</dl>
-</dd></dl>
-
-</div>
+</section>
 
 
             <div class="clearer"></div>

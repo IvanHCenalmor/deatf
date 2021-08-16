@@ -34,7 +34,7 @@ if __name__ == "__main__":
                  population=15, generations=10, max_num_layers=10, max_num_neurons=20,
                  seed=0, dropout=False, batch_norm=False, evol_alg='mu_plus_lambda',
                  evol_kwargs={'mu':10, 'lambda_':15, 'cxpb':0., "mutpb": 1.},
-                 sel = 'best')
+                 sel_kwargs={'tournsize':3}, sel = 'tournament')
     
     a = e.evolve()
 

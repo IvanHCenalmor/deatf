@@ -40,6 +40,7 @@ exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 
 autodoc_mock_imports = ["deap"]
+autodoc_member_order = 'bysource'
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -54,5 +55,5 @@ html_theme = 'default'
 html_static_path = ['']
 
 html_sidebars = {
-    'index': ['indexsidebar.html'],
+    'index': [],
 }

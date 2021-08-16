@@ -12,7 +12,7 @@
 #
 import sys, os
 sys.path.append(os.path.abspath('..'))
-sys.path.append(os.path.abspath('../evoflow'))
+sys.path.append(os.path.abspath('../deatf'))
 sys.path.append(os.path.abspath('../examples'))
 
 # -- Project information -----------------------------------------------------
@@ -39,7 +39,8 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 
-autodoc_mock_imports = ["deap"]
+autodoc_mock_imports = ['deap']
+autodoc_member_order = 'bysource'
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -54,5 +55,5 @@ html_theme = 'default'
 html_static_path = ['']
 
 html_sidebars = {
-    'index': ['indexsidebar.html'],
+    'index': [],
 }

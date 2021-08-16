@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Evolution &#8212; DEATF  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
@@ -45,13 +46,13 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-deatf.evolution">
+  <section id="module-deatf.evolution">
 <span id="evolution"></span><h1>Evolution<a class="headerlink" href="#module-deatf.evolution" title="Permalink to this headline">¶</a></h1>
 <p>Here there can be found the classes responsible of the evolution of the netwroks.
 This is a key part of the library, in charge of initializing and evolving the 
 desired networks, using other class to achieve it. Is also important because is 
 the one that the user will make use of.</p>
-<p><a class="reference internal" href="#deatf.evolution.Evolving" title="deatf.evolution.Evolving"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolving</span></code></a> class is the main class and the one in charge of evolving model descriptors.
+<p><a class="reference internal" href="../deatf.html#deatf.evolution.Evolving" title="deatf.evolution.Evolving"><code class="xref py py-class docutils literal notranslate"><span class="pre">Evolving</span></code></a> class is the main class and the one in charge of evolving model descriptors.
 Those descriptors and the atributes specified in the initialization will generate
 network to evolve; so the stepts to follow are:</p>
 <blockquote>
@@ -60,7 +61,7 @@ network to evolve; so the stepts to follow are:</p>
 <li><p>Call <code class="xref py py-func docutils literal notranslate"><span class="pre">evolve()</span></code> function.</p></li>
 </ol>
 </div></blockquote>
-<p><a class="reference internal" href="#deatf.evolution.DescriptorContainer" title="deatf.evolution.DescriptorContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DescriptorContainer</span></code></a> is just an auxiliar class to help Evolving. It is 
+<p><a class="reference internal" href="../deatf.html#deatf.evolution.DescriptorContainer" title="deatf.evolution.DescriptorContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DescriptorContainer</span></code></a> is just an auxiliar class to help Evolving. It is 
 used with the DEAP library and it represent the individul to be evolved.</p>
 <hr class="docutils" />
 <dl class="py class">
@@ -176,7 +177,7 @@ compl</p></td>
 <p>By using the described atributes in the initialization and some functions defined
 in this class, an Evolving object is created. This is the first step in the evolving
 process and the most relevant one, because here is where decisions are taken. Then 
-by calling <a class="reference internal" href="#deatf.evolution.Evolving.evolve" title="deatf.evolution.Evolving.evolve"><code class="xref py py-func docutils literal notranslate"><span class="pre">evolve()</span></code></a> function everything is done automaticaly.</p>
+by calling <a class="reference internal" href="../deatf.html#deatf.evolution.Evolving.evolve" title="deatf.evolution.Evolving.evolve"><code class="xref py py-func docutils literal notranslate"><span class="pre">evolve()</span></code></a> function everything is done automaticaly.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -331,8 +332,8 @@ or a defined evolutionary function by the user.</p>
 <dt class="sig sig-object py" id="deatf.evolution.Evolving.is_complex">
 <span class="sig-name descname"><span class="pre">is_complex</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">compl</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">evaluation</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deatf.evolution.Evolving.is_complex" title="Permalink to this definition">¶</a></dt>
 <dd><p>Determines if the case that will be evolved is a simple or a complex case.
-This will affect in the evaluation method used <a class="reference internal" href="#deatf.evolution.Evolving.simple_eval" title="deatf.evolution.Evolving.simple_eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">simple_eval()</span></code></a> or 
-<a class="reference internal" href="#deatf.evolution.Evolving.complex_eval" title="deatf.evolution.Evolving.complex_eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">complex_eval()</span></code></a>.</p>
+This will affect in the evaluation method used <a class="reference internal" href="../deatf.html#deatf.evolution.Evolving.simple_eval" title="deatf.evolution.Evolving.simple_eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">simple_eval()</span></code></a> or 
+<a class="reference internal" href="../deatf.html#deatf.evolution.Evolving.complex_eval" title="deatf.evolution.Evolving.complex_eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">complex_eval()</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -354,9 +355,9 @@ if is a simple case.</p>
 <dt class="sig sig-object py" id="deatf.evolution.Evolving.initialize_deap">
 <span class="sig-name descname"><span class="pre">initialize_deap</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">sel</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sel_kwargs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">add_obj</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deatf.evolution.Evolving.initialize_deap" title="Permalink to this definition">¶</a></dt>
 <dd><p>Initialize DEAP function and atributes in order to be ready for evolutionary algorithm.
-In this function all the other functions that have been defined in <a class="reference internal" href="#deatf.evolution.Evolving.define_evaluation" title="deatf.evolution.Evolving.define_evaluation"><code class="xref py py-func docutils literal notranslate"><span class="pre">define_evaluation()</span></code></a>,
-<a class="reference internal" href="#deatf.evolution.Evolving.define_evolving" title="deatf.evolution.Evolving.define_evolving"><code class="xref py py-func docutils literal notranslate"><span class="pre">define_evolving()</span></code></a> and <a class="reference internal" href="#deatf.evolution.Evolving.define_selection" title="deatf.evolution.Evolving.define_selection"><code class="xref py py-func docutils literal notranslate"><span class="pre">define_selection()</span></code></a> will be added to the toolbox of DEAP.
-Also here the individuals <a class="reference internal" href="#deatf.evolution.DescriptorContainer" title="deatf.evolution.DescriptorContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DescriptorContainer</span></code></a> will be assigned as individuals 
+In this function all the other functions that have been defined in <a class="reference internal" href="../deatf.html#deatf.evolution.Evolving.define_evaluation" title="deatf.evolution.Evolving.define_evaluation"><code class="xref py py-func docutils literal notranslate"><span class="pre">define_evaluation()</span></code></a>,
+<a class="reference internal" href="../deatf.html#deatf.evolution.Evolving.define_evolving" title="deatf.evolution.Evolving.define_evolving"><code class="xref py py-func docutils literal notranslate"><span class="pre">define_evolving()</span></code></a> and <a class="reference internal" href="../deatf.html#deatf.evolution.Evolving.define_selection" title="deatf.evolution.Evolving.define_selection"><code class="xref py py-func docutils literal notranslate"><span class="pre">define_selection()</span></code></a> will be added to the toolbox of DEAP.
+Also here the individuals <a class="reference internal" href="../deatf.html#deatf.evolution.DescriptorContainer" title="deatf.evolution.DescriptorContainer"><code class="xref py py-class docutils literal notranslate"><span class="pre">DescriptorContainer</span></code></a> will be assigned as individuals 
 to be evolved.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
@@ -420,8 +421,8 @@ the evolution or not.</p></li>
 <span class="sig-name descname"><span class="pre">eval_individual</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">individual</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deatf.evolution.Evolving.eval_individual" title="Permalink to this definition">¶</a></dt>
 <dd><p>Function used for evaluating a DEAP individual during the evolutionary algorithm.
 This is the registered function for evalution and is an auxiliar function because
-it only does another calling depending on the type of evaluation (<a class="reference internal" href="#deatf.evolution.Evolving.simple_eval" title="deatf.evolution.Evolving.simple_eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">simple_eval()</span></code></a> or 
-<a class="reference internal" href="#deatf.evolution.Evolving.complex_eval" title="deatf.evolution.Evolving.complex_eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">complex_eval()</span></code></a>).</p>
+it only does another calling depending on the type of evaluation (<a class="reference internal" href="../deatf.html#deatf.evolution.Evolving.simple_eval" title="deatf.evolution.Evolving.simple_eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">simple_eval()</span></code></a> or 
+<a class="reference internal" href="../deatf.html#deatf.evolution.Evolving.complex_eval" title="deatf.evolution.Evolving.complex_eval"><code class="xref py py-func docutils literal notranslate"><span class="pre">complex_eval()</span></code></a>).</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><p><strong>individual</strong> – DEAP individual.</p>
@@ -469,7 +470,7 @@ complex case. The user must have implemented the training and evaluation functio
 <span class="sig-prename descclassname"><span class="pre">deatf.evolution.</span></span><span class="sig-name descname"><span class="pre">mutations</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutations</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">individual</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deatf.evolution.mutations" title="Permalink to this definition">¶</a></dt>
 <dd><p>Mutation operators for individuals. It can be affected any network or hyperparameter.
 Depending on the type of network that will suffer the mutation, this function
-will create a different object from <a class="reference internal" href="mutation.html#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a>.</p>
+will create a different object from <a class="reference internal" href="../deatf.html#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a>.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
@@ -505,7 +506,7 @@ parameters (the offspring).</p>
 </dl>
 </dd></dl>
 
-</div>
+</section>
 
 
             <div class="clearer"></div>

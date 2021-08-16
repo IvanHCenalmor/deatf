@@ -4,7 +4,8 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
+
     <title>Multi Layer Perceptron &#8212; DEATF  documentation</title>
     <link rel="stylesheet" type="text/css" href="../_static/pygments.css" />
     <link rel="stylesheet" type="text/css" href="../_static/classic.css" />
@@ -45,7 +46,7 @@
         <div class="bodywrapper">
           <div class="body" role="main">
             
-  <div class="section" id="module-simple">
+  <section id="module-simple">
 <span id="multi-layer-perceptron"></span><h1>Multi Layer Perceptron<a class="headerlink" href="#module-simple" title="Permalink to this headline">¶</a></h1>
 <p>This is the simplest use case of DEATF.</p>
 <p>In this instance, we require a simple DNN, a Multi Layer Perceptron (MLP). Only restrictions
@@ -72,12 +73,12 @@ a one in the index 3 (starting to count from 0) and the rest are zeros.</p>
                  <span class="n">population</span><span class="o">=</span><span class="mi">15</span><span class="p">,</span> <span class="n">generations</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_num_layers</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span> <span class="n">max_num_neurons</span><span class="o">=</span><span class="mi">20</span><span class="p">,</span>
                  <span class="n">seed</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">dropout</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">batch_norm</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">evol_alg</span><span class="o">=</span><span class="s1">&#39;mu_plus_lambda&#39;</span><span class="p">,</span>
                  <span class="n">evol_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;mu&#39;</span><span class="p">:</span><span class="mi">10</span><span class="p">,</span> <span class="s1">&#39;lambda_&#39;</span><span class="p">:</span><span class="mi">15</span><span class="p">,</span> <span class="s1">&#39;cxpb&#39;</span><span class="p">:</span><span class="mf">0.</span><span class="p">,</span> <span class="s2">&quot;mutpb&quot;</span><span class="p">:</span> <span class="mf">1.</span><span class="p">},</span>
-                 <span class="n">sel</span> <span class="o">=</span> <span class="s1">&#39;best&#39;</span><span class="p">)</span>
+                 <span class="n">sel_kwargs</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;tournsize&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">},</span> <span class="n">sel</span> <span class="o">=</span> <span class="s1">&#39;tournament&#39;</span><span class="p">)</span>
     
     <span class="n">a</span> <span class="o">=</span> <span class="n">e</span><span class="o">.</span><span class="n">evolve</span><span class="p">()</span>
 </pre></div>
 </div>
-</div>
+</section>
 
 
             <div class="clearer"></div>
