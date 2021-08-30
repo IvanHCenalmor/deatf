@@ -81,6 +81,8 @@ class NetworkDescriptor:
     def remove_random_layer(self):
         """
         Selects and removes a random layer from the network.
+        
+        :return: True if the action is done or False if it can not be done.
         """
         layer_pos = np.random.randint(self.number_hidden_layers)
         return self.remove_layer(layer_pos)
@@ -91,6 +93,8 @@ class NetworkDescriptor:
         
         :param layer_pos: Position of the layer whose activation function wants to be changed.
         :param new_act_fn: New activation fucntion that is going to be asigned.
+        :return: True if the action is done or False if it can not be done (in this case
+                 it will always be done).
         """
         self.act_functions[layer_pos] = new_act_fn
         return True
@@ -101,6 +105,8 @@ class NetworkDescriptor:
         
         :param layer_pos: Position of the layer whose activation function wants to be changed.
         :param new_act_fn: New activation fucntion that is going to be asigned.
+        :return: True if the action is done or False if it can not be done (in this case
+                 it will always be done).
         """
         self.init_functions[layer_pos] = new_weight_fn
         return True
@@ -108,6 +114,9 @@ class NetworkDescriptor:
     def change_dropout(self):
         """
         Change the dropout conditional. If dropout layers are used, quit them; otherwise, add them.
+        
+        :return: True if the action is done or False if it can not be done (in this case
+                 it will always be done).
         """
         self.dropout = not self.dropout
         return True # This mutation is controled, it always will be applied
@@ -115,6 +124,9 @@ class NetworkDescriptor:
     def change_dropout_prob(self):
         """
         The dropout probability for each layer is changed by a new random one (between 0 and 1).
+        
+        :return: True if the action is done or False if it can not be done (in this case
+                 it will always be done).
         """
         self.dropout_probs = np.random.rand(self.number_hidden_layers)
         return True # This mutation is controled, it always will be applied
@@ -122,6 +134,9 @@ class NetworkDescriptor:
     def change_batch_norm(self):
         """
         Change the batch normalization conditional. If batch normalization is used, quit it; otherwise, add it.
+        
+        :return: True if the action is done or False if it can not be done (in this case
+                 it will always be done).
         """
         self.batch_norm = not self.batch_norm
         return True # This mutation is controled, it always will be applied
@@ -231,6 +246,7 @@ class MLPDescriptor(NetworkDescriptor):
         :param act_function: Activation function to be applied.
         :param drop_prob: Probability of dropout.
         :param batch_norm: Whether batch normalization is applied after the layer.
+        :return: True if the action is done or False if it can not be done.
         """
         if self.number_hidden_layers >= self.max_num_layers:
             return False 
@@ -250,6 +266,7 @@ class MLPDescriptor(NetworkDescriptor):
         Removes the layer in the position received by parameter from the network.
         
         :param layer_pos: Position of the layer that is going to be removed.
+        :return: True if the action is done or False if it can not be done.
         """
         if self.number_hidden_layers <= 1:
             return False 
@@ -269,6 +286,7 @@ class MLPDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the layer that will be changed.
         :param new_dim: Dimension that will be changed to.
+        :return: True if the action is done or False if it can not be done.
         """
         if new_dim < MIN_NUM_NEURONS or new_dim > self.max_num_neurons:
             return False # It is not within feasible bounds
@@ -454,6 +472,7 @@ class CNNDescriptor(NetworkDescriptor):
         :param stride_size: Stride size.
         :param act_function: Activation function.
         :param init_function: Initialization function.
+        :return: True if the action is done or False if it can not be done.
         """
         if self.number_hidden_layers >= self.max_num_layers:
             return False  
@@ -531,6 +550,7 @@ class CNNDescriptor(NetworkDescriptor):
         Removes the layer in the position received by parameter from the network.
         
         :param layer_pos: Position of the layer that is going to be removed.
+        :return: True if the action is done or False if it can not be done.
         """
         if self.number_hidden_layers <= 1:
             return False # If there is only one layer it can  not be removed
@@ -584,6 +604,7 @@ class CNNDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the filter to be changed.
         :param new_filter_size: Height and width of the filter (only square filters are allowed).
         :param new_channel: Number of output channels.
+        :return: True if the action is done or False if it can not be done.
         """
         if new_filter_size < MIN_NUM_FILTERS or new_filter_size > self.max_filter:
             return False # It is not within feasible bounds
@@ -627,6 +648,7 @@ class CNNDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the filter to be changed.
         :param new_stride_size: Stride assigned to that layer. 
+        :return: True if the action is done or False if it can not be done.
         """
         if new_stride_size < MIN_NUM_STRIDES or new_stride_size > self.max_stride:
             return False # It is not within feasible bounds
@@ -778,6 +800,7 @@ class TCNNDescriptor(NetworkDescriptor):
         :param stride_size: Stride size.
         :param act_function: Activation function.
         :param init_function: Initialization function.
+        :return: True if the action is done or False if it can not be done.
         """
         if self.number_hidden_layers >= self.max_num_layers:
             return False 
@@ -817,6 +840,7 @@ class TCNNDescriptor(NetworkDescriptor):
         Removes the layer in the position received by parameter from the network.
         
         :param layer_pos: Position of the layer that is going to be removed.
+        :return: True if the action is done or False if it can not be done.
         """
         if self.number_hidden_layers <= 1:
             return False 
@@ -849,6 +873,7 @@ class TCNNDescriptor(NetworkDescriptor):
         :param layer_pos: Position of the filter to be changed.
         :param new_filter_size: Height and width of the filter (only square filters are allowed).
         :param new_channel: Number of output channels.
+        :return: True if the action is done or False if it can not be done.
         """
         if new_filter_size < MIN_NUM_FILTERS or new_filter_size > self.max_filter:
             return False # It is not within feasible bounds
@@ -884,6 +909,7 @@ class TCNNDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the stride to be changed.
         :param new_stride_size: Stride assigned to that layer.
+        :return: True if the action is done or False if it can not be done.
         """
         if new_stride_size < MIN_NUM_STRIDES or new_stride_size > self.max_stride:
             return False # It is not within feasible bounds
@@ -1011,7 +1037,8 @@ class RNNDescriptor(NetworkDescriptor):
         Adds a layer in the given position with all the characteristics indicated by parameters.
         
         :param layer_pos: Position of the layer.
-        :param lay_params: Type of recurrent layer, how many units, etc..
+        :param lay_params: Type of recurrent layer, how many units, etc.
+        :return: True if the action is done or False if it can not be done.
         """
         
         if self.number_hidden_layers >= self.max_num_layers:
@@ -1033,6 +1060,7 @@ class RNNDescriptor(NetworkDescriptor):
         Removes the layer in the position received by parameter from the network.
         
         :param layer_pos: Position of the layer that is going to be removed.
+        :return: True if the action is done or False if it can not be done.
         """
 
         if self.number_hidden_layers <= 1:
@@ -1053,6 +1081,7 @@ class RNNDescriptor(NetworkDescriptor):
         for a new one selected randomly.
         
         :param layer_pos: Position of the filter to be changed.
+        :return: True if the action is done or False if it can not be done.
         """
         self.rnn_layers[layer_pos] = layer_type
         return True
@@ -1064,6 +1093,7 @@ class RNNDescriptor(NetworkDescriptor):
         
         :param layer_pos: Position of the filter to be changed.
         :param new_units: Number of units assigned to that layer. 
+        :return: True if the action is done or False if it can not be done.
         """
         if new_units < MIN_NUM_NEURONS or new_units > self.max_num_neurons:
             return False # It is not within feasible bounds
@@ -1078,6 +1108,7 @@ class RNNDescriptor(NetworkDescriptor):
         bidirectional one.
         
         :param layer_pos: Position of the filter to be changed.
+        :return: True if the action is done or False if it can not be done.
         """
         self.bidirectional[layer_pos] = not self.bidirectional[layer_pos]
         return True

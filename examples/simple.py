@@ -30,7 +30,7 @@ if __name__ == "__main__":
     e = Evolving(evaluation="XEntropy", desc_list=[MLPDescriptor], compl=False,
                  x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val], 
                  n_inputs=[[28, 28]], n_outputs=[[10]],
-                 population=5, generations=5, batch_size=150, iters=50, 
+                 population=5, generations=5, batch_size=200, iters=50, 
                  lrate=0.1, cxp=0, mtp=1, seed=0,
                  max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
                  evol_alg='mu_plus_lambda', sel='tournament', sel_kwargs={'tournsize':3}, 

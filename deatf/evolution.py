@@ -366,7 +366,7 @@ class Evolving:
         """
 
         creator.create("Fitness", base.Fitness, weights=[-1.0]*(len(self.test_outputs) + add_obj))
-
+        
         creator.create("Individual", DescriptorContainer, fitness=creator.Fitness)
 
         self.toolbox.register("individual", self.init_individual, creator.Individual, batch_norm, dropout)
