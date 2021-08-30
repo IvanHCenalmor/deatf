@@ -62,7 +62,6 @@ def eval_cnn_ae(nets, train_inputs, _, batch_size, iters, test_inputs, __, hyper
     # As the output has to be the same as the input, the input is passed twice
     model.fit(train_inputs['i0'], train_inputs['i0'], epochs=iters , batch_size=batch_size, verbose=0)
                 
-    
     pred = model.predict(test_inputs["i0"])
     res = pred[:, :28, :28, :3] 
         
@@ -74,14 +73,11 @@ def eval_cnn_ae(nets, train_inputs, _, batch_size, iters, test_inputs, __, hyper
 
 if __name__ == "__main__":
 
-    x_train, y_train, x_test, y_test, x_val, y_val = load_fashion()
+    x_train, _, x_test, _, x_val, _ = load_fashion()
         
     x_train = x_train[:10000]
-    y_train = y_train[:10000]
     x_test = x_test[:5000]
-    y_test = y_test[:5000]
     x_val = x_val[:5000]
-    y_val = y_val[:5000]
     
     # 3 channel dataset is faked by copying the grayscale channel three times.
     x_train = np.expand_dims(x_train, axis=3)/255
@@ -92,29 +88,17 @@ if __name__ == "__main__":
 
     x_val = np.expand_dims(x_val, axis=3)/255
     x_val = np.concatenate((x_val, x_val, x_val), axis=3)
-    
-    OHEnc = OneHotEncoder()
 
-    y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
+    e = Evolving(evaluation=eval_cnn_ae, desc_list=[CNNDescriptor, TCNNDescriptor], 
+                 x_trains=[x_train], y_trains=[x_train], x_tests=[x_val], y_tests=[x_val], 
+                 n_inputs=[[28, 28, 3], [7, 7, 1]], n_outputs=[[7,7,1], [28, 28, 3]],
+                 population=5, generations=5, batch_size=150, iters=50, 
+                 lrate=0.1, cxp=0.5, mtp=0.5, seed=0,
+                 max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
+                 evol_alg='mu_plus_lambda', sel='best', sel_kwargs={}, 
+                 hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
+                 batch_norm=True, dropout=True)
 
-    y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
-    
-    y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()   
-    
-    e = Evolving(desc_list=[CNNDescriptor, TCNNDescriptor], 
-                 x_trains=[x_train], y_trains=[y_train], 
-                 x_tests=[x_val], y_tests=[y_val], 
-                 evaluation=eval_cnn_ae, 
-                 batch_size=150, 
-                 population=6, 
-                 generations=10, iters=10, 
-                 n_inputs=[[28, 28, 3], [7, 7, 1]], 
-                 n_outputs=[[7,7,1], [28, 28, 3]], 
-                 cxp=0.5, 
-                 mtp=0.5, 
-                 hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
-                 batch_norm=True, 
-                 dropout=True)
     a = e.evolve()
     
     print(a[-1])

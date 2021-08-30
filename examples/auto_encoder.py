@@ -97,12 +97,17 @@ if __name__ == "__main__":
     x_test = x_test/1
     x_val = x_val/1
 
+
     e = Evolving(evaluation=ae_eval, desc_list=[MLPDescriptor], 
                  x_trains=[x_train], y_trains=[x_train], x_tests=[x_val], y_tests=[x_val], 
                  n_inputs=[[784]], n_outputs=[[784]],
-                 hyperparameters={"lrate": [0.1, 0.5, 1]},
-                 population=5, generations=20,  batch_size=150, iters=100, 
-                 max_num_layers=10, max_num_neurons=100, seed=0)
+                 population=5, generations=5, batch_size=150, iters=50, 
+                 lrate=0.1, cxp=0, mtp=1, seed=0,
+                 max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
+                 evol_alg='mu_plus_lambda', sel='best', sel_kwargs={}, 
+                 hyperparameters={"lrate": [0.1, 0.5, 1]}, 
+                 batch_norm=True, dropout=True)    
+
     a = e.evolve()
 
     print(a)

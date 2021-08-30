@@ -20,8 +20,29 @@ from deap import tools
 optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 
 
-def eval_model(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, __, hypers):  
-
+def eval_model(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):  
+    """
+    The model that will evaluate the data is a simple MLP. Data passed to those 
+    models in this case will be noise, models will have to predict a probability
+    distribution with the size of the bounds of the build. 
+    
+    :param nets: Dictionary with the networks that will be used to build the 
+                 final network and that represent the individuals to be 
+                 evaluated in the genetic algorithm.
+    :param train_inputs: Input data for training, this data will only be used to 
+                         give it to the created networks and train them.
+    :param train_outputs: Output data for training, it will be used to compare 
+                          the returned values by the networks and see their performance.
+    :param batch_size: Number of samples per batch are used during training process.
+    :param iters: Number of iterations that each network will be trained.
+    :param test_inputs: Input data for testing, this data will only be used to 
+                        give it to the created networks and test them. It can not be used during
+                        training in order to get a real feedback.
+    :param test_outputs: Output data for testing, it will be used to compare 
+                         the returned values by the networks and see their real performance.
+    :param hypers: Hyperparameters that are being evolved and used in the process.
+    :return: Accuracy error calculated from the networks prediction an real data.  
+    """
     
     # In the autoencoder would be the flattened representation of the solutions 
     inp = Input(shape=train_inputs['i0'].shape[1:])
@@ -44,7 +65,18 @@ def eval_model(nets, train_inputs, train_outputs, batch_size, iters, test_inputs
     return ev,
 
 def evolve_with_population(evolving_alg, population):
-
+    """
+    Function that actualy applies the evolutionary algorithm. Using all the information
+    from the parameters (both created population and the evolving algorithm), this function 
+    does the evolution. It will print the mean, standard, minimum and maximum values obtained 
+    form the individuals in each generation. Finally, it return the individuals from the last 
+    generation, the stats and the best individuals found during the algorithm.
+        
+    :param evolving_alg: Algorithm that will be used during the evolution.
+    :pram population: Population that will be used during the evolutioin process.
+    :return: The last generation, a log book (stats) and the hall of fame (the best 
+                 individuals found).
+    """
     hall_of = tools.HallOfFame(evolving_alg.population_size)
     stats = tools.Statistics(lambda ind: ind.fitness.values)
 

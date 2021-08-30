@@ -11,7 +11,6 @@ sys.path.append('..')
 
 import numpy as np
 
-
 from deatf.auxiliary_functions import load_fashion
 from deatf.network import MLPDescriptor
 from deatf.evolution import Evolving
@@ -27,14 +26,15 @@ if __name__ == "__main__":
     y_train = OHEnc.fit_transform(np.reshape(y_train, (-1, 1))).toarray()
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
     y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()
-
+    
     e = Evolving(evaluation="XEntropy", desc_list=[MLPDescriptor], compl=False,
                  x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val], 
-                 n_inputs=[[28, 28]], n_outputs=[[10]], batch_size=150, iters=10, 
-                 population=15, generations=10, max_num_layers=10, max_num_neurons=20,
-                 seed=0, dropout=False, batch_norm=False, evol_alg='mu_plus_lambda',
-                 evol_kwargs={'mu':10, 'lambda_':15, 'cxpb':0., "mutpb": 1.},
-                 sel_kwargs={'tournsize':3}, sel = 'tournament')
+                 n_inputs=[[28, 28]], n_outputs=[[10]],
+                 population=5, generations=5, batch_size=150, iters=50, 
+                 lrate=0.1, cxp=0, mtp=1, seed=0,
+                 max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
+                 evol_alg='mu_plus_lambda', sel='tournament', sel_kwargs={'tournsize':3}, 
+                 evol_kwargs={}, batch_norm=False, dropout=False)
     
     a = e.evolve()
 

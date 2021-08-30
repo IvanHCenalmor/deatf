@@ -138,7 +138,7 @@ def load_dataset(dataset_name, is_time_series=False, series_input_width=30, seri
                 'parkinsons': load_parkinsons
                 }
     
-    datasets_CNN = ['mnist', 'kmnist', 'cmaterdb', 'fashion_mnist', 'omniglot', 
+    datasets_CNN = ['mnist', 'kmnist', 'cmaterdb', 'fashion_mnist',
                     'binary_alpha_digits', 'cifar10', 'rock_paper_scissors']
     
     if dataset_name in datasets.keys():

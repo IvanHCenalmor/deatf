@@ -62,7 +62,7 @@ def discriminator_loss(fake_out, real_out):
     d_loss = d_loss_real + d_loss_fake
     return d_loss
 
-def gan_eval(nets, train_inputs, _, batch_size, iters, __, ___ ,____):
+def eval_gan(nets, train_inputs, _, batch_size, iters, __, ___ ,____):
     """
     This case is more complex than other examples, in it two models are used
     the generator and the discriminator. They are two separete models, but they 
@@ -145,14 +145,19 @@ def gan_eval(nets, train_inputs, _, batch_size, iters, __, ___ ,____):
 if __name__ == "__main__":
 
     x_train, _, x_test, _, x_val, _ = load_fashion()
+
     # The GAN evolutive process is a common 2-DNN evolution
-    e = Evolving(desc_list=[MLPDescriptor, MLPDescriptor], 
-                 x_trains=[x_train], y_trains=[x_train], 
-                 x_tests=[x_val], y_tests=[x_val], 
-                 evaluation=gan_eval, batch_size=150, iters=10, 
-                 population=10, generations=10, 
+
+    e = Evolving(evaluation=eval_gan, desc_list=[MLPDescriptor, MLPDescriptor],
+                 x_trains=[x_train], y_trains=[x_train], x_tests=[x_val], y_tests=[x_val], 
                  n_inputs=[[28, 28], [10]], n_outputs=[[1], [784]], 
-                 cxp=0.5, mtp=0.5)
+                 population=5, generations=5, batch_size=150, iters=50, 
+                 lrate=0.1, cxp=0.5, mtp=0.5, seed=0,
+                 max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
+                 evol_alg='mu_plus_lambda', sel='best', sel_kwargs={}, 
+                 hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
+                 batch_norm=True, dropout=True)
+
     res = e.evolve()
 
     print(res[0])

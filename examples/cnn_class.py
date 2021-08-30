@@ -98,12 +98,15 @@ if __name__ == "__main__":
     y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()  
     
     # The order in the descriptor list is important in order to have the CNN first
-    e = Evolving(desc_list=[CNNDescriptor, MLPDescriptor], x_trains=[x_train], y_trains=[y_train], 
-                 x_tests=[x_val], y_tests=[y_val], evaluation=eval_cnn, 
-                 batch_size=150, population=5, generations=10, iters=10, 
-                 n_inputs=[[28, 28, 3], [20]], n_outputs=[[7, 7, 1], [10]], cxp=0.5,
-                 mtp=0.5, hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
-    batch_norm=True, dropout=True)
+    e = Evolving(evaluation=eval_cnn, desc_list=[CNNDescriptor, MLPDescriptor], 
+                 x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val], 
+                 n_inputs=[[28, 28, 3], [20]], n_outputs=[[7, 7, 1], [10]], 
+                 population=5, generations=5, batch_size=150, iters=50, 
+                 lrate=0.1, cxp=0.5, mtp=0.5, seed=0,
+                 max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
+                 evol_alg='mu_plus_lambda', sel='best', sel_kwargs={}, 
+                 hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
+                 batch_norm=True, dropout=True)
 
     a = e.evolve()
 

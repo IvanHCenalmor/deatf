@@ -384,7 +384,7 @@ class Evolving:
         Function that actualy applies the evolutionary algorithm. Using all the information
         provided in the initialization of the class, this function does the evolution. It will
         print the mean, standard, minimum and maximum values obtained form the individuals in
-        each generation. Finally, it return the individuals from the lasta generation, the stats
+        each generation. Finally, it return the individuals from the last generation, the stats
         and the best individuals found during the algorithm.
         
         :return: The last generation, a log book (stats) and the hall of fame (the best 

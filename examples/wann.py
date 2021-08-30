@@ -115,13 +115,18 @@ if __name__ == "__main__":
     y_test = OHEnc.fit_transform(np.reshape(y_test, (-1, 1))).toarray()
     y_val = OHEnc.fit_transform(np.reshape(y_val, (-1, 1))).toarray()
 
+
     e = Evolving(evaluation=eval_wann, desc_list=[MLPDescriptor], 
                  x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val],
-                 batch_size=150, population=10, generations=100, iters=10, 
-                 n_inputs=[[28, 28]], n_outputs=[[2]], cxp=0, mtp=1,
-                 batch_norm=False, dropout=False, 
+                 n_inputs=[[28, 28]], n_outputs=[[2]],
+                 population=5, generations=5, batch_size=150, iters=50, 
+                 lrate=0.1, cxp=0, mtp=1, seed=0,
+                 max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
+                 evol_alg='mu_plus_lambda', sel='best', sel_kwargs={}, 
                  hyperparameters={"weight1": np.arange(-2, 2, 0.5), "weight2": np.arange(-2, 2, 0.5), 
                                   "start": ["0", "1"], "p1": ["01", "10"],
-                                  "p2": ["001", "010", "011", "101", "110", "100"]})  # The weights, that are also evolved
+                                  "p2": ["001", "010", "011", "101", "110", "100"]}, 
+                 batch_norm=False, dropout=False) # The weights, that are also evolved
+
     a = e.evolve()
     print(a[-1])

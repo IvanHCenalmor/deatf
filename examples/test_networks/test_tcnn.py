@@ -22,8 +22,7 @@ optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 def test_TCNN_all_datasets(eval_func=None, batch_size=150, population=5, 
                       generations=10, iters=100, max_num_layers=10, max_num_neurons=20):
     
-    dataset_collection = ['mnist', 'kmnist', 'cmaterdb', 'fashion_mnist', 'omniglot', 
-                          'binary_alpha_digits', 'cifar10', 'rock_paper_scissors']
+    dataset_collection = ['mnist', 'kmnist', 'cmaterdb', 'fashion_mnist', 'cifar10', 'rock_paper_scissors']
    
     for dataset in dataset_collection:
         
@@ -82,21 +81,19 @@ def test_TCNN(dataset_name, eval_func=None, batch_size=150, population=5,
     return a 
 
 def eval_tcnn(nets, train_inputs, train_outputs, batch_size, iters, test_inputs, test_outputs, hypers):
-    models = {}
     
     inp = Input(shape=train_inputs["i0"].shape[1:])
     out = nets["n0"].building(inp)
+    out = tf.keras.layers.AvgPool2D(pool_size=(1,5), strides=(1, 1), padding='valid')(out)
     
     model = Model(inputs=inp, outputs=out)
-    #model.summary()
+    model.summary()
     opt = optimizers[hypers["optimizer"]](learning_rate=hypers["lrate"])
     model.compile(loss=tf.losses.mean_squared_error, optimizer=opt, metrics=[])
     
     model.fit(train_inputs['i0'], train_outputs['o0'], epochs=iters, batch_size=batch_size, verbose=0)
-    
-    models["n0"] = model
 
-    pred = models["n0"].predict(test_inputs["i0"])
+    pred = model.predict(test_inputs["i0"])
     
     ev = mean_squared_error(pred.flatten(), test_outputs["o0"].flatten())
     return ev,

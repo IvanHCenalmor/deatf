@@ -17,6 +17,18 @@ for i,a in enumerate(initializations):
 positions_neurons = [(0,0),(0,1),(0,2),(0,3),(1,0),(1,3),(2,0),(2,3),(3,0),(3,1),(3,2),(3,3)]
 
 def creating_data_and_population(evolving_alg, wanted_blocks, bounds, center_layer, layer_size):
+    """
+    Creates data and noisy data based in the network descriptors that are received as 
+    parameter. That data will be the representation of the network in a build form.
+    
+    :param evolving alg: Evolving algorithm that will be used in the GA process.
+    :param wanted_blocks: List with the desired blocks for the builds.
+    :param bounds: Bounds where the build can be created.
+    :param center_layer: Coordinates of the center where the build wil be created.
+    :param layer_size: Size of the layers from the network.
+    :return: Created data based in the network descriptors, noisy data and population
+             of toolbox.
+    """
     population = evolving_alg.toolbox.population(n=evolving_alg.population_size)
     
     network_descriptors = [ind.descriptor_list for ind in population]
@@ -26,6 +38,18 @@ def creating_data_and_population(evolving_alg, wanted_blocks, bounds, center_lay
     return data, noisy_data, population
 
 def generate_data(network_descriptors, wanted_blocks, bounds, center_layer, layer_size):
+    """
+    Creates data based in the network descriptors that are received as parameter. That
+    data will be the representation of the network in a build form.
+    
+    :param network_descriptors: List with the network descriptors that will be used
+                                to create the data.
+    :param wanted_blocks: List with the desired blocks for the builds.
+    :param bounds: Bounds where the build can be created.
+    :param center_layer: Coordinates of the center where the build wil be created.
+    :param layer_size: Size of the layers from the network.
+    :return: Created data based in the network descriptors.
+    """
     data = []
     
     for desc in network_descriptors:
@@ -65,6 +89,10 @@ def add_noise(data, wanted_blocks):
     Add noise to given data. Values that are different from -1
     are changed to it. In minecraft and cube representation, this 
     means to remove a block from a position.
+    
+    :param data: Data created from the network descriptorss.
+    :param wanted_blocks: List with teh desired blocks in the build.
+    :return: Received data but with noise added to it.
     """
     data_blocks_indices = np.where(data != -1)
     data_blocks_indices = np.array(data_blocks_indices).transpose()

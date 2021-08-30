@@ -154,11 +154,15 @@ if __name__ == "__main__":
 
     # Here we indicate that we want a CNN as the first network of the model
     e = evolution.Evolving(evaluation=eval_cnn, desc_list=[CNNDescriptor, MLPDescriptor], 
-                           x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val],
-                           batch_size=150, population=5, generations=3, iters=10, 
-                           n_inputs=[[28, 28, 3], [20]], n_outputs=[[7, 7, 1], [10]], cxp=0.5, mtp=0.5, 
-                           hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2], "skip": range(3, 10)}, 
-                           batch_norm=True, dropout=True)
+                        x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val], 
+                        n_inputs=[[28, 28, 3], [20]], n_outputs=[[7, 7, 1], [10]], 
+                        population=5, generations=5, batch_size=150, iters=50, 
+                        lrate=0.1, cxp=0.5, mtp=0.5, seed=0,
+                        max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
+                        evol_alg='mu_plus_lambda', sel='best', sel_kwargs={}, 
+                        hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
+                        batch_norm=True, dropout=True)
+
     a = e.evolve()
 
     print(a[-1])

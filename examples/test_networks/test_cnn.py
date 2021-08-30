@@ -1,6 +1,6 @@
 import sys
-sys.path.append('../..')
-
+sys.path.append('.')
+ 
 import tensorflow as tf
 import time
 
@@ -19,7 +19,7 @@ optimizers = [opt.Adadelta, opt.Adagrad, opt.Adam]
 def test_CNN_all_datasets(eval_func=None, batch_size=150, population=5, 
                       generations=10, iters=100, max_num_layers=10, max_num_neurons=20):
     
-    dataset_collection = ['mnist', 'kmnist', 'cmaterdb', 'fashion_mnist', 'omniglot', 
+    dataset_collection = ['mnist', 'kmnist', 'cmaterdb', 'fashion_mnist', 
                           'binary_alpha_digits', 'cifar10', 'rock_paper_scissors']
 
     for dataset in dataset_collection:

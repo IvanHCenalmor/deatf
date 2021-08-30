@@ -75,16 +75,15 @@ if __name__ == "__main__":
     x_val = x_val/255
     
     # Here we define a convolutional-transposed convolutional network combination
-    e = Evolving(evaluation=eval_rnn, 
-                 desc_list=[RNNDescriptor], 
-                 x_trains=[x_train], y_trains=[y_train], 
-                 x_tests=[x_val], y_tests=[y_val], 
-                 batch_size=150, population=2, generations=10, iters=10, 
+    e = Evolving(evaluation=eval_rnn, desc_list=[RNNDescriptor], 
+                 x_trains=[x_train], y_trains=[y_train], x_tests=[x_val], y_tests=[y_val], 
                  n_inputs=[[28, 28]], n_outputs=[[10]], 
-                 cxp=0, mtp=1, 
-                 hyperparameters = {"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
-                 batch_norm=True, dropout=True,
-                 evol_alg='mu_plus_lambda')
+                 population=5, generations=5, batch_size=150, iters=50, 
+                 lrate=0.1, cxp=0, mtp=1, seed=0,
+                 max_num_layers=10, max_num_neurons=100, max_filter=4, max_stride=3,
+                 evol_alg='mu_plus_lambda', sel='best', sel_kwargs={}, 
+                 hyperparameters={"lrate": [0.1, 0.5, 1], "optimizer": [0, 1, 2]}, 
+                 batch_norm=True, dropout=True)    
 
     a = e.evolve()
 
