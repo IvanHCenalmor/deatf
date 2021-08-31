@@ -14,6 +14,10 @@ import sys, os
 sys.path.append(os.path.abspath('..'))
 sys.path.append(os.path.abspath('../deatf'))
 sys.path.append(os.path.abspath('../examples'))
+sys.path.append(os.path.abspath('../examples/test_networks'))
+sys.path.append(os.path.abspath('../examples/evocraft'))
+
+master_doc = 'index'
 
 # -- Project information -----------------------------------------------------
 

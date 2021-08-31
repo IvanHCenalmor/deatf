@@ -49,17 +49,17 @@
   <section id="module-deatf.mutation">
 <span id="mutation"></span><h1>Mutation<a class="headerlink" href="#module-deatf.mutation" title="Permalink to this headline">¶</a></h1>
 <p>Mutation is a key step in the genetic algorithm. Here are defined and explained all
-the classes used to make those mutations possible. <a class="reference internal" href="../deatf.html#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mutation</span></code></a> is the main and
-generic class; then there are specific classes, one for each <a class="reference internal" href="../deatf.html#deatf.network.NetworkDescriptor" title="deatf.network.NetworkDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.network.NetworkDescriptor</span></code></a>.
+the classes used to make those mutations possible. <a class="reference internal" href="#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">Mutation</span></code></a> is the main and
+generic class; then there are specific classes, one for each <a class="reference internal" href="network.html#deatf.network.NetworkDescriptor" title="deatf.network.NetworkDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.network.NetworkDescriptor</span></code></a>.
 These classes contains all the possible mutations that can be made in their defined functions.
 But the two steps to follow are:</p>
 <ol class="arabic simple">
 <li><p>Initialize appropiate class for the Network to evolve.</p></li>
-<li><p>Call <a class="reference internal" href="../deatf.html#deatf.mutation.Mutation.apply_random_mutation" title="deatf.mutation.Mutation.apply_random_mutation"><code class="xref py py-func docutils literal notranslate"><span class="pre">Mutation.apply_random_mutation()</span></code></a> in order to apply a random possible mutation
-or <a class="reference internal" href="../deatf.html#deatf.mutation.Mutation.apply_mutation" title="deatf.mutation.Mutation.apply_mutation"><code class="xref py py-func docutils literal notranslate"><span class="pre">Mutation.apply_mutation()</span></code></a> to apply an specific mutation (these functions 
+<li><p>Call <a class="reference internal" href="#deatf.mutation.Mutation.apply_random_mutation" title="deatf.mutation.Mutation.apply_random_mutation"><code class="xref py py-func docutils literal notranslate"><span class="pre">Mutation.apply_random_mutation()</span></code></a> in order to apply a random possible mutation
+or <a class="reference internal" href="#deatf.mutation.Mutation.apply_mutation" title="deatf.mutation.Mutation.apply_mutation"><code class="xref py py-func docutils literal notranslate"><span class="pre">Mutation.apply_mutation()</span></code></a> to apply an specific mutation (these functions 
 are inherited from Mutation so they can be used in other mutation classes).</p></li>
 </ol>
-<p>The mutation will be applied to the <a class="reference internal" href="../deatf.html#deatf.network.NetworkDescriptor" title="deatf.network.NetworkDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.network.NetworkDescriptor</span></code></a> object passed
+<p>The mutation will be applied to the <a class="reference internal" href="network.html#deatf.network.NetworkDescriptor" title="deatf.network.NetworkDescriptor"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.network.NetworkDescriptor</span></code></a> object passed
 i nthe parameter network in the initialization. The change will be made in the object, that
 is why mutation function do not return anything.</p>
 <hr class="docutils" />
@@ -165,7 +165,7 @@ randomly from the list of evolvable hyperparameters described in the initializat
 <dl class="py class">
 <dt class="sig sig-object py" id="deatf.mutation.MLP_Mutation">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deatf.mutation.</span></span><span class="sig-name descname"><span class="pre">MLP_Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deatf.mutation.MLP_Mutation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../deatf.html#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a></p>
 <p>This class implements the possible mutations that can be applied 
 specialy to the MLP descriptors.</p>
 <dl class="field-list simple">
@@ -211,7 +211,7 @@ in the initialization.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deatf.mutation.CNN_Mutation">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deatf.mutation.</span></span><span class="sig-name descname"><span class="pre">CNN_Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deatf.mutation.CNN_Mutation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../deatf.html#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a></p>
 <p>This class implements the possible mutations that can be applied 
 specialy to the CNN descriptors.</p>
 <dl class="field-list simple">
@@ -280,7 +280,7 @@ activation function.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deatf.mutation.TCNN_Mutation">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deatf.mutation.</span></span><span class="sig-name descname"><span class="pre">TCNN_Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deatf.mutation.TCNN_Mutation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../deatf.html#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a></p>
 <p>This class implements the possible mutations that can be applied 
 specialy to the TCNN descriptors.</p>
 <dl class="field-list simple">
@@ -335,7 +335,7 @@ in the network descriptor and with channels from 1 to 65.</p>
 <dl class="py class">
 <dt class="sig sig-object py" id="deatf.mutation.RNN_Mutation">
 <em class="property"><span class="pre">class</span> </em><span class="sig-prename descclassname"><span class="pre">deatf.mutation.</span></span><span class="sig-name descname"><span class="pre">RNN_Mutation</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">hypers</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">batch_norm</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">dropout</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">network</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hyperparameters</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">custom_mutation_list</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">[]</span></span></em><span class="sig-paren">)</span><a class="headerlink" href="#deatf.mutation.RNN_Mutation" title="Permalink to this definition">¶</a></dt>
-<dd><p>Bases: <a class="reference internal" href="../deatf.html#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a></p>
+<dd><p>Bases: <a class="reference internal" href="#deatf.mutation.Mutation" title="deatf.mutation.Mutation"><code class="xref py py-class docutils literal notranslate"><span class="pre">deatf.mutation.Mutation</span></code></a></p>
 <p>This class implements the possible mutations that can be applied 
 specialy to the RNN descriptors.</p>
 <dl class="field-list simple">

@@ -9,5 +9,5 @@ setup(
   author_email = 'ivanhcenalmor@domain.com',      # Type in your E-Mail
   url = 'https://github.com/IvanHCenalmor/deatf',   # Provide either the link to your github or to your website
   keywords = ['NEUROEVOLUTION', 'DEAP', 'TENSORFLOW', 'GENETIC', 'ALGORITHMS'],   # Keywords that define your package best
-  install_requires=['numpy', 'tensorflow', 'deap', 'tensorflow-datasets', 'scikit-learn', 'pandas']
+  install_requires=['numpy', 'tensorflow', 'deap', 'tensorflow-datasets', 'scikit-learn', 'sklearn', 'pandas']
 )

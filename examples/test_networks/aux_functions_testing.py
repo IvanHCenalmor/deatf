@@ -20,8 +20,8 @@ from sklearn.preprocessing import MinMaxScaler
 import tensorflow_datasets as tfds
 
 def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, population=5, 
-         generations=10, iters=100, seed=None, 
-         lrate=0.01, cxp=0, mtp=1, evol_alg='mu_plus_lambda', sel='best',
+         generations=10, iters=100, seed=None, max_filter=4, max_stride=3,
+         lrate=0.01, cxp=0, mtp=1, evol_alg='mu_plus_lambda', sel='best', sel_kwargs={},
          max_num_layers=10, max_num_neurons=20, hyperparameters={}, 
          is_time_series=False, series_input_width=30, series_label_width=1):
     """
@@ -93,8 +93,11 @@ def test(dataset_name, descriptors=[], eval_func=None, batch_size=150, populatio
              mtp=mtp,
              evol_alg=evol_alg,
              sel=sel,
+             sel_kwargs=sel_kwargs,
 			 max_num_layers=max_num_layers, 
 			 max_num_neurons=max_num_neurons,
+             max_filter=max_filter,
+             max_stride=max_stride,
              hyperparameters=hyperparameters)   
      
     a = e.evolve()
@@ -106,7 +109,7 @@ def select_evaluation(mode):
     function that has to be used is returned.
     
     :param mode: Mode of the dataset 'class' if classification and 'regr' if 
-    regresion.
+                 regresion.
     :return: Loss function that sould be used in each case.
     """
     
@@ -275,7 +278,7 @@ def load_csv(data_directory, data_sep, decimal, label_column, removed_columns):
     
     :param data_directory: Directory where the desired dataset is located.
     :param data_sep: Delemiter of data separator in the file.
-    :param decimal:The way decimal data is expressed in the file.
+    :param decimal: The way decimal data is expressed in the file.
     :param label_column: Name of the column that contains the labels.
     :param removed_columns: Columns in the file that are not desired.
     :return: Features and labels of the dataset.

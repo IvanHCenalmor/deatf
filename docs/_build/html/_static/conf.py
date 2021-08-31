@@ -12,8 +12,12 @@
 #
 import sys, os
 sys.path.append(os.path.abspath('..'))
-sys.path.append(os.path.abspath('../evoflow'))
+sys.path.append(os.path.abspath('../deatf'))
 sys.path.append(os.path.abspath('../examples'))
+sys.path.append(os.path.abspath('../examples/test_networks'))
+sys.path.append(os.path.abspath('../examples/evocraft'))
+
+master_doc = 'index'
 
 # -- Project information -----------------------------------------------------
 
@@ -39,7 +43,7 @@ templates_path = ['_templates']
 exclude_patterns = ['_build', 'Thumbs.db', '.DS_Store']
 
 
-autodoc_mock_imports = ["deap"]
+autodoc_mock_imports = ['deap']
 autodoc_member_order = 'bysource'
 
 # -- Options for HTML output -------------------------------------------------
