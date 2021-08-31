@@ -8,12 +8,6 @@ Distributed Evolutionary Algorithms in TensorFlow (DEATF) is a framework where n
 
 ![DEATF-logo](./docs/_images/DEATF-logo.png)
 
-<p align="left">
-<a href="https://github.com/deap/deap"><img src="https://repository-images.githubusercontent.com/20035587/2559bd00-9a75-11e9-9686-0697d18522cf" height=250 align="right" /></a>
-<a href="https://www.tensorflow.org/"><img src="https://upload.wikimedia.org/wikipedia/commons/2/2d/Tensorflow_logo.svg" height=250 align="left" /></a>
-</p>
-
-
 ## Installation
 
 DEATF has available an easy installation with pip.
